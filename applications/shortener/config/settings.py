@@ -10,7 +10,18 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
+
 from pathlib import Path
+
+import socket
+
+
+def get_ipaddress():
+    host_name = socket.gethostname()
+    ip_address = socket.gethostbyname(host_name)
+    return "http://" + ip_address
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +36,13 @@ SECRET_KEY = "django-insecure-ai9omaxa8#(_=q8_buzs*7y8@9k$tmrxbq^@m6%&mzy!^doi2j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
+
+CSRF_TRUSTED_ORIGINS = [
+    get_ipaddress(),
+    "http://127.0.0.1:8881",
+    "http://127.0.0.1:8001",
+]
 
 
 # Application definition
@@ -73,12 +90,22 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB", "postgres"),
+        "USER": os.getenv("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "postgres"),
+        "PORT": os.getenv("POSTGRES_PORT", "5433"),
+        "HOST": os.getenv("DB_HOST", "postgres"),
+        "OPTIONS": {"options": "-c search_path=shortener,public"},
 
 
 # Password validation
@@ -116,6 +143,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = "/var/www/html/static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
