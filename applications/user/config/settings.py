@@ -14,6 +14,15 @@ import os
 
 from pathlib import Path
 
+import socket
+
+
+def get_ipaddress():
+    host_name = socket.gethostname()
+    ip_address = socket.gethostbyname(host_name)
+    return "http://" + ip_address
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,6 +37,12 @@ SECRET_KEY = "django-insecure-%&!+cq=t3&oacn3&-pe3^r1e(d-x()gmu=_6=9y(!l@3l9yj=c
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+
+CSRF_TRUSTED_ORIGINS = [
+    get_ipaddress(),
+    "http://127.0.0.1:8880",
+    "http://127.0.0.1:8000",
+]
 
 
 # Application definition
