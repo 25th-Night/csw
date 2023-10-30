@@ -39,7 +39,7 @@ class User(CommonModel, AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["password"]
 
-    objects = UserManager()
+    objects: UserManager = UserManager()
 
     class Meta:
         verbose_name = "사용자"
