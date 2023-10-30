@@ -106,6 +106,8 @@ DATABASES = {
         "PORT": os.getenv("POSTGRES_PORT", "5433"),
         "HOST": os.getenv("DB_HOST", "postgres"),
         "OPTIONS": {"options": "-c search_path=shortener,public"},
+    }
+}
 
 
 # Password validation
