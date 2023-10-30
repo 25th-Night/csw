@@ -12,6 +12,7 @@ class SignUpSerializer(serializers.ModelSerializer):
             "id",
             "email",
             "fullname",
+            "phone",
             "password",
         )
 
