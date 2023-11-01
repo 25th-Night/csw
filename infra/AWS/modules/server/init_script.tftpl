@@ -1,0 +1,109 @@
+#!/bin/bash
+
+USERNAME="${username}"
+PASSWORD="${password}"
+AWS_ACCESS_KEY="${aws_access_key}"
+AWS_SECRET_KEY="${aws_secret_key}"
+DJANGO_SECRET_KEY="${django_secret_key}"
+JWT_SIGNING_KEY="${jwt_signing_key}"
+USER_POSTGRES_DB="${user_postgres_db}"
+USER_POSTGRES_USER="${user_postgres_user}"
+USER_POSTGRES_PASSWORD="${user_postgres_password}"
+USER_POSTGRES_PORT="${user_postgres_port}"
+SHORTENER_POSTGRES_DB="${shortener_postgres_db}"
+SHORTENER_POSTGRES_USER="${shortener_postgres_user}"
+SHORTENER_POSTGRES_PASSWORD="${shortener_postgres_password}"
+SHORTENER_POSTGRES_PORT="${shortener_postgres_port}"
+SSH_KEY="${ssh_key}"
+
+
+REMOTE_DIRECTORY=/home/$USERNAME/
+PROJECT_PATH=$REMOTE_DIRECTORY/csw/
+ENV_REPOSITORY=$PROJECT_PATH.envs/
+USER_ENV_PATH=$ENV_REPOSITORY.env_user
+SHORTENER_ENV_PATH=$ENV_REPOSITORY.env_shortener
+BASH_ALIASES=$REMOTE_DIRECTORY.bash_aliases
+BASHRC=$REMOTE_DIRECTORY.bashrc
+AWS_PATH=$REMOTE_DIRECTORY.aws
+AWS_CONFIG_PATH=$AWS_PATH/config
+AWS_CREDENTIALS_PATH=$AWS_PATH/credentials
+
+
+echo "Add User"
+useradd -s /bin/bash -d $REMOTE_DIRECTORY -m $USERNAME
+
+echo "Set Password"
+echo "$USERNAME:$PASSWORD" | chpasswd
+
+echo "Set sudo"
+usermod -aG sudo $USERNAME
+echo "$USERNAME ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers.d/$USERNAME
+
+echo "Update apt and Install docker & docker-compose"
+sudo apt-get update
+sudo apt install -y docker.io docker-compose
+
+echo "Start docker"
+sudo service docker start && sudo service docker enable
+
+echo "Add user to 'docker' group"
+sudo usermod -aG docker $USERNAME
+
+
+echo "Set alias to \"$BASH_ALIASES\" file"
+touch $BASH_ALIASES
+echo "alias ssbas=\"sed -i 's/\r$//g' $BASH_ALIASES && source $BASH_ALIASES\"" >> $BASH_ALIASES
+echo "alias chbaenv=\"sudo chown lion:lion $BASH_ALIASES $ENV_PATH\"" >> $BASH_ALIASES
+echo "alias dps=\"docker ps\"" >> $BASH_ALIASES
+echo "alias dpsa=\"docker ps -a\"" >> $BASH_ALIASES
+echo "alias dimg=\"docker image\"" >> $BASH_ALIASES
+echo "alias dimgs=\"docker images\"" >> $BASH_ALIASES
+echo "alias drst=\"docker restart\"" >> $BASH_ALIASES
+echo "alias dlog=\"docker logs\"" >> $BASH_ALIASES
+echo "alias dpsls=\"docker ps && docker logs\"" >> $BASH_ALIASES
+echo "alias dexc=\"docker exec\"" >> $BASH_ALIASES
+echo "alias dst=\"docker stop\"" >> $BASH_ALIASES
+echo "alias dstrm=\"docker rm\"" >> $BASH_ALIASES
+
+
+echo "Set authorized_keys"
+mkdir $REMOTE_DIRECTORY.ssh
+echo "ssh-rsa $SSH_KEY" >> $REMOTE_DIRECTORY.ssh/authorized_keys
+
+
+echo "Git clone"
+cd $REMOTE_DIRECTORY
+git clone https://github.com/25th-Night/csw.git
+
+echo "Move to csw directory"
+cd csw
+
+echo "Create .env file"
+mkdir .envs
+touch .envs/.env_user
+echo "POSTGRES_DB=$USER_POSTGRES_DB" >> $USER_ENV_PATH
+echo "POSTGRES_USER=$USER_POSTGRES_USER" >> $USER_ENV_PATH
+echo "POSTGRES_PASSWORD=$USER_POSTGRES_PASSWORD" >> $USER_ENV_PATH
+echo "POSTGRES_PORT=$USER_POSTGRES_PORT" >> $USER_ENV_PATH
+echo "DB_HOST=user-db" >> $USER_ENV_PATH
+echo "JWT_SIGNING_KEY=$JWT_SIGNING_KEY" >> $USER_ENV_PATH   
+echo "DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY" >> $USER_ENV_PATH
+echo "AWS_ACCESS_KEY=$AWS_ACCESS_KEY" >> $USER_ENV_PATH
+echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> $USER_ENV_PATH
+
+touch .envs/.env_shortener
+echo "POSTGRES_DB=$SHORTENER_POSTGRES_DB" >> $SHORTENER_ENV_PATH
+echo "POSTGRES_USER=$SHORTENER_POSTGRES_USER" >> $SHORTENER_ENV_PATH
+echo "POSTGRES_PASSWORD=$SHORTENER_POSTGRES_PASSWORD" >> $SHORTENER_ENV_PATH
+echo "POSTGRES_PORT=$SHORTENER_POSTGRES_PORT" >> $SHORTENER_ENV_PATH
+echo "DB_HOST=shortener-db" >> $SHORTENER_ENV_PATH
+echo "JWT_SIGNING_KEY=$JWT_SIGNING_KEY" >> $SHORTENER_ENV_PATH
+echo "DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY" >> $SHORTENER_ENV_PATH
+echo "AWS_ACCESS_KEY=$AWS_ACCESS_KEY" >> $SHORTENER_ENV_PATH
+echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> $SHORTENER_ENV_PATH
+
+echo "Execute docker-compose"
+docker-compose -f docker/docker-compose.yml up -d --build
+
+
+echo "done"
