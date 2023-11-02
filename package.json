@@ -1,9 +1,0 @@
-{
-    "scripts": {
-        "start": "tailwindcss -i ./applications/user/static/css/input.css -o ./applications/user/static/css/base.css --watch",
-        "build": "tailwindcss -i ./applications/user/static/css/input.css -o ./applications/user/static/css/base.css"
-    },
-    "devDependencies": {
-        "tailwindcss": "^3.3.5"
-    }
-}
