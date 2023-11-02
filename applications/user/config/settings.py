@@ -70,6 +70,7 @@ INSTALLED_APPS += [
 INSTALLED_APPS += [
     "sign",
     "user",
+    "rendering",
 ]
 
 MIDDLEWARE = [
