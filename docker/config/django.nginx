@@ -1,6 +1,6 @@
 server {
         listen 80;
-        server_name 127.0.0.1 user.csw.kr;
+        server_name 127.0.0.1 csw.kr;
 
         location / {
                 proxy_pass http://user:8000;
