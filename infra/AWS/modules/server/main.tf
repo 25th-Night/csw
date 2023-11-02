@@ -17,16 +17,8 @@ data "aws_vpc" "main" {
 
 resource "aws_security_group" "main" {
   name        = "${var.name}-asg-${var.env}"
-  description = "Allow SSH, ${var.sc_port_range_start}-${var.sc_port_range_end} inbound traffic"
+  description = "Allow SSH, HTTPS, HTTP inbound traffic"
   vpc_id      = data.aws_vpc.main.id
-
-  ingress {
-    description = "TLS from VPC"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
-  }
 
   ingress {
     description = "ingress for ssh"
@@ -37,11 +29,21 @@ resource "aws_security_group" "main" {
   }
 
   ingress {
-    description = "ingress for ${var.name}"
-    from_port   = var.sc_port_range_start
-    to_port     = var.sc_port_range_end
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description      = "ingress for https"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  ingress {
+    description      = "ingress for http"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
   }
 
   egress {

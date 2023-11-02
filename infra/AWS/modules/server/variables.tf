@@ -14,14 +14,6 @@ variable "subnet_id" {
   type = string
 }
 
-variable "sc_port_range_start" {
-  type = string
-}
-
-variable "sc_port_range_end" {
-  type = string
-}
-
 variable "ami" {
   type = string
 }
