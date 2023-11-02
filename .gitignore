@@ -313,3 +313,7 @@ terraform.rc
 
 # ssh
 *.pem
+
+# Nodejs
+node_modules/
+/applications/user/static/css/base.css
