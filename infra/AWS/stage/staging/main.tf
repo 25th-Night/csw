@@ -12,13 +12,17 @@ provider "aws" {
 }
 
 locals {
-  name             = "csw"
-  env              = "staging"
-  ami              = "ami-0c9c942bd7bf113a2"
-  instance_type    = "t2.micro"
-  port_start       = 80
-  port_end         = 80
-  init_script_path = "init_script.tftpl"
+  name                      = "csw"
+  env                       = "staging"
+  ami                       = "ami-0c9c942bd7bf113a2"
+  instance_type             = "t2.micro"
+  init_script_path          = "init_script.tftpl"
+  subnet_name1              = "csw"
+  subnet_netnum1            = 1
+  subnet_availability_zone1 = "ap-northeast-2a"
+  subnet_name2              = "csw2"
+  subnet_netnum2            = 2
+  subnet_availability_zone2 = "ap-northeast-2b"
 }
 
 module "s3" {
@@ -38,22 +42,35 @@ module "vpc" {
 module "subnet" {
   source = "../../modules/subnet"
 
-  env    = local.env
-  vpc_id = module.vpc.vpc_id
+  name              = local.subnet_name1
+  env               = local.env
+  vpc_id            = module.vpc.vpc_id
+  route_table_id    = module.vpc.route_table_id
+  subnet_netnum     = local.subnet_netnum1
+  availability_zone = local.subnet_availability_zone1
+}
+
+module "subnet2" {
+  source = "../../modules/subnet"
+
+  name              = local.subnet_name2
+  env               = local.env
+  vpc_id            = module.vpc.vpc_id
+  route_table_id    = module.vpc.route_table_id
+  subnet_netnum     = local.subnet_netnum2
+  availability_zone = local.subnet_availability_zone2
 }
 
 module "server" {
   source = "../../modules/server"
 
-  name                = local.name
-  env                 = local.env
-  vpc_id              = module.vpc.vpc_id
-  subnet_id           = module.subnet.subnet_id
-  sc_port_range_start = local.port_start
-  sc_port_range_end   = local.port_end
-  ami                 = local.ami
-  instance_type       = local.instance_type
-  init_script_path    = local.init_script_path
+  name             = local.name
+  env              = local.env
+  vpc_id           = module.vpc.vpc_id
+  subnet_id        = module.subnet.subnet_id
+  ami              = local.ami
+  instance_type    = local.instance_type
+  init_script_path = local.init_script_path
   init_script_envs = {
     username                    = var.username
     password                    = var.password
