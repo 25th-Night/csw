@@ -18,3 +18,26 @@ resource "aws_vpc" "main" {
     Name = "vpc-${var.env}"
   }
 }
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "main"
+  }
+}
+
+resource "aws_route_table" "main" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "main-${var.env}"
+  }
+}
+
+resource "aws_route" "main" {
+  route_table_id         = aws_route_table.main.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.gw.id
+  depends_on             = [aws_route_table.main]
+}
