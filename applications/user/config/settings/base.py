@@ -19,6 +19,12 @@ import socket
 import platform
 
 
+if platform.system() in ["Windows", "Darwin"]:
+    from dotenv import load_dotenv
+
+    load_dotenv(dotenv_path="../../.envs/.env_user")
+
+
 def get_ipaddress():
     host_name = socket.gethostname()
     ip_address = socket.gethostbyname(host_name)
@@ -26,7 +32,7 @@ def get_ipaddress():
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -42,8 +48,8 @@ ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
     get_ipaddress(),
-    "http://127.0.0.1:8881",
-    "http://127.0.0.1:8001",
+    "http://127.0.0.1:8880",
+    "http://127.0.0.1:8000",
 ]
 
 
@@ -68,7 +74,9 @@ INSTALLED_APPS += [
 
 ## Create Apps
 INSTALLED_APPS += [
-    "url",
+    "sign",
+    "user",
+    "rendering",
 ]
 
 MIDDLEWARE = [
@@ -105,25 +113,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-if platform.system() in ["Windows", "Darwin"]:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("POSTGRES_DB", "postgres"),
-            "USER": os.getenv("POSTGRES_USER", "postgres"),
-            "PASSWORD": os.getenv("POSTGRES_PASSWORD", "postgres"),
-            "PORT": os.getenv("POSTGRES_PORT", "5432"),
-            "HOST": os.getenv("DB_HOST", "postgres"),
-            "OPTIONS": {"options": "-c search_path=shortener,public"},
-        }
-    }
+}
 
 
 # Password validation
@@ -167,6 +163,9 @@ STATIC_ROOT = "/var/www/html/static"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# AUTH_USER_MODEL
+AUTH_USER_MODEL = "user.User"
 
 # REST_FRAMEWORK
 REST_FRAMEWORK = {
