@@ -4,8 +4,8 @@ ARG APP_HOME=/app
 
 WORKDIR ${APP_HOME}
 
-COPY ./package.json ./
-COPY ./package-lock.json ./
+COPY ./applications/user/package.json ./
+COPY ./applications/user/package-lock.json ./
 RUN npm install
 
 COPY ./applications/user ${APP_HOME}
