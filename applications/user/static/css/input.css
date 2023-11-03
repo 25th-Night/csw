@@ -1,3 +1,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'EliceDigitalBaeum';
+    font-weight: 400;
+    font-style: normal;
+    src: url('https://cdn.jsdelivr.net/gh/webfontworld/elice/EliceDigitalBaeumRegular.eot');
+    src: url('https://cdn.jsdelivr.net/gh/webfontworld/elice/EliceDigitalBaeumRegular.eot?#iefix') format('embedded-opentype'),
+         url('https://cdn.jsdelivr.net/gh/webfontworld/elice/EliceDigitalBaeumRegular.woff2') format('woff2'),
+         url('https://cdn.jsdelivr.net/gh/webfontworld/elice/EliceDigitalBaeumRegular.woff') format('woff'),
+         url('https://cdn.jsdelivr.net/gh/webfontworld/elice/EliceDigitalBaeumRegular.ttf') format("truetype");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'YDestreet';
+    font-weight: 300;
+    font-style: normal;
+    src: url('https://cdn.jsdelivr.net/gh/webfontworld/kt/YDestreetLight.eot');
+    src: url('https://cdn.jsdelivr.net/gh/webfontworld/kt/YDestreetLight.eot?#iefix') format('embedded-opentype'),
+         url('https://cdn.jsdelivr.net/gh/webfontworld/kt/YDestreetLight.woff2') format('woff2'),
+         url('https://cdn.jsdelivr.net/gh/webfontworld/kt/YDestreetLight.woff') format('woff'),
+         url('https://cdn.jsdelivr.net/gh/webfontworld/kt/YDestreetLight.ttf') format("truetype");
+    font-display: swap;
+} 
