@@ -91,11 +91,11 @@ class UserSerializer(serializers.Serializer):
         user = User.objects.filter(email=email).last()
 
         if not user:
-            errors["email_error"] = message_email
+            errors["email"] = message_email
         elif validation.match(password) is None:
-            errors["password_error"] = message_password1
+            errors["password"] = message_password1
         elif not check_password(password, user.password):
-            errors["password_error"] = message_password2
+            errors["password"] = message_password2
 
         if errors:
             raise serializers.ValidationError(errors)
