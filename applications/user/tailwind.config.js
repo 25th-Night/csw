@@ -21,6 +21,10 @@ module.exports = {
                     '@apply mx-auto w-[90%] xl:max-w-[1024px] lg:max-w-[920px] md:max-w-[700px] sm:max-w-[576px]':
                     '',
                 },
+                '.title': {
+                    '@apply text-2xl':
+                    '',
+                },
             });
         },
         ({ addBase }) => {
