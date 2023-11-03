@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    login
+{% endblock title %}
+
+{% block content %}
+<section class="mx-auto w-[90%] sm:w-[600px]">
+    <div class="flex items-center justify-between mb-5 title-wrap">
+        <div class="font-semibold title">Login</div>
+        <img src="{% static 'img/icon/submit01.png' %}" alt="submit" class="block cursor-pointer h-9" tabindex="3" id="login_btn_email">
+    </div>
+    <form class="login-form">
+        <div class="form-field">
+            <div class="my-2 label sm:flex">
+                <label for="email" class="block mr-4">Email</label>
+                <block class="self-center hidden text-xs text-red-600 email-error"></block>
+            </div>
+            <input type="text" id="login_email" name="email" autocomplete="off" autofocus tabindex="1" class="block w-full"
+            placeholder="Please enter your email.">
+        </div>
+        <div class="form-field">
+            <div class="my-2 label sm:flex">
+                <label for="password" class="block mr-4">Password</label>
+                <block class="self-center hidden text-xs text-red-600 password-error"></block>
+            </div>
+            <input type="password" id="login_password" name="password" autocomplete="off" autofocus tabindex="2" class="block w-full"
+            placeholder="Please enter your password.">
+        </div>
+    </form>
+</section>
+{% endblock content%}
+
+{% block include_js %}
+<script type="module" src="{% static 'js/login.js' %}" defer></script>
+{% endblock include_js %}
