@@ -7,7 +7,11 @@
     <meta name="keywords" content="csw, shortener, recruit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>csw</title>
+    <title>
+        {% block title %}
+            csw
+        {% endblock title %}
+    </title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,4 +31,5 @@
 {% endblock include_js %}
 {% block script %}
 {% endblock script %}
+<script type="module" src="{% static 'js/header.js' %}" defer></script>
 </html>
