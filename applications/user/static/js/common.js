@@ -126,6 +126,49 @@ function imageHover(imageElement, hoverImagePath, normalImagePath) {
     });
 }
 
+function debounce(func, delay) {
+    /* 입력 이벤트를 처리하기 위한 디바운스 함수 (입력이 끝난 후 API 호출을 트리거하기 위함) */
+    let timer;
+    return function() {
+        clearTimeout(timer);
+        timer = setTimeout(func, delay);
+    };
+}
+
+const displayErrorMessage = (inputField, errorMessage) => {
+    /* 입력 필드의 값이 없을 경우 3초간 에러 메시지 표시 함수 */
+    const errorElement = getElFromSel(`.${inputField}-error`);
+    errorElement.textContent = errorMessage;
+    errorElement.classList.remove('hidden');
+    setTimeout(() => {
+        errorElement.classList.add('hidden');
+        errorElement.textContent = '';
+    }, 3000);
+};
+
+const displayPermanentErrorMessage  = (condition, inputField, errorMessage) => {
+    /* 입력 필드의 값이 없을 경우 영구적 에러 메시지 표시 함수 */
+    const errorElement = getElFromSel(`.${inputField}-error`);
+
+    if (condition) {
+        errorElement.textContent = errorMessage;
+        errorElement.classList.remove('hidden');
+    } else {
+        errorElement.classList.add('hidden');
+        errorElement.textContent = '';
+    }
+};
+
+function setKeyForFunction(element, input_key, func) {
+    /* 요소에 특정 키를 입력했을 때, 특정 함수를 실행하는 함수 */
+    element.addEventListener('keydown', function(event) {
+        if (event.key === input_key) {
+            event.preventDefault();
+            func();
+        }
+    });
+}
+
 export {
     getElFromSel,
     getElsFromSel,
@@ -141,4 +184,8 @@ export {
     setFetchData,
     redirectLogin,
     imageHover,
+    debounce,
+    displayErrorMessage,
+    displayPermanentErrorMessage,
+    setKeyForFunction,
 };
