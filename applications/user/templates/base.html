@@ -10,26 +10,26 @@
     <title>
         {% block title %}
             csw
-        {% endblock title %}
+        {% endblock %}
     </title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
     {% block style %}
-    {% endblock style %}
+    {% endblock %}
 </head>
 <body class="screen-width">
     {% include "header.html" %}
     <main>
         {% block content %}
-        {% endblock content %}
+        {% endblock %}
     </main>
     {% include 'footer.html' %}
 </body>
 {% block include_js %}
-{% endblock include_js %}
+{% endblock %}
 {% block script %}
-{% endblock script %}
+{% endblock %}
 <script type="module" src="{% static 'js/header.js' %}" defer></script>
 </html>
