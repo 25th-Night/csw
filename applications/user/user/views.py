@@ -1,3 +1,5 @@
+import re
+
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.views import APIView
@@ -97,7 +99,7 @@ class AuthView(GenericAPIView):
         return response
 
 
-class CheckEmailView(GenericAPIView):
+class EmailExistView(GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request: Request):
@@ -112,7 +114,26 @@ class CheckEmailView(GenericAPIView):
         return response
 
 
-class CheckPasswordView(GenericAPIView):
+class PhoneCheckView(GenericAPIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request: Request):
+        phone = request.data.get("phone")
+
+        user_exist = User.objects.filter(phone=phone).exists()
+
+        match = "^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$"
+        validation = re.compile(match)
+
+        phone_format = False if validation.match(phone) is None else True
+        response_data = {"user_exist": user_exist, "phone_format": phone_format}
+
+        response = Response(response_data, status=status.HTTP_200_OK)
+
+        return response
+
+
+class PasswordCorrectView(GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request: Request):
@@ -124,6 +145,24 @@ class CheckPasswordView(GenericAPIView):
         password_check = check_password(password, user.password)
 
         response_data = {"password_check": password_check}
+
+        response = Response(response_data, status=status.HTTP_200_OK)
+
+        return response
+
+
+class PasswordFormatView(GenericAPIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request: Request):
+        password = request.data.get("password")
+
+        match = "^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
+        message = "비밀번호는 하나 이상의 문자, 숫자, 특수문자를 포함하여 8자리 이상으로 작성해주세요."
+        validation = re.compile(match)
+
+        password_format = True if validation.match(password) is not None else False
+        response_data = {"password_format": password_format}
 
         response = Response(response_data, status=status.HTTP_200_OK)
 
