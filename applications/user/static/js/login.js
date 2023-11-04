@@ -13,41 +13,30 @@ import {
     setFetchData,
     redirectLogin,
     imageHover,
+    debounce,
+    displayErrorMessage,
+    displayPermanentErrorMessage,
+    setKeyForFunction,
 } from './common.js';
 
 document.addEventListener('DOMContentLoaded', function() {
-    function debounce(func, delay) {
-        let timer;
-        return function() {
-            clearTimeout(timer);
-            timer = setTimeout(func, delay);
-        };
-    }
 
     // Email Check
-    const emailInput = getElFromId('login_email');
+    const loginEmailInput = getElFromId('login_email');
 
-    emailInput.addEventListener('input', debounce(checkUser, 500));
+    loginEmailInput.addEventListener('input', debounce(existUser, 500));
 
-    async function checkUser() {
-        const email = emailInput.value;
+    async function existUser() {
+        const email = loginEmailInput.value;
 
         if (email) {
             const data = setFetchData("post", { email: email });
-            const response = await fetch('/api/user/check_email', data);
+            const response = await fetch('/api/user/exist_email', data);
 
             if (response.status === 200) {
                 const responseData = await response.json();
                 const userExist = responseData.user_exist;
-                const emailError = getElFromSel(".email-error");
-
-                if (userExist) {
-                    emailError.classList.add("hidden");
-                    emailError.textContent = "";
-                } else {
-                    emailError.classList.remove("hidden");
-                    emailError.textContent = "Please check your email.";
-                }
+                displayPermanentErrorMessage(!userExist, "login-email", "Please check your email.")
             } else {
                 console.log('API 요청 실패');
             }
@@ -55,30 +44,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Password Check
-    const passwordInput = getElFromId('login_password');
+    const loginPasswordInput = getElFromId('login_password');
 
-    passwordInput.addEventListener('input', debounce(checkPassword, 500));
+    loginPasswordInput.addEventListener('input', debounce(correctPassword, 500));
 
-    async function checkPassword() {
-        const email = emailInput.value;
-        const password = passwordInput.value;
+    async function correctPassword() {
+        const email = loginEmailInput.value;
+        const password = loginPasswordInput.value;
 
         if (email) {
             const data = setFetchData("post", { email: email, password: password });
-            const response = await fetch('/api/user/check_pw', data);
+            const response = await fetch('/api/user/correct_pw', data);
 
             if (response.status === 200) {
                 const responseData = await response.json();
                 const passwordCheck = responseData.password_check;
-                const passwordError = getElFromSel(".password-error");
-
-                if (passwordCheck) {
-                    passwordError.classList.add("hidden");
-                    passwordError.textContent = "";
-                } else {
-                    passwordError.classList.remove("hidden");
-                    passwordError.textContent = "Please check your password.";
-                }
+                displayPermanentErrorMessage(!passwordCheck, "login-password", "Please check your password.")
             } else {
                 console.log('API 요청 실패');
             }
@@ -91,29 +72,20 @@ document.addEventListener('DOMContentLoaded', function() {
     loginSubmitBtn.addEventListener('click', login)
 
     async function login() {
-        const emailInput = getElFromId('login_email');
-        const passwordInput = getElFromId('login_password');
-        const email = emailInput.value;
-        const password = passwordInput.value;
+        const loginEmailInput = getElFromId('login_email');
+        const loginPasswordInput = getElFromId('login_password');
+        const email = loginEmailInput.value;
+        const password = loginPasswordInput.value;
 
-        // 입력 필드의 값이 없을 경우 에러 메시지 표시
-        const displayErrorMessage = (inputField, errorMessage) => {
-            const errorElement = getElFromSel(`.${inputField}-error`);
-            errorElement.textContent = errorMessage;
-            errorElement.classList.remove('hidden');
-            setTimeout(() => {
-                errorElement.classList.add('hidden');
-                errorElement.textContent = '';
-            }, 3000);
-        };
+        
 
         if (!email) {
-            displayErrorMessage('email', 'Please enter your email.');
+            displayErrorMessage('login-email', 'Please enter your email.');
             return;
         }
 
         if (!password) {
-            displayErrorMessage('password', 'Please enter your password.');
+            displayErrorMessage('login-password', 'Please enter your password.');
             return;
         }
 
@@ -132,17 +104,46 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('errorData:', errorData);
             if (errorData) {
                 if (errorData.email) {
-                    displayErrorMessage('email', errorData.email);
+                    displayErrorMessage('login-email', errorData.email);
                 }
                 if (errorData.password) {
-                    displayErrorMessage('password', errorData.password);
+                    displayErrorMessage('login-password', errorData.password);
                 }
             }
         }
     }
 
+    // email 입력 칸에서 Enter 키 입력 시 폼 제출
+    setKeyForFunction(loginEmailInput, 'Enter', login)
+    
+    // password 입력 칸에서 Enter 키 입력 시 폼 제출
+    setKeyForFunction(loginPasswordInput, 'Enter', login)
+
     // login submit 버튼 마우스 오버 시 효과
-    imageHover(loginSubmitBtn, '/static/img/icon/submit02.png', '/static/img/icon/submit01.png')
+    imageHover(loginSubmitBtn, '/static/img/icon/submit02.png', '/static/img/icon/submit03.png')
+
+    // find email 버튼 마우스 오버 시 효과
+    const fineEmailBtn = getElFromId('find_email')
+    imageHover(fineEmailBtn, '/static/img/icon/find_email04.png', '/static/img/icon/find_email03.png')
+    
+    // find password 버튼 마우스 오버 시 효과
+    const finePwBtn = getElFromId('find_pw')
+    imageHover(finePwBtn, '/static/img/icon/find_pw06.png', '/static/img/icon/find_pw05.png')
+
+    // signup 버튼 마우스 오버 시 효과
+    const signupBtn = getElFromId('signup')
+    imageHover(signupBtn, '/static/img/icon/signup03.png', '/static/img/icon/signup02.png')
+
+    // signup 버튼 클릭 시, 모달 생성
+    signupBtn.addEventListener('click', openModal)
+    async function openModal() {
+        const signupModal = getElFromId('signup_modal');
+        signupModal.classList.remove('hidden');
+        loginEmailInput.value='';
+        loginPasswordInput.value='';
+        const signupEmailInput = getElFromId('signup_email');
+        signupEmailInput.focus();
+    }
 });
 
 
