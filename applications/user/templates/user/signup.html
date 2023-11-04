@@ -1,0 +1,60 @@
+{% load static %}
+
+<section class="relative z-10 hidden w-full signup-modal" aria-labelledby="modal-title" role="dialog" aria-modal="true" id="signup_modal">
+    <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
+    <div class="absolute translate-y-[-50%] z-10 mx-auto bg-black p-2 overflow-y-auto w-full signup-modal-wrap max-h-[600px]">
+        <div class="flex items-start justify-between my-2 title-wrap">
+            <div class="font-semibold title">SignUp</div>
+            <div class="flex btn-wrap">
+            <img src="{% static 'img/icon/submit03.png' %}" alt="submit" class="block h-12 mx-3 cursor-pointer" tabindex="12" id="signup_btn_email">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#FFFFFF" class="w-8 h-8 cursor-pointer hover:stroke-neutral-400" id="signup_btn_close">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>              
+            </div>
+              
+        </div>
+        <form class="m-2 signup-form">
+            <div class="form-field">
+                <div class="my-2 label sm:flex">
+                    <label for="signup-email" class="block mr-4 text-lg">Email</label>
+                    <block class="self-center hidden text-sm text-[yellow] signup-email-error"></block>
+                </div>
+                <input type="text" id="signup_email" name="signup-email" autocomplete="off" autofocus tabindex="7" class="block w-full p-1 text-black outline-none"
+                placeholder="Please enter your email.">
+            </div>
+            <div class="form-field">
+                <div class="my-2 label sm:flex">
+                    <label for="signup-fullname" class="block mr-4 text-lg">Name</label>
+                    <block class="self-center hidden text-sm text-[yellow] signup-fullname-error"></block>
+                </div>
+                <input type="text" id="signup_fullname" name="signup-fullname" autocomplete="off" autofocus tabindex="8" class="block w-full p-1 text-black outline-none"
+                placeholder="Please enter your name.">
+            </div>
+            <div class="form-field">
+                <div class="my-2 label sm:flex">
+                    <label for="signup-phone" class="block mr-4 text-lg">Phone</label>
+                    <block class="self-center hidden text-sm text-[yellow] signup-phone-error"></block>
+                </div>
+                <input type="text" id="signup_phone" name="signup-phone" autocomplete="off" autofocus tabindex="9" class="block w-full p-1 text-black outline-none"
+                placeholder="Please enter your phone.">
+            </div>
+            <div class="form-field">
+                <div class="my-2 label sm:flex">
+                    <label for="signup-password" class="block mr-4 text-lg">Password</label>
+                    <block class="self-center hidden text-sm text-[yellow] signup-password-error"></block>
+                </div>
+                <input type="password" id="signup_password" name="signup-password" autocomplete="off" autofocus tabindex="10" class="block w-full p-1 text-black outline-none"
+                placeholder="Please enter your password.">
+            </div>
+            <div class="form-field">
+                <div class="my-2 label sm:flex">
+                    <label for="signup-password-confirm" class="block mr-4 text-lg">Password Confirm</label>
+                    <block class="self-center hidden text-sm text-[yellow] signup-password-confirm-error"></block>
+                </div>
+                <input type="password" id="signup_password_confirm" name="signup-password-confirm" autocomplete="off" autofocus tabindex="11" class="block w-full p-1 text-black outline-none"
+                placeholder="Please enter your password again.">
+            </div>
+        </form>  
+    </div>
+    
+</section>
