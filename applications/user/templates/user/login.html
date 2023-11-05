@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    login
+    Login
 {% endblock %}
 
 {% block inner_content %}
@@ -14,7 +14,7 @@
     <div class="form-field">
         <div class="my-2 label sm:flex">
             <label for="login-email" class="block mr-4 text-lg">Email</label>
-            <block class="self-center hidden text-sm text-[yellow] login-email-error"></block>
+            <div class="self-center hidden text-sm text-[yellow] login-email-error"></div>
         </div>
         <input type="text" id="login_email" name="login-email" autocomplete="off" autofocus tabindex="1" class="block w-full p-1 text-black outline-none"
         placeholder="Please enter your email.">
@@ -22,7 +22,7 @@
     <div class="form-field">
         <div class="my-2 label sm:flex">
             <label for="login-password" class="block mr-4 text-lg">Password</label>
-            <block class="self-center hidden text-sm text-[yellow] login-password-error"></block>
+            <div class="self-center hidden text-sm text-[yellow] login-password-error"></div>
         </div>
         <input type="password" id="login_password" name="login-password" autocomplete="off" autofocus tabindex="2" class="block w-full p-1 text-black outline-none"
         placeholder="Please enter your password.">
