@@ -56,6 +56,14 @@ CSRF_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    get_ipaddress(),
+    "http://127.0.0.1:8881",
+    "http://127.0.0.1:8880",
+    "http://127.0.0.1:8001",
+    "http://127.0.0.1:8000",
+]
+
 
 # Application definition
 
