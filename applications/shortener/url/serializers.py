@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from common.utils import (
-    get_user_id_from_cookie,
+    get_user_id_from_token,
     make_shortened_url_and_prefix,
 )
 
@@ -25,7 +25,7 @@ class ShortenedUrlSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context["request"]
-        creator_id = get_user_id_from_cookie(request)
+        creator_id = get_user_id_from_token(request)
         prefix, shortened_url = make_shortened_url_and_prefix()
         validated_data["prefix"] = prefix
         validated_data["creator_id"] = creator_id

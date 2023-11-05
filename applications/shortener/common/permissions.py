@@ -1,8 +1,9 @@
 from rest_framework.permissions import BasePermission
 from rest_framework import status
+from rest_framework.request import Request
 
 from common.exceptions import GenericAPIException
-from common.utils import get_user_id_from_cookie
+from common.utils import get_token_from_header, get_user_id_from_token
 
 
 class LoginRequired(BasePermission):
@@ -13,8 +14,8 @@ class LoginRequired(BasePermission):
     def class_name(obj):
         return type(obj).__name__
 
-    def has_permission(self, request, view):
-        access_token = request.COOKIES.get("access")
+    def has_permission(self, request: Request, view):
+        access_token = get_token_from_header(request)
         if not access_token:
             response = {
                 "detail": "login required",
@@ -26,6 +27,6 @@ class LoginRequired(BasePermission):
             return True
 
     def has_object_permission(self, request, view, obj):
-        user_id = get_user_id_from_cookie(request)
+        user_id = get_user_id_from_token(request)
         if hasattr(obj, "creator_id"):
             return obj.creator_id == user_id

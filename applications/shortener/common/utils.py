@@ -11,8 +11,18 @@ from url.models import ShortenedUrl
 from common.exceptions import GenericAPIException
 
 
-def get_user_id_from_cookie(request: Request):
-    access_token = request.COOKIES.get("access")
+def get_token_from_header(request: Request):
+    authorization_header = request.META.get("HTTP_AUTHORIZATION", "")
+    header_split_list = authorization_header.split(" ")
+    if header_split_list[0] == "Bearer":
+        access_token = authorization_header.split(" ")[1]
+    else:
+        access_token = ""
+    return access_token
+
+
+def get_user_id_from_token(request: Request):
+    access_token = get_token_from_header(request)
     if not access_token:
         response = {
             "detail": "login required",
@@ -48,3 +58,19 @@ def make_shortened_url_and_prefix():
             return prefix, shortened_url
         else:
             continue
+
+
+USER_GRADE = {
+    "free": {"max_link_cnt": 10, "monthly_limit_click": 100, "allow_alias": False},
+    "basic": {"max_link_cnt": 300000, "monthly_limit_click": 100, "allow_alias": True},
+    "premium": {
+        "max_link_cnt": float("inf"),
+        "monthly_limit_click": 100,
+        "allow_alias": True,
+    },
+    "master": {
+        "max_link_cnt": float("inf"),
+        "monthly_limit_click": 100,
+        "allow_alias": True,
+    },
+}
