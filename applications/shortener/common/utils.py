@@ -12,12 +12,11 @@ from common.exceptions import GenericAPIException
 
 
 def get_token_from_header(request: Request):
-    authorization_header = request.META.get("HTTP_AUTHORIZATION", "")
-    header_split_list = authorization_header.split(" ")
-    if header_split_list[0] == "Bearer":
-        access_token = authorization_header.split(" ")[1]
-    else:
-        access_token = ""
+    access_token = None
+    for content in request.headers.get("Cookie").split("; "):
+        if content.startswith("access"):
+            access_token = content[7:]
+            break
     return access_token
 
 
