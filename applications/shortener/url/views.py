@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
 from common.permissions import LoginRequired
-from common.utils import get_user_id_from_cookie
+from common.utils import get_user_id_from_token
 from url.models import ShortenedUrl
 from url.serializers import ShortenedUrlSerializer
 
@@ -21,7 +21,7 @@ class ShortenedUrlView(GenericAPIView):
     serializer_class = ShortenedUrlSerializer
 
     def get(self, request: Request):
-        user_id = get_user_id_from_cookie(request)
+        user_id = get_user_id_from_token(request)
         shortened_url = ShortenedUrl.objects.filter(creator_id=user_id, is_active=True)
 
         serializer: ShortenedUrlSerializer = self.get_serializer(
