@@ -1,9 +1,9 @@
 {% load static %}
-    <header class="grid items-center h-20 mb-10">
+    <header class="grid items-center h-20 mb-10 border-b-2 border-black">
         <nav class="flex items-center justify-between">
             <a href="{% url 'index' %}" class="block text-4xl font-bold font-yedstreet hover:text-blue-700">csw</a>
             <ul class="flex items-center list-none">
-                <li><img src="{% static 'img/icon/url05.png' %}" alt="url_shortener" onclick="window.location.href='#'" class="mx-4 cursor-pointer h-9"id="header_url_btn"></li>
+                <li><img src="{% static 'img/icon/url05.png' %}" alt="url_shortener" onclick="window.location.href='{% url "url" %}'" class="mx-4 cursor-pointer h-9"id="header_url_btn"></li>
                 <li><img src="{% static 'img/icon/job-post01.png' %}" alt="crawling_jd" onclick="window.location.href='#'" class="mx-4 cursor-pointer h-9"id="header_jd_btn"></li>
                 {% if login == undefined %}
                 <li><img src="{% static 'img/icon/login01.png' %}" alt="login" onclick="window.location.href='{% url "login" %}'" class="mx-4 cursor-pointer h-9" id="header_login_btn"></li>
@@ -13,5 +13,4 @@
             </ul>
         </nav>
     </header>
-
-
+    
