@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginSubmitBtn = getElFromId('login_btn_email');
 
     loginSubmitBtn.addEventListener('click', login)
+    setKeyForFunction(loginSubmitBtn, 'Enter', login)
 
     async function login() {
         const loginEmailInput = getElFromId('login_email');
@@ -136,6 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // signup 버튼 클릭 시, 모달 생성
     signupBtn.addEventListener('click', openModal)
+    setKeyForFunction(signupBtn, "Enter", openModal)
+
     async function openModal() {
         const signupModal = getElFromId('signup_modal');
         signupModal.classList.remove('hidden');
