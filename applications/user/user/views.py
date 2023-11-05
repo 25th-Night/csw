@@ -1,19 +1,22 @@
 import re
 
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import authenticate, logout
+from django.contrib.auth.hashers import check_password
+
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
-from django.contrib.auth import authenticate, logout
-from django.contrib.auth.hashers import check_password
 
 
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from user.models import User
 
+from user.models import User
 from user.serializers import SignUpSerializer, UserSerializer
 
 
@@ -57,8 +60,6 @@ class AuthView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data.get("email")
         password = serializer.validated_data.get("password")
-        # email = request.data.get("email")
-        # password = request.data.get("password")
         user = authenticate(email=email, password=password)
 
         if user is not None:
@@ -97,6 +98,38 @@ class AuthView(GenericAPIView):
             logout(request)
 
         return response
+
+
+class TokenRefreshView(APIView):
+    def post(self, request):
+        refresh_token = request.data.get("refresh")
+
+        if not refresh_token:
+            return Response(
+                {"error": "Refresh Token required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            access_token = str(refresh.access_token)
+            response_data = {
+                "detail": "refresh token success",
+                "token": {
+                    "access": access_token,
+                    "refresh": refresh_token,
+                },
+            }
+
+            response = Response(response_data, status=status.HTTP_200_OK)
+            response.set_cookie("access", access_token, httponly=True)
+            response.set_cookie("refresh", refresh_token, httponly=True)
+
+            return response
+
+        except Exception as e:
+            return Response(
+                {"error": "refresh token failed"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class EmailExistView(GenericAPIView):
