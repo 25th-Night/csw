@@ -18,6 +18,8 @@ from pathlib import Path
 import socket
 import platform
 
+from corsheaders.defaults import default_methods, default_headers
+
 
 if platform.system() in ["Windows", "Darwin"]:
     from dotenv import load_dotenv
@@ -46,10 +48,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-CSRF_TRUSTED_ORIGINS = [
+CSRF_ALLOWED_ORIGINS = [
     get_ipaddress(),
     "http://127.0.0.1:8881",
+    "http://127.0.0.1:8880",
     "http://127.0.0.1:8001",
+    "http://127.0.0.1:8000",
 ]
 
 
@@ -70,6 +74,7 @@ INSTALLED_APPS += [
     "rest_framework_simplejwt",
     "drf_spectacular",
     "django_filters",
+    "corsheaders",
 ]
 
 ## Create Apps
@@ -78,6 +83,7 @@ INSTALLED_APPS += [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -164,14 +170,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # REST_FRAMEWORK
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticatedOrReadOnly"
-    ],
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    # "DEFAULT_AUTHENTICATION_CLASSES": [
+    #     "rest_framework_simplejwt.authentication.JWTAuthentication",
+    #     "rest_framework.authentication.TokenAuthentication",
+    #     "rest_framework.authentication.SessionAuthentication",
+    # ],
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
         "rest_framework.parsers.FormParser",
@@ -191,3 +195,9 @@ SIMPLE_JWT = {
     "USER_ID_CLAIM": "user_id",
     "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
 }
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = list(default_methods) + []
+CORS_ALLOW_HEADERS = list(default_headers) + []
