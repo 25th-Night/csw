@@ -49,8 +49,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // logout 버튼 마우스 오버 시 효과
         imageHover(myInfoBtn, '/static/img/icon/user02.png', '/static/img/icon/user01.png')
     }
-
-
 });
 
 
