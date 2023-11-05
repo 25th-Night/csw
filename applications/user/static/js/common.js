@@ -93,18 +93,27 @@ function setFetchData(method, body){
     /* Fetch data 셋팅 함수 */
 
     let csrftoken   = getCookie('csrftoken');
+    
+    let headers = {
+        'content-type': 'application/json',
+        'X-CSRFToken': csrftoken,
 
-    const data = {
+    };
+
+    let data = {
         method: method,
-        headers: {
-            'content-type': 'application/json',
-            'X-CSRFToken' : csrftoken,        
-        },
-        body: JSON.stringify(body)
+        headers: headers,
+        credentials: 'include'
+    }
+
+    if (method != 'get') {
+        
+        data['body'] = JSON.stringify(body);
     }
 
     return data
 }
+
 
 function redirectLogin(response) {
     /* Server에서 200외의 상태값을 받았을 경우 login페이지로 이동하는 함수 
@@ -169,6 +178,38 @@ function setKeyForFunction(element, input_key, func) {
     });
 }
 
+function getShortenerURL() {
+    // 현재 URL
+    const currentURL = window.location.href;
+
+    // URL 객체 생성
+    const currentURLObject = new URL(currentURL);
+    console.log(`currentURLObject:${currentURLObject}`);
+
+    // 현재 URL에서 호스트 (도메인) 이름을 추출
+    const currentHost = currentURLObject.host;
+    console.log(`currentHost:${currentHost}`);
+
+    // URL 스키마 (http 또는 https)를 조회
+    const currentProtocol = currentURLObject.protocol;
+    console.log(`currentProtocol:${currentProtocol}`);
+
+    let shortenerURL;
+
+    if (currentHost === "127.0.0.1:8000") {
+        shortenerURL = `${currentProtocol}//127.0.0.1:8001`;
+    } else if (currentHost === "127.0.0.1:8880") {
+        shortenerURL = `${currentProtocol}//127.0.0.1:8881`;
+    } else if (currentHost === "csw.kr") {
+        shortenerURL = `${currentProtocol}//url.csw.kr`;
+    } else {
+        // 기본 URL 설정
+        shortenerURL = "";
+    }
+    console.log(`shortenerURL:${shortenerURL}`);
+    return shortenerURL;
+}
+
 export {
     getElFromSel,
     getElsFromSel,
@@ -188,4 +229,5 @@ export {
     displayErrorMessage,
     displayPermanentErrorMessage,
     setKeyForFunction,
+    getShortenerURL,
 };
