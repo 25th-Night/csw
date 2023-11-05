@@ -18,6 +18,8 @@ from pathlib import Path
 import socket
 import platform
 
+from django.urls import reverse_lazy
+
 
 if platform.system() in ["Windows", "Darwin"]:
     from dotenv import load_dotenv
@@ -180,7 +182,6 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.TokenAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
@@ -193,6 +194,8 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=2),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
     "ALGORITHM": "HS256",
     "SIGNING_KEY": os.getenv("JWT_SIGNING_KEY", SECRET_KEY),
     "AUTH_HEADER_TYPES": ("Bearer",),
@@ -201,3 +204,7 @@ SIMPLE_JWT = {
     "USER_ID_CLAIM": "user_id",
     "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
 }
+
+
+# LOGIN_URL
+LOGIN_URL = reverse_lazy("login")
