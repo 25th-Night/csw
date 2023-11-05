@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import check_password
 
 from rest_framework import serializers
 
-from user.models import User
+from user.models import Url, User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -66,6 +66,8 @@ class SignUpSerializer(serializers.ModelSerializer):
         user = User.objects.create(email=email, fullname=fullname, phone=phone)
         user.set_password(password)
         user.save()
+
+        Url.objects.create(user=user)
 
         return user
 
