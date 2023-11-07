@@ -6,7 +6,7 @@ class LoginView(TemplateView):
     template_name = "user/login.html"
 
     def get(self, request, *args, **kwargs):
-        kwargs["login"] = request.COOKIES.get("access")
-        if kwargs["login"]:
+        user = request.user
+        if hasattr(request.user, "is_authenticated") and user.is_authenticated:
             return redirect("index")
         return super().get(request, *args, **kwargs)
