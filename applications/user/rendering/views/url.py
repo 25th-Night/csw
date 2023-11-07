@@ -1,12 +1,15 @@
 from django.views.generic import TemplateView
-from common.utils import get_user_url_license
+
+
 from common.permissions import LoginRequired
+from common.data import LICENSE
 
 
 class UrlView(LoginRequired, TemplateView):
     template_name = "url/index.html"
 
     def get(self, request, *args, **kwargs):
-        kwargs["login"] = request.COOKIES.get("access")
-        kwargs["url_license"] = get_user_url_license(request)
+        user = request.user
+        available_url_cnt = LICENSE.get(user.url.license).get("max_link_cnt")
+        kwargs["available_url_cnt"] = available_url_cnt
         return super().get(request, *args, **kwargs)
