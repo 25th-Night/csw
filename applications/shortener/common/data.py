@@ -1,4 +1,4 @@
-License = {
+LICENSE = {
     1: {
         "grade": "FREE",
         "max_link_cnt": 10,
