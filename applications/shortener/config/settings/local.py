@@ -12,3 +12,7 @@ DATABASES = {
         "OPTIONS": {"options": "-c search_path=shortener,public"},
     }
 }
+
+
+# Application URL
+USER_URL = "http://127.0.0.1"
