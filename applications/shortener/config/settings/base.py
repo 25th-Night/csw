@@ -54,6 +54,8 @@ CSRF_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8880",
     "http://127.0.0.1:8001",
     "http://127.0.0.1:8000",
+    "http://127.0.0.1:80",
+    "http://127.0.0.1",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -62,6 +64,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8880",
     "http://127.0.0.1:8001",
     "http://127.0.0.1:8000",
+    "http://127.0.0.1:80",
+    "http://127.0.0.1",
 ]
 
 
@@ -87,6 +91,7 @@ INSTALLED_APPS += [
 
 ## Create Apps
 INSTALLED_APPS += [
+    "common",
     "url",
 ]
 
@@ -179,16 +184,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # REST_FRAMEWORK
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
-    # "DEFAULT_AUTHENTICATION_CLASSES": [
-    #     "rest_framework_simplejwt.authentication.JWTAuthentication",
-    #     "rest_framework.authentication.TokenAuthentication",
-    #     "rest_framework.authentication.SessionAuthentication",
-    # ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "config.authentication.JWTAuthentication",
+    ],
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
         "rest_framework.parsers.FormParser",
         "rest_framework.parsers.MultiPartParser",
     ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
 }
 
 # SIMPLE_JWT
@@ -207,5 +212,27 @@ SIMPLE_JWT = {
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_METHODS = list(default_methods) + []
-CORS_ALLOW_HEADERS = list(default_headers) + []
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+] + []
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+] + [
+    "Cookie",
+    "access",
+    "refresh",
+]
+
+
+# Application URL
+USER_URL = "http://127.0.0.1:8000"
