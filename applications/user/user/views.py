@@ -1,6 +1,7 @@
 import re
 
-from django.shortcuts import get_object_or_404
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.hashers import check_password
 
@@ -8,15 +9,23 @@ from django.contrib.auth.hashers import check_password
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from rest_framework_simplejwt.serializers import (
+    TokenObtainPairSerializer,
+    TokenRefreshSerializer,
+)
 
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from common.utils import (
+    get_object_or_404,
+    get_user_from_request,
+    get_user_id_from_access_token,
+    refresh_access_token_from_request,
+)
 
-from user.models import User
+from user.models import Url, User
 from user.serializers import SignUpSerializer, UserSerializer
 
 
@@ -54,6 +63,34 @@ class AuthView(GenericAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
+    def get(self, request):
+        try:
+            user: User = get_user_from_request(request)
+            serializer: UserSerializer = self.get_serializer(user)
+
+            serializer_data = serializer.data
+            serializer_data["is_authenticated"] = True
+            serializer_data["url_license"] = user.url.license
+            return Response(serializer_data, status=status.HTTP_200_OK)
+        except ExpiredSignatureError:
+            data = {"refresh": request.COOKIES.get("refresh", None)}
+            serializer = TokenRefreshSerializer(data=data)
+
+            serializer.is_valid(raise_exception=True)
+            access_token = serializer.data.get("access", None)
+            refresh_token = serializer.data.get("refresh", None)
+
+            user = get_user_id_from_access_token(access_token)
+            serializer: UserSerializer = self.get_serializer(user)
+
+            response: Response = Response(serializer.data, status=status.HTTP_200_OK)
+            response.set_cookie("access", access_token, httponly=True)
+            response.set_cookie("refresh", refresh_token, httponly=True)
+
+            return response
+        except InvalidTokenError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
     def post(self, request):
         serializer: UserSerializer = self.get_serializer(data=request.data)
 
@@ -87,6 +124,8 @@ class AuthView(GenericAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
+        if hasattr(request.user, "is_authenticated") and request.user.is_authenticated:
+            logout(request)
         response_data = {
             "detail": "logout success",
         }
@@ -94,42 +133,29 @@ class AuthView(GenericAPIView):
         response = Response(response_data, status=status.HTTP_202_ACCEPTED)
         response.delete_cookie("access")
         response.delete_cookie("refresh")
-        if request.user.is_authenticated:
-            logout(request)
 
         return response
 
 
 class TokenRefreshView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        refresh_token = request.data.get("refresh")
+        access_token, refresh_token = refresh_access_token_from_request(request)
 
-        if not refresh_token:
-            return Response(
-                {"error": "Refresh Token required"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        response_data = {
+            "detail": "refresh token success",
+            "token": {
+                "access": access_token,
+                "refresh": refresh_token,
+            },
+        }
 
-        try:
-            refresh = RefreshToken(refresh_token)
-            access_token = str(refresh.access_token)
-            response_data = {
-                "detail": "refresh token success",
-                "token": {
-                    "access": access_token,
-                    "refresh": refresh_token,
-                },
-            }
+        response = Response(response_data, status=status.HTTP_200_OK)
+        response.set_cookie("access", access_token, httponly=True)
+        response.set_cookie("refresh", refresh_token, httponly=True)
 
-            response = Response(response_data, status=status.HTTP_200_OK)
-            response.set_cookie("access", access_token, httponly=True)
-            response.set_cookie("refresh", refresh_token, httponly=True)
-
-            return response
-
-        except Exception as e:
-            return Response(
-                {"error": "refresh token failed"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        return response
 
 
 class EmailExistView(GenericAPIView):
@@ -196,6 +222,31 @@ class PasswordFormatView(GenericAPIView):
 
         password_format = True if validation.match(password) is not None else False
         response_data = {"password_format": password_format}
+
+        response = Response(response_data, status=status.HTTP_200_OK)
+
+        return response
+
+
+class UpdateTotalUrlCountView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request):
+        user = request.user
+
+        url = get_object_or_404(Url, user=user)
+        update = request.data.get("update")
+
+        response_data = {"detail": "update success"}
+        status = status.HTTP_200_OK
+
+        if update == "created":
+            url.total_cnt += 1
+        elif update == "deleted":
+            url.total_cnt -= 1
+        else:
+            response_data = {"detail": "Bad request"}
+            status = status.HTTP_400_BAD_REQUEST
 
         response = Response(response_data, status=status.HTTP_200_OK)
 
