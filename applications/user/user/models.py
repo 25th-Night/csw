@@ -9,7 +9,7 @@ from common.models import CommonModel
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, password, phone, license, **kwargs):
+    def create_user(self, email, password, phone, **kwargs):
         if not email:
             raise ValueError("Users must have an email address")
         if not password:
@@ -29,7 +29,8 @@ class UserManager(BaseUserManager):
         superuser.is_superuser = True
         superuser.save(using=self._db)
 
-        url = superuser.url.license = Url.License.MASTER
+        url = superuser.url
+        url.license = Url.License.MASTER
         url.save()
 
         return superuser
