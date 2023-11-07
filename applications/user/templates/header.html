@@ -3,9 +3,12 @@
         <nav class="flex items-center justify-between">
             <a href="{% url 'index' %}" class="block text-4xl font-bold font-yedstreet hover:text-blue-700">csw</a>
             <ul class="flex items-center list-none">
+                {% if user.is_admin %}
+                <li><img src="{% static 'img/icon/admin02.png' %}" alt="admin" class="h-10 mx-4 cursor-pointer" id="header_admin_btn"></li>
+                {% endif %}
                 <li><img src="{% static 'img/icon/url05.png' %}" alt="url_shortener" onclick="window.location.href='{% url "url" %}'" class="mx-4 cursor-pointer h-9"id="header_url_btn"></li>
-                <li><img src="{% static 'img/icon/job-post01.png' %}" alt="crawling_jd" onclick="window.location.href='#'" class="mx-4 cursor-pointer h-9"id="header_jd_btn"></li>
-                {% if login == undefined %}
+                <li><img src="{% static 'img/icon/job-post01.png' %}" alt="crawling_jd" onclick="alert('Not Started')" class="mx-4 cursor-pointer h-9"id="header_jd_btn"></li>
+                {% if user == undefined %}
                 <li><img src="{% static 'img/icon/login01.png' %}" alt="login" onclick="window.location.href='{% url "login" %}'" class="mx-4 cursor-pointer h-9" id="header_login_btn"></li>
                 {% else %}
                 <li><img src="{% static 'img/icon/user01.png' %}" alt="my_info" class="mx-4 cursor-pointer h-9" id="header_my_info_btn"></li>
