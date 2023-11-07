@@ -1,31 +1,42 @@
 server {
-        listen 80;
-        server_name 127.0.0.1 csw.kr;
+    listen 80;
+    server_name 127.0.0.1 csw.kr;
 
-        location / {
-                proxy_pass http://user:8000;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-        }
+    location / {
+        proxy_pass http://user:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Cookie $http_cookie;
 
-        location /static/ {
-                alias /var/www/html/static/;
-                autoindex off;
-        }
+    }
+
+    location /static/ {
+        alias /var/www/html/static/;
+        autoindex off;
+    }
 }
 
 server {
-        listen 80;
-        server_name 127.0.0.2 url.csw.kr;
+    listen 80;
+    server_name 127.0.0.2 url.csw.kr;
 
-        location / {
-                proxy_pass http://shortener:8000;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-        }
+    underscores_in_headers on;
 
-        location /static/ {
-                alias /var/www/html/static/;
-                autoindex off;
-        }
+    location / {
+        proxy_pass http://shortener:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Cookie $http_cookie;
+
+        add_header Cross-Origin-Opener-Policy same-origin;
+    }
+
+    location /static/ {
+        alias /var/www/html/static/;
+        autoindex off;
+    }
 }
