@@ -14,9 +14,16 @@ DATABASES = {
 }
 
 
-# domain
-DOMAIN = "csw.kr"
-
+# CORS settings
 
 # Application URL
 USER_URL = "https://csw.kr"
+
+
+# COOKIE settings
+
+# domain
+DOMAIN = "127.0.0.1"
+
+# secure
+SECURE = False

@@ -210,14 +210,18 @@ SIMPLE_JWT = {
 }
 
 
+# CORS settings
+
 # CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ORIGIN_WHITELIST = [
     "http://127.0.0.1",
+    "http://127.0.0.1:8000",
     "https://csw.kr",
 ]
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1",
+    "http://127.0.0.1:8000",
     "https://csw.kr",
 ]
 CORS_ALLOW_CREDENTIALS = True
@@ -241,9 +245,14 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ] + []
 
+# Application URL
+USER_URL = "http://127.0.0.1:8000"
+
+
+# COOKIE settings
 
 # domain
 DOMAIN = "127.0.0.1"
 
-# Application URL
-USER_URL = "http://127.0.0.1:8000"
+# secure
+SECURE = False
