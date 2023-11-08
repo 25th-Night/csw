@@ -1,0 +1,110 @@
+version: '3'
+
+services:
+  user-db:
+    container_name: csw-user-db
+    image: postgres:13
+    ports:
+      - 5432:5432
+    env_file:
+      - ../.envs/.env_user
+    volumes:
+      - postgres-csw-user:/var/lib/postgresql/data
+  
+  shortener-db:
+    container_name: csw-shortener-db
+    image: postgres:13
+    ports:
+      - 5433:5432
+    env_file:
+      - ../.envs/.env_shortener
+    volumes:
+      - postgres-csw-shortener:/var/lib/postgresql/data
+
+  user:
+    depends_on:
+      - user-db
+    container_name: csw-user
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile_user
+    image: csw-user
+    volumes:
+      - ../applications/user:/app
+      - static-csw-user:/var/www/html/static
+    ports:
+      - 8000:8000
+    command:
+      - "/start"
+    env_file:
+      - ../.envs/.env_user
+
+  shortener:
+    depends_on:
+      - shortener-db
+    container_name: csw-shortener
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile_shortener
+    image: csw-shortener
+    volumes:
+      - ../applications/shortener:/app
+      - static-csw-shortener:/var/www/html/static
+    ports:
+      - 8001:8000
+    command:
+      - "/start"
+    env_file:
+      - ../.envs/.env_shortener
+  
+  nginx:
+    restart: always
+    depends_on:
+      - user
+    container_name: csw-nx
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile_nginx
+    image: csw-nx
+    volumes:
+      - static-csw-user:/var/www/html/static
+    ports:
+      - 80:80
+    env_file:
+      - ../.envs/.env_user
+
+  # prometheus:
+  #   container_name: csw-prometheus
+  #   depends_on:
+  #     - user
+  #     - shortener
+  #   image: prom/prometheus
+  #   ports:
+  #     - 9090:9090
+  #   volumes:
+  #     - ../monitoring:/etc/prometheus
+  #   command:
+  #     - --config.file=/etc/prometheus/prometheus.yml
+  #     - --web.console.templates=/etc/proemtheus/consoles
+  #     - --storage.tsdb.retention.time=10d
+  #     - --storage.tsdb.retention.size=1GB
+  #     - --web.enable-admin-api
+
+  # grafana:
+  #   container_name: csw-grafana
+  #   image: grafana/grafana-oss
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - csw-grafana:/var/lib/grafana
+  #   environment:
+  #     - GF_SECURITY_ADMIN_USER=admin
+  #     - GF_SECURITY_ADMIN_PASSWORD=1234
+  #     - GF_USERS_ALLOW_SIGN_UP=false
+
+volumes:
+  static-csw-user:
+  static-csw-shortener:
+  postgres-csw-user:
+  postgres-csw-shortener:
+  # csw-grafana:
