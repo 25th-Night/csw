@@ -41,6 +41,18 @@ DATABASES = {
 }
 
 
+# CORS settings
+
+CORS_ORIGIN_WHITELIST += [
+    USER_DOMAIN,
+    SERVICE_DOMAIN,
+]
+CORS_ALLOWED_ORIGINS += [
+    USER_DOMAIN,
+    SERVICE_DOMAIN,
+]
+
+
 # COOKIE settings
 
 # domain
