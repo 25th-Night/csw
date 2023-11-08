@@ -38,14 +38,14 @@ class TokenRefreshMiddleware:
                     "access",
                     access_token,
                     domain=settings.DOMAIN,
-                    secure=True,
+                    secure=settings.SECURE,
                     httponly=True,
                 )
                 response.set_cookie(
                     "refresh",
                     refresh_token,
                     domain=settings.DOMAIN,
-                    secure=True,
+                    secure=settings.SECURE,
                     httponly=True,
                 )
 
