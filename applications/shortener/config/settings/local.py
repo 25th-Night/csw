@@ -1,6 +1,19 @@
 from .base import *
 
 
+SERVICE_DOMAIN = f"http://{SERVICE_HOST}:82"
+USER_DOMAIN = f"http://{USER_SERVICE_HOST}:81"
+
+CSRF_ALLOWED_ORIGINS += [
+    USER_DOMAIN,
+    SERVICE_DOMAIN,
+]
+
+CSRF_TRUSTED_ORIGINS += [
+    USER_DOMAIN,
+    SERVICE_DOMAIN,
+]
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -12,3 +25,19 @@ DATABASES = {
         "OPTIONS": {"options": "-c search_path=shortener,public"},
     }
 }
+
+
+# CORS settings
+
+CORS_ORIGIN_WHITELIST += [
+    USER_DOMAIN,
+    SERVICE_DOMAIN,
+]
+CORS_ALLOWED_ORIGINS += [
+    USER_DOMAIN,
+    SERVICE_DOMAIN,
+]
+
+
+# Container Network Settings
+USER_DOMAIN = "http://user:8000"

@@ -15,7 +15,6 @@ import os
 
 from pathlib import Path
 
-import socket
 import platform
 
 from corsheaders.defaults import default_methods, default_headers
@@ -25,12 +24,6 @@ if platform.system() in ["Windows", "Darwin"]:
     from dotenv import load_dotenv
 
     load_dotenv(dotenv_path="../../.envs/.env_shortener")
-
-
-def get_ipaddress():
-    host_name = socket.gethostname()
-    ip_address = socket.gethostbyname(host_name)
-    return "http://" + ip_address
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -46,26 +39,20 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+SERVICE_HOST = "127.0.0.1"
+USER_SERVICE_HOST = SERVICE_HOST
+USER_DOMAIN = f"http://{USER_SERVICE_HOST}:8000"
+
+ALLOWED_HOSTS = [
+    SERVICE_HOST,
+]
 
 CSRF_ALLOWED_ORIGINS = [
-    get_ipaddress(),
-    "http://127.0.0.1:8881",
-    "http://127.0.0.1:8880",
-    "http://127.0.0.1:8001",
-    "http://127.0.0.1:8000",
-    "http://127.0.0.1:80",
-    "http://127.0.0.1",
+    USER_DOMAIN,
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    get_ipaddress(),
-    "http://127.0.0.1:8881",
-    "http://127.0.0.1:8880",
-    "http://127.0.0.1:8001",
-    "http://127.0.0.1:8000",
-    "http://127.0.0.1:80",
-    "http://127.0.0.1",
+    USER_DOMAIN,
 ]
 
 
@@ -215,12 +202,10 @@ SIMPLE_JWT = {
 # CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ORIGIN_WHITELIST = [
-    "http://127.0.0.1:8000",
-    "https://csw.kr",
+    USER_DOMAIN,
 ]
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8000",
-    "https://csw.kr",
+    USER_DOMAIN,
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -243,14 +228,11 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ] + []
 
-# Application URL
-USER_URL = "http://127.0.0.1:8000"
-
 
 # COOKIE settings
 
 # domain
-DOMAIN = "127.0.0.1"
+DOMAIN = USER_SERVICE_HOST
 
 # secure
 SECURE = False

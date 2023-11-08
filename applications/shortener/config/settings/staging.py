@@ -1,4 +1,31 @@
+import os
+
 from .base import *
+
+
+DEBUG = False
+
+
+SERVICE_HOST = os.getenv("URL_SERVICE_HOST")
+USER_SERVICE_HOST = os.getenv("USER_SERVICE_HOST")
+
+SERVICE_DOMAIN = f"https://{SERVICE_HOST}"
+USER_DOMAIN = f"https://{USER_SERVICE_HOST}"
+
+ALLOWED_HOSTS += [
+    SERVICE_HOST,
+    USER_SERVICE_HOST,
+]
+
+CSRF_ALLOWED_ORIGINS += [
+    USER_DOMAIN,
+    SERVICE_DOMAIN,
+]
+
+CSRF_TRUSTED_ORIGINS += [
+    USER_DOMAIN,
+    SERVICE_DOMAIN,
+]
 
 
 DATABASES = {
@@ -14,16 +41,10 @@ DATABASES = {
 }
 
 
-# CORS settings
-
-# Application URL
-USER_URL = "https://csw.kr"
-
-
 # COOKIE settings
 
 # domain
-DOMAIN = "127.0.0.1"
+DOMAIN = USER_SERVICE_HOST
 
 # secure
-SECURE = False
+SECURE = True
