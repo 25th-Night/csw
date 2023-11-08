@@ -106,9 +106,12 @@ def get_user_id_from_request(request: Request):
 def get_user_info_via_authorization(request: Request):
     access_token = get_token_from_request(request)
     auth_url = f"{settings.USER_DOMAIN}/api/user/auth"
+    print(f"auth_url: {auth_url}")
     cookies = {"access": access_token}
+    print(f"cookies: {cookies}")
 
     response = requests.get(auth_url, cookies=cookies)
+    print(f"response.json():{response.json()}")
 
     if response.status_code == 200:
         user = response.json()

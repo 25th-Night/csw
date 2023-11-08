@@ -78,6 +78,7 @@ class AuthView(GenericAPIView):
 
     def get(self, request):
         try:
+            print("try")
             user: User = get_user_from_request(request)
             serializer: UserSerializer = self.get_serializer(user)
 
@@ -86,6 +87,7 @@ class AuthView(GenericAPIView):
             serializer_data["url_license"] = user.url.license
             return Response(serializer_data, status=status.HTTP_200_OK)
         except ExpiredSignatureError:
+            print("ExpiredSignatureError")
             data = {"refresh": request.COOKIES.get("refresh", None)}
             serializer = TokenRefreshSerializer(data=data)
 
@@ -114,6 +116,7 @@ class AuthView(GenericAPIView):
 
             return response
         except InvalidTokenError:
+            print("InvalidTokenError")
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request):
