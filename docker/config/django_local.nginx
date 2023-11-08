@@ -1,6 +1,6 @@
 server {
-    listen 80;
-    server_name USER_SERVICE_HOST;
+    listen 81;
+    server_name 127.0.0.1;
 
     location / {
         proxy_pass http://user:8000;
@@ -17,8 +17,8 @@ server {
 }
 
 server {
-    listen 80;
-    server_name URL_SERVICE_HOST;
+    listen 82;
+    server_name 127.0.0.1;
 
     underscores_in_headers on;
 
