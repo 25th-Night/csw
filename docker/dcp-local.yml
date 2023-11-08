@@ -64,14 +64,13 @@ services:
     container_name: csw-nx
     build:
       context: ../
-      dockerfile: ./docker/Dockerfile_nginx
-    image: csw-nx
+      dockerfile: ./docker/Dockerfile_nginx_local
+    image: csw-nx-local
     volumes:
       - static-csw-user:/var/www/html/static
     ports:
-      - 80:80
-    env_file:
-      - ../.envs/.env_user
+      - 81:81
+      - 82:82
 
   # prometheus:
   #   container_name: csw-prometheus
