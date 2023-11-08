@@ -1,4 +1,5 @@
 import re
+from django.conf import settings
 
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
@@ -53,8 +54,12 @@ class SignUpView(GenericAPIView):
         }
 
         response = Response(response_data, status=status.HTTP_200_OK)
-        response.set_cookie("access", access_token, httponly=True)
-        response.set_cookie("refresh", refresh_token, httponly=True)
+        response.set_cookie(
+            "access", access_token, domain=settings.DOMAIN, secure=True, httponly=True
+        )
+        response.set_cookie(
+            "refresh", refresh_token, domain=settings.DOMAIN, secure=True, httponly=True
+        )
 
         return response
 
@@ -84,8 +89,20 @@ class AuthView(GenericAPIView):
             serializer: UserSerializer = self.get_serializer(user)
 
             response: Response = Response(serializer.data, status=status.HTTP_200_OK)
-            response.set_cookie("access", access_token, httponly=True)
-            response.set_cookie("refresh", refresh_token, httponly=True)
+            response.set_cookie(
+                "access",
+                access_token,
+                domain=settings.DOMAIN,
+                secure=True,
+                httponly=True,
+            )
+            response.set_cookie(
+                "refresh",
+                refresh_token,
+                domain=settings.DOMAIN,
+                secure=True,
+                httponly=True,
+            )
 
             return response
         except InvalidTokenError:
@@ -115,8 +132,20 @@ class AuthView(GenericAPIView):
             }
 
             response = Response(response_data, status=status.HTTP_200_OK)
-            response.set_cookie("access", access_token, httponly=True)
-            response.set_cookie("refresh", refresh_token, httponly=True)
+            response.set_cookie(
+                "access",
+                access_token,
+                domain=settings.DOMAIN,
+                secure=True,
+                httponly=True,
+            )
+            response.set_cookie(
+                "refresh",
+                refresh_token,
+                domain=settings.DOMAIN,
+                secure=True,
+                httponly=True,
+            )
 
             return response
 
@@ -152,8 +181,12 @@ class TokenRefreshView(APIView):
         }
 
         response = Response(response_data, status=status.HTTP_200_OK)
-        response.set_cookie("access", access_token, httponly=True)
-        response.set_cookie("refresh", refresh_token, httponly=True)
+        response.set_cookie(
+            "access", access_token, domain=settings.DOMAIN, secure=True, httponly=True
+        )
+        response.set_cookie(
+            "refresh", refresh_token, domain=settings.DOMAIN, secure=True, httponly=True
+        )
 
         return response
 
