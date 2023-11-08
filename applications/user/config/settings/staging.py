@@ -3,7 +3,7 @@ import os
 from .base import *
 
 
-DEBUG = False
+DEBUG = True
 
 SERVICE_HOST = os.getenv("USER_SERVICE_HOST")
 URL_SERVICE_HOST = os.getenv("URL_SERVICE_HOST")
