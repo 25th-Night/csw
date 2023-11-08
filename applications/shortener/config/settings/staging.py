@@ -14,5 +14,9 @@ DATABASES = {
 }
 
 
+# domain
+DOMAIN = "csw.kr"
+
+
 # Application URL
 USER_URL = "https://csw.kr"
