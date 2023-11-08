@@ -99,6 +99,7 @@ class AuthView(GenericAPIView):
             serializer: UserSerializer = self.get_serializer(user)
 
             response: Response = Response(serializer.data, status=status.HTTP_200_OK)
+            print(f"settings.DOMAIN:{settings.DOMAIN}")
             response.set_cookie(
                 "access",
                 access_token,

@@ -110,8 +110,16 @@ def get_user_info_via_authorization(request: Request):
     cookies = {"access": access_token}
     print(f"cookies: {cookies}")
 
-    response = requests.get(auth_url, cookies=cookies)
-    print(f"response.json():{response.json()}")
+    try:
+        response = requests.get(auth_url, cookies=cookies)
+        response.raise_for_status()
+        print(f"response.json(): {response.json()}")
+    except requests.exceptions.HTTPError as err:
+        print(f"HTTP 오류 발생: {err}")
+    except requests.exceptions.RequestException as err:
+        print(f"요청 예외 발생: {err}")
+    except Exception as err:
+        print(f"다른 예외 발생: {err}")
 
     if response.status_code == 200:
         user = response.json()
