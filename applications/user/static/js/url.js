@@ -231,17 +231,11 @@ document.addEventListener("DOMContentLoaded", function () {
             setAttributeToElement(urlListTitle, "data-total", totalCountNum);
 
             // totalCount 업데이트
-            if (url_license == 1) {
-                const percentage = (totalCountNum / available_url_cnt) * 100;
-                totalCount.textContent = `${percentage.toFixed(1)} %`;
-            } else {
-                totalCount.textContent = `${totalCountNum} URLs`;
-            }
+            const percentageNum = (totalCountNum / available_url_cnt) * 100;
+            const percentage = `${percentageNum.toFixed(1)}%`;
+            totalCount.textContent = `${totalCountNum} URLs (${percentage})`;
 
             response_data.results.forEach((url) => {
-                // Shortener URL 서비스의 url 조회
-                const urlServiceURL = getShortenerURL();
-
                 // svg code
                 const openSvg = `
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#373737" class="w-6 h-6 cursor-pointer hover:stroke-[#d9d9d9]">
@@ -280,7 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // url 관련 정보를 각각 담을 태그 생성
                 const shortened = `${url.prefix}/${url.shortened_url}`;
-                const urlLink = `${urlServiceURL}/${shortened}`;
+                const urlLink = `${ShortenerUrl}/${shortened}`;
                 const targetUrl = createNewElement(
                     "div",
                     `url-list-1 url-link target-url-${urlId}`,
