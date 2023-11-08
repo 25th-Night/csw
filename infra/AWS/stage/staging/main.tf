@@ -88,6 +88,8 @@ module "server" {
     shortener_postgres_port     = var.shortener_postgres_port
     ssh_key                     = var.ssh_key
     jwt_signing_key             = var.jwt_signing_key
+    user_service_host           = var.user_service_host
+    url_service_host            = var.url_service_host
   }
 }
 

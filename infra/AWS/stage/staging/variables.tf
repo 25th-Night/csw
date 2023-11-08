@@ -78,5 +78,13 @@ variable "domain" {
 }
 
 variable "django_settings_module" {
+  type = string
+}
 
+variable "user_service_host" {
+  type = string
+}
+
+variable "url_service_host" {
+  type = string
 }
