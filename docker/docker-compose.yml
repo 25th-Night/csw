@@ -30,7 +30,6 @@ services:
       dockerfile: ./docker/Dockerfile_user
     image: csw-user
     volumes:
-      - ../applications/user:/app
       - static-csw-user:/var/www/html/static
     ports:
       - 8000:8000
@@ -48,7 +47,6 @@ services:
       dockerfile: ./docker/Dockerfile_shortener
     image: csw-shortener
     volumes:
-      - ../applications/shortener:/app
       - static-csw-shortener:/var/www/html/static
     ports:
       - 8001:8000
