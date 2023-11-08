@@ -210,3 +210,7 @@ SIMPLE_JWT = {
 
 # LOGIN_URL
 LOGIN_URL = reverse_lazy("login")
+
+
+# domain
+DOMAIN = "127.0.0.1"
