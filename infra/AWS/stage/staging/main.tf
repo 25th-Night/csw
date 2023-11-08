@@ -39,7 +39,7 @@ module "vpc" {
   env = local.env
 }
 
-module "subnet" {
+module "subnet1" {
   source = "../../modules/subnet"
 
   name              = local.subnet_name1
@@ -67,7 +67,7 @@ module "server" {
   name             = local.name
   env              = local.env
   vpc_id           = module.vpc.vpc_id
-  subnet_id        = module.subnet.subnet_id
+  subnet_id        = module.subnet1.subnet_id
   ami              = local.ami
   instance_type    = local.instance_type
   init_script_path = local.init_script_path
@@ -77,6 +77,7 @@ module "server" {
     aws_access_key              = var.aws_access_key
     aws_secret_key              = var.aws_secret_key
     django_secret_key           = var.django_secret_key
+    django_settings_module      = var.django_settings_module
     user_postgres_db            = var.user_postgres_db
     user_postgres_user          = var.user_postgres_user
     user_postgres_password      = var.user_postgres_password
@@ -89,3 +90,29 @@ module "server" {
     jwt_signing_key             = var.jwt_signing_key
   }
 }
+
+
+# module "acm" {
+#   source = "../../modules/acm"
+
+#   acm_domain = var.acm_domain
+# }
+
+
+# module "loadBalancer" {
+#   source = "../../modules/loadBalancer"
+
+#   name        = local.name
+#   env         = local.env
+#   vpc_id      = module.vpc.vpc_id
+#   subnet_id1  = module.subnet1.subnet_id
+#   subnet_id2  = module.subnet2.subnet_id
+#   instance_id = module.server.instance_id
+#   acm_arn     = module.acm.arn
+# }
+
+# module "route53" {
+#   source = "../../modules/route53"
+
+#   domain = var.domain
+# }
