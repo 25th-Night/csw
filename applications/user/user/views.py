@@ -55,10 +55,18 @@ class SignUpView(GenericAPIView):
 
         response = Response(response_data, status=status.HTTP_200_OK)
         response.set_cookie(
-            "access", access_token, domain=settings.DOMAIN, secure=True, httponly=True
+            "access",
+            access_token,
+            domain=settings.DOMAIN,
+            secure=settings.SECURE,
+            httponly=True,
         )
         response.set_cookie(
-            "refresh", refresh_token, domain=settings.DOMAIN, secure=True, httponly=True
+            "refresh",
+            refresh_token,
+            domain=settings.DOMAIN,
+            secure=settings.SECURE,
+            httponly=True,
         )
 
         return response
@@ -93,14 +101,14 @@ class AuthView(GenericAPIView):
                 "access",
                 access_token,
                 domain=settings.DOMAIN,
-                secure=True,
+                secure=settings.SECURE,
                 httponly=True,
             )
             response.set_cookie(
                 "refresh",
                 refresh_token,
                 domain=settings.DOMAIN,
-                secure=True,
+                secure=settings.SECURE,
                 httponly=True,
             )
 
@@ -136,14 +144,14 @@ class AuthView(GenericAPIView):
                 "access",
                 access_token,
                 domain=settings.DOMAIN,
-                secure=True,
+                secure=settings.SECURE,
                 httponly=True,
             )
             response.set_cookie(
                 "refresh",
                 refresh_token,
                 domain=settings.DOMAIN,
-                secure=True,
+                secure=settings.SECURE,
                 httponly=True,
             )
 
@@ -182,10 +190,18 @@ class TokenRefreshView(APIView):
 
         response = Response(response_data, status=status.HTTP_200_OK)
         response.set_cookie(
-            "access", access_token, domain=settings.DOMAIN, secure=True, httponly=True
+            "access",
+            access_token,
+            domain=settings.DOMAIN,
+            secure=settings.SECURE,
+            httponly=True,
         )
         response.set_cookie(
-            "refresh", refresh_token, domain=settings.DOMAIN, secure=True, httponly=True
+            "refresh",
+            refresh_token,
+            domain=settings.DOMAIN,
+            secure=settings.SECURE,
+            httponly=True,
         )
 
         return response
