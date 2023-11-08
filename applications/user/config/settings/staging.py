@@ -14,5 +14,10 @@ DATABASES = {
 }
 
 
+# COOKIE settings
+
 # domain
 DOMAIN = "csw.kr"
+
+# secure
+SECURE = True
