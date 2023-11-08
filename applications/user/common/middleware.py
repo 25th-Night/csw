@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 
 from rest_framework import status
@@ -33,8 +34,20 @@ class TokenRefreshMiddleware:
                 response = self.get_response(request)
                 access_token, refresh_token = refresh_access_token_from_request(request)
 
-                response.set_cookie("access", access_token, httponly=True)
-                response.set_cookie("refresh", refresh_token, httponly=True)
+                response.set_cookie(
+                    "access",
+                    access_token,
+                    domain=settings.DOMAIN,
+                    secure=True,
+                    httponly=True,
+                )
+                response.set_cookie(
+                    "refresh",
+                    refresh_token,
+                    domain=settings.DOMAIN,
+                    secure=True,
+                    httponly=True,
+                )
 
                 return response
         else:
