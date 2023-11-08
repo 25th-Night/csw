@@ -195,10 +195,13 @@ function getShortenerURL() {
     let shortenerURL;
 
     if (currentHost === "127.0.0.1:8000") {
+        console.log("local-window");
         shortenerURL = `${currentProtocol}//127.0.0.1:8001`;
-    } else if (currentHostName === "127.0.0.1") {
-        shortenerURL = `${currentProtocol}//127.0.0.2`;
+    } else if (currentHost === "127.0.0.1:81") {
+        console.log("local-docker");
+        shortenerURL = `${currentProtocol}//127.0.0.1:82`;
     } else if (currentHostName === "csw.kr") {
+        console.log("aws");
         shortenerURL = `${currentProtocol}//url.csw.kr`;
     } else {
         // 기본 URL 설정
