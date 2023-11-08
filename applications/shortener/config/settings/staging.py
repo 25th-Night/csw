@@ -44,19 +44,17 @@ DATABASES = {
 # CORS settings
 
 CORS_ORIGIN_WHITELIST += [
-    USER_DOMAIN,
-    SERVICE_DOMAIN,
+    "https://csw.kr",
 ]
 CORS_ALLOWED_ORIGINS += [
-    USER_DOMAIN,
-    SERVICE_DOMAIN,
+    "https://csw.kr",
 ]
 
 
 # COOKIE settings
 
 # domain
-DOMAIN = USER_SERVICE_HOST
+DOMAIN = "csw.kr"
 
 # secure
 SECURE = True
