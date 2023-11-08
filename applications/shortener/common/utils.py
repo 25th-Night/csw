@@ -105,7 +105,7 @@ def get_user_id_from_request(request: Request):
 
 def get_user_info_via_authorization(request: Request):
     access_token = get_token_from_request(request)
-    auth_url = f"{settings.USER_URL}/api/user/auth"
+    auth_url = f"{settings.USER_DOMAIN}/api/user/auth"
     cookies = {"access": access_token}
 
     response = requests.get(auth_url, cookies=cookies)
@@ -120,7 +120,7 @@ def get_user_info_via_authorization(request: Request):
 def refresh_access_token(request: Request):
     refresh_token = get_refresh_token_from_request(request)
     cookies = {"refresh": refresh_token}
-    refresh_url = f"{settings.USER_URL}/api/user/refresh"
+    refresh_url = f"{settings.USER_DOMAIN}/api/user/refresh"
     response = requests.post(refresh_url)
 
     if response.status_code == 200:
