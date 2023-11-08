@@ -68,3 +68,15 @@ variable "jwt_signing_key" {
 variable "ssh_key" {
   type = string
 }
+
+variable "acm_domain" {
+  type = string
+}
+
+variable "domain" {
+  type = string
+}
+
+variable "django_settings_module" {
+
+}
