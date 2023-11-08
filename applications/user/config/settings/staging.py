@@ -1,4 +1,22 @@
+import os
+
 from .base import *
+
+
+DEBUG = False
+
+SERVICE_HOST = os.getenv("USER_SERVICE_HOST")
+URL_SERVICE_HOST = os.getenv("URL_SERVICE_HOST")
+
+ALLOWED_HOSTS += [
+    SERVICE_HOST,
+    URL_SERVICE_HOST,
+]
+
+CSRF_TRUSTED_ORIGINS += [
+    f"https://{SERVICE_HOST}",
+    f"https://{URL_SERVICE_HOST}",
+]
 
 
 DATABASES = {
@@ -17,7 +35,7 @@ DATABASES = {
 # COOKIE settings
 
 # domain
-DOMAIN = "csw.kr"
+DOMAIN = SERVICE_HOST
 
 # secure
 SECURE = True

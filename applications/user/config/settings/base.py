@@ -15,8 +15,9 @@ import os
 
 from pathlib import Path
 
-import socket
 import platform
+
+from corsheaders.defaults import default_methods, default_headers
 
 from django.urls import reverse_lazy
 
@@ -25,12 +26,6 @@ if platform.system() in ["Windows", "Darwin"]:
     from dotenv import load_dotenv
 
     load_dotenv(dotenv_path="../../.envs/.env_user")
-
-
-def get_ipaddress():
-    host_name = socket.gethostname()
-    ip_address = socket.gethostbyname(host_name)
-    return "http://" + ip_address
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -46,12 +41,21 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+SERVICE_HOST = "127.0.0.1"
+URL_SERVICE_HOST = SERVICE_HOST
+URL_DOMAIN = f"http://{URL_SERVICE_HOST}:8001"
+
+ALLOWED_HOSTS = [
+    SERVICE_HOST,
+    "user",
+]
+
+CSRF_ALLOWED_ORIGINS = [
+    f"http://{SERVICE_HOST}:8001",
+]
 
 CSRF_TRUSTED_ORIGINS = [
-    get_ipaddress(),
-    "http://127.0.0.1:8880",
-    "http://127.0.0.1:8000",
+    f"http://{SERVICE_HOST}:8001",
 ]
 
 
@@ -82,6 +86,7 @@ INSTALLED_APPS += [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "common.middleware.TokenRefreshMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -211,10 +216,11 @@ SIMPLE_JWT = {
 # LOGIN_URL
 LOGIN_URL = reverse_lazy("login")
 
+
 # COOKIE settings
 
 # domain
-DOMAIN = "127.0.0.1"
+DOMAIN = SERVICE_HOST
 
 # secure
 SECURE = False
