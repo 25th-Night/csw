@@ -35,9 +35,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Page Num
     const currentPageNumber = 1;
+    const currentTotalURL = 1;
 
     const urlListTitle = getElFromSel(".url-list-title");
-    setAttributeToElement(urlListTitle, "data-id", currentPageNumber);
+    setAttributeToElement(urlListTitle, "data-page", currentPageNumber);
+    setAttributeToElement(urlListTitle, "data-total", currentTotalURL);
 
     // Make Input
     const makeUrlInput = getElFromId("url_target");
@@ -68,9 +70,9 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const currentTotalPercentage = parseFloat(getElFromSel(".total-percentage").textContent);
+        const currentTotal = parseInt(getElFromSel(".url-list-title").getAttribute("data-total"));
 
-        if (currentTotalPercentage >= 100) {
+        if (currentTotal >= available_url_cnt) {
             alert("Cannot create more URLs.");
             return;
         }
@@ -222,7 +224,13 @@ document.addEventListener("DOMContentLoaded", function () {
             // url-list 태그 내 모든 요소 초기화
             removeAllNode(urlList);
 
+            // 전체 데이터 수
             let totalCountNum = response_data.count;
+
+            // 전체 데이터 수 저장
+            setAttributeToElement(urlListTitle, "data-total", totalCountNum);
+
+            // totalCount 업데이트
             if (url_license == 1) {
                 const percentage = (totalCountNum / available_url_cnt) * 100;
                 totalCount.textContent = `${percentage.toFixed(1)} %`;
@@ -391,7 +399,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 pageNumBtn.style.margin = "10px";
                 pageBtnWrap.appendChild(pageNumBtn);
 
-                const currentPageNumber = getElFromSel(".url-list-title").getAttribute("data-id");
+                const currentPageNumber = getElFromSel(".url-list-title").getAttribute("data-page");
 
                 if (i == currentPageNumber) {
                     pageNumBtn.style.cursor = "default";
@@ -400,7 +408,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     pageNumBtn.addEventListener("click", () => {
                         getUrlList(i);
-                        setAttributeToElement(urlListTitle, "data-id", i);
+                        setAttributeToElement(urlListTitle, "data-page", i);
                     });
                 }
             }
