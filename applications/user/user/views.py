@@ -168,8 +168,14 @@ class AuthView(GenericAPIView):
         }
 
         response = Response(response_data, status=status.HTTP_202_ACCEPTED)
-        response.delete_cookie("access")
-        response.delete_cookie("refresh")
+        response.delete_cookie(
+            "access",
+            domain=settings.DOMAIN,
+        )
+        response.delete_cookie(
+            "refresh",
+            domain=settings.DOMAIN,
+        )
 
         return response
 
