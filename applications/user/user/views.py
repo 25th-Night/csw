@@ -217,7 +217,7 @@ class TokenRefreshView(APIView):
         return response
 
 
-class EmailExistView(GenericAPIView):
+class EmailExistView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request: Request):
@@ -232,7 +232,7 @@ class EmailExistView(GenericAPIView):
         return response
 
 
-class PhoneCheckView(GenericAPIView):
+class PhoneCheckView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request: Request):
@@ -251,7 +251,7 @@ class PhoneCheckView(GenericAPIView):
         return response
 
 
-class PasswordCorrectView(GenericAPIView):
+class PasswordCorrectView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request: Request):
@@ -271,7 +271,7 @@ class PasswordCorrectView(GenericAPIView):
         return response
 
 
-class PasswordFormatView(GenericAPIView):
+class PasswordFormatView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request: Request):
@@ -288,10 +288,10 @@ class PasswordFormatView(GenericAPIView):
         return response
 
 
-class UpdateTotalUrlCountView(GenericAPIView):
+class UpdateTotalUrlCountView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request: Request):
+    def post(self, request: Request):
         user = request.user
 
         url: Url = get_object_or_404(Url, user=user)
