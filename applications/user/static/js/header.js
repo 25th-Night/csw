@@ -43,11 +43,9 @@ document.addEventListener("DOMContentLoaded", function () {
         imageHover(adminBtn, "/static/img/icon/admin03.png", "/static/img/icon/admin02.png");
         // admin 메뉴 요소 가져오기
         const adminMenu = getElFromSel(".admin-menu");
-        console.log(adminMenu);
 
-        // 드롭다운 버튼을 클릭할 때 드롭다운 메뉴의 표시/숨김을 토글
+        // admin 버튼을 클릭할 때 드롭다운 메뉴의 표시/숨김을 토글
         adminBtn.addEventListener("click", function () {
-            console.log("click adminBtn");
             if (adminMenu.classList.contains("hidden")) {
                 adminMenu.classList.remove("hidden");
             } else {
@@ -65,6 +63,18 @@ document.addEventListener("DOMContentLoaded", function () {
             adminMenu.addEventListener("click", function (event) {
                 event.stopPropagation();
             });
+        });
+
+        adminBtn.addEventListener("mouseover", function () {
+            if (adminMenu.classList.contains("hidden")) {
+                adminMenu.classList.remove("hidden");
+            }
+        });
+
+        adminBtn.addEventListener("mouseout", function () {
+            if (!adminMenu.classList.contains("hidden")) {
+                adminMenu.classList.add("hidden");
+            }
         });
     }
 
