@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -20,10 +20,10 @@ class ShortenedUrlSerializer(serializers.ModelSerializer):
         allow_blank=True,
         default="Unknown",
     )
-    expired_at = serializers.DateField(
+    expired_at = serializers.CharField(
         required=False,
+        allow_blank=True,
         allow_null=True,
-        validators=[MinValueValidator(limit_value=date.today())],
     )
 
     access = serializers.IntegerField(
@@ -55,4 +55,17 @@ class ShortenedUrlSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
+        expired_at = validated_data.get("expired_at")
+        if not expired_at:
+            validated_data["expired_at"] = None
         return super().update(instance, validated_data)
+
+    def validate_expired_at(self, value):
+        message = "Cannot select a date earlier than today"
+        print(f"expire_at value:{value}")
+        if value:
+            date_format = "%Y-%m-%d"
+            input_date = datetime.strptime(value, date_format).date()
+            if input_date < date.today():
+                raise serializers.ValidationError(message)
+        return value
