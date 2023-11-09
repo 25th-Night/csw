@@ -31,7 +31,6 @@ import {
 document.addEventListener("DOMContentLoaded", function () {
     // Shortener Url Service URL
     const ShortenerUrl = getShortenerURL();
-    console.log("shortener Service Url", ShortenerUrl);
 
     // Page Num
     const currentPageNumber = 1;
@@ -95,6 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
             makeAccessInput.value = "1";
             fp.clear();
             makeUrlInput.focus();
+            updateTotalCount("created");
             getUrlList();
         } else if (make_url_response.status === 400) {
             const errorData = await make_url_response.json();
@@ -102,6 +102,24 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log(errorData);
                 displayErrorMessage("make-url", errorData);
             }
+        }
+    }
+
+    // 유저 Url 정보에 total_cnt 업데이트하는 함수
+    async function updateTotalCount(update_status) {
+        const data = setFetchData("patch", { update: update_status });
+        try {
+            const update_url_response = await fetch(`/api/user/url`, data);
+            if (update_url_response.status === 200) {
+                return;
+            } else if (update_url_response.status === 400) {
+                const errorData = await update_url_response.json();
+                if (errorData) {
+                    displayErrorMessage("list-url", errorData);
+                }
+            }
+        } catch (error) {
+            console.error(error);
         }
     }
 
@@ -129,6 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const delete_url_response = await fetch(`${ShortenerUrl}/shortener/${urlId}`, data);
             if (delete_url_response.status === 204) {
+                updateTotalCount("deleted");
                 getUrlList();
             } else if (delete_url_response.status === 400) {
                 const errorData = await delete_url_response.json();
@@ -142,74 +161,167 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Target URL 클릭 시 모달창 오픈
-    async function openModal(url) {
-        const modifyModal = getElFromId("modify_modal");
-        modifyModal.classList.remove("hidden");
+    async function openModal(urlId) {
+        const data = setFetchData("get", {});
 
-        const modalTargetUrl = getElFromId("url_target_modify");
-        const modalNickname = getElFromId("url_nickname_modify");
-        const modalExpire = getElFromId("url_expire_modify");
-        const modalAccess = getElFromId("url_access_modify");
-        const modalShortenedUrl = getElFromId("url_shortened_info");
-        const modalClick = getElFromId("url_click_info");
-        const modalLastClicked = getElFromId("url_last_clicked_info");
-        const modalCreated = getElFromId("url_created_at_info");
+        // shortened_url api 호출
+        const get_url_response = await fetch(`${ShortenerUrl}/shortener/${urlId}`, data);
 
-        modalTargetUrl.value = url.target_url;
-        modalNickname.value = url.nick_name;
-        modalExpire.value = url.expired_at;
-        modalAccess.value = url.access;
-        modalShortenedUrl.textContent = `/${url.prefix}/${url.shortened_url}`;
-        modalClick.textContent = url.click.toString();
-        modalLastClicked.textContent = formatDateToCustomFormat(url.last_clicked);
-        modalCreated.textContent = formatDateToCustomFormat(url.created_at);
+        if (get_url_response.status === 200) {
+            const url = await get_url_response.json();
+            const modifyModal = getElFromId("modify_modal");
+            modifyModal.classList.remove("hidden");
 
-        modalShortenedUrl.style.backgroundColor = "#bfbfbf";
-        modalClick.style.backgroundColor = "#bfbfbf";
-        modalLastClicked.style.backgroundColor = "#bfbfbf";
-        modalCreated.style.backgroundColor = "#bfbfbf";
+            const modalTargetUrl = getElFromId("url_target_modify");
+            const modalNickname = getElFromId("url_nickname_modify");
+            const modalExpire = getElFromId("url_expire_modify");
+            const modalAccess = getElFromId("url_access_modify");
+            const modalShortenedUrl = getElFromId("url_shortened_info");
+            const modalClick = getElFromId("url_click_info");
+            const modalLastClicked = getElFromId("url_last_clicked_info");
+            const modalCreated = getElFromId("url_created_at_info");
 
-        let calendar = getElFromId("calendar");
-        if (!calendar) {
-            calendar = createNewElement(
-                "div",
-                "fixed md:left-1/2 top-[40%] translate-y-[120px] md:translate-x-[-50%] md:translate-y-[calc(-50%+80px)] z-20",
-                null,
-                "calendar"
+            modalTargetUrl.value = url.target_url;
+            modalNickname.value = url.nick_name;
+            modalExpire.value = url.expired_at;
+            modalAccess.value = url.access;
+            modalShortenedUrl.textContent = `/${url.prefix}/${url.shortened_url}`;
+            modalClick.textContent = url.click.toString();
+            modalLastClicked.textContent = formatDateToCustomFormat(url.last_clicked);
+            modalCreated.textContent = formatDateToCustomFormat(url.created_at);
+
+            modalShortenedUrl.style.backgroundColor = "#bfbfbf";
+            modalClick.style.backgroundColor = "#bfbfbf";
+            modalLastClicked.style.backgroundColor = "#bfbfbf";
+            modalCreated.style.backgroundColor = "#bfbfbf";
+
+            modalTargetUrl.focus();
+
+            // 유저 license에 따른 nickname 필드 숨김 처리
+            if (url_license == 1) {
+                url_nickname_modify.parentNode.classList.add("hidden");
+            }
+
+            // flatpickr 위치 지정
+            let calendar = getElFromId("calendar");
+            if (!calendar) {
+                calendar = createNewElement(
+                    "div",
+                    "fixed md:left-1/2 top-[40%] translate-y-[120px] md:translate-x-[-50%] md:translate-y-[calc(-50%+80px)] z-20",
+                    null,
+                    "calendar"
+                );
+                const modifyModalWrap = getElFromSel(".modify-modal-wrap");
+                modifyModalWrap.insertAdjacentElement("afterend", calendar);
+            }
+            const fp = flatpickr("#url_expire_modify", {
+                minDate: "today",
+                dateFormat: "Y-m-d",
+                static: true,
+                disableMobile: true,
+                wrap: true,
+            });
+
+            calendar.appendChild(fp.calendarContainer);
+            setAttributeToElement(modifyModal, "data-id", url.id);
+
+            // Date Input 선택 시 x 버튼 활성화
+            const clearDateBtn = getElFromId("clear_modify_date");
+
+            if (url.expired_at) {
+                clearDateBtn.classList.remove("hidden");
+            }
+
+            if (clearDateBtn) {
+                clearDateBtn.addEventListener("click", function () {
+                    const expireInput = getElFromId("url_expire_modify");
+                    expireInput.value = null;
+                    clearDateBtn.classList.add("hidden");
+                });
+            }
+
+            modalExpire.addEventListener("input", function () {
+                if (modalExpire.value) {
+                    clearDateBtn.classList.remove("hidden");
+                } else {
+                    clearDateBtn.classList.add("hidden");
+                }
+            });
+
+            // submit 버튼 클릭 시 modify API 호출
+            const modifySubmitBtn = getElFromId("modify_btn_url");
+            modifySubmitBtn.addEventListener("click", () => {
+                modify(url.id);
+            });
+
+            modalTargetUrl.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    modify(url.id);
+                }
+            });
+
+            imageHover(
+                modifySubmitBtn,
+                "/static/img/icon/submit02.png",
+                "/static/img/icon/submit03.png"
             );
-            const modifyModalWrap = getElFromSel(".modify-modal-wrap");
-            modifyModalWrap.insertAdjacentElement("afterend", calendar);
+
+            // x 버튼 클릭 시 모달창 닫기
+            const closeModalBtn = getElFromId("modify_btn_close");
+            closeModalBtn.addEventListener("click", () => {
+                closeModal();
+            });
+
+            // Esc 입력 시 모달창 닫기
+            setKeyForFunction(document, "Escape", closeModal);
+
+            // flatpickr가 열린 경우, Expire 글자 클릭 시 닫기
+            // const modifyExpireLabel = getElFromSel(".modify-expire-label");
+
+            // modifyExpireLabel.addEventListener("click", function () {
+            //     const flatpickrCalendar = modifyModal.querySelector("#calendar .flatpickr-calendar");
+            //     if (flatpickrCalendar) {
+            //         flatpickrCalendar.classList.remove("open");
+            //         modifyExpireLabel.style.cursor = "default";
+            //         modifyExpireLabel.style.color = "#ffffff";
+            //     }
+            // });
+            // modalExpire.addEventListener("click", function () {
+            //     const flatpickrCalendar = modifyModal.querySelector("#calendar .flatpickr-calendar");
+            //     if (flatpickrCalendar) {
+            //         flatpickrCalendar.classList.add("open");
+            //         modifyExpireLabel.style.cursor = "pointer";
+            //         modifyExpireLabel.style.color = "#808080";
+            //     }
+            // });
+
+            // modifyExpireLabel.addEventListener("mouseover", function () {
+            //     const flatpickrCalendar = modifyModal.querySelector("#calendar .flatpickr-calendar");
+            //     if (flatpickrCalendar.classList.contains("open")) {
+            //         modifyExpireLabel.style.cursor = "pointer";
+            //         modifyExpireLabel.style.color = "#808080";
+            //     } else {
+            //         modifyExpireLabel.style.cursor = "default";
+            //         modifyExpireLabel.style.color = "#ffffff";
+            //     }
+            // });
+
+            // document.addEventListener("click", function (event) {
+            //     if (
+            //         makeFlatpickrCalendar &&
+            //         ![makeExpireInput, makeFlatpickrCalendar].includes(event.target)
+            //     ) {
+            //         makeFlatpickrCalendar.classList.remove("open");
+            //     }
+            // });
+        } else {
+            const errorData = await get_url_response.json();
+            if (errorData) {
+                console.log(errorData);
+                displayErrorMessage("list-url", errorData.detail);
+            }
         }
-        const fp = flatpickr("#url_expire_modify", {
-            minDate: "today",
-            dateFormat: "Y-m-d",
-            static: true,
-        });
-
-        calendar.appendChild(fp.calendarContainer);
-        setAttributeToElement(modifyModal, "data-id", url.id);
-
-        // submit 버튼 클릭 시 modify API 호출
-        const modifySubmitBtn = getElFromId("modify_btn_url");
-        modifySubmitBtn.addEventListener("click", () => {
-            modify(url.id);
-        });
-
-        imageHover(
-            modifySubmitBtn,
-            "/static/img/icon/submit02.png",
-            "/static/img/icon/submit03.png"
-        );
-        // x 버튼 클릭 시 모달창 닫기
-        const closeModalBtn = getElFromId("modify_btn_close");
-        closeModalBtn.addEventListener("click", () => {
-            closeModal();
-        });
-
-        // Esc 입력 시 모달창 닫기
-        setKeyForFunction(window, "Escape", closeModal);
-
-        modalTargetUrl.focus();
     }
 
     // 유저가 생성한 Shortened Url List 조회
@@ -359,7 +471,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // targetUrl에 클릭 이벤트 추가
                 targetUrl.addEventListener("click", function () {
-                    openModal(url);
+                    openModal(urlId);
                 });
 
                 // wrapper 태그에 각각의 태그를 추가
@@ -469,28 +581,30 @@ document.addEventListener("DOMContentLoaded", function () {
     imageHover(makeSubmitBtn, "/static/img/icon/submit02.png", "/static/img/icon/submit01.png");
 
     // Datepicker 적용
-    const fp = flatpickr("#url_expire", {
+    const fp = flatpickr("#url_expire_wrap", {
         minDate: "today",
         dateFormat: "Y-m-d",
         static: true,
+        disableMobile: true,
+        wrap: true,
     });
 
     // Date Input 선택 시 x 버튼 활성화
-    const input = getElFromId("url_expire");
+    const expireInput = getElFromId("url_expire");
     const svg = getElFromId("clearDate");
 
-    if (svg) {
-        svg.addEventListener("click", function () {
-            input.value = "";
-            svg.classList.add("hidden");
-        });
-    }
+    // if (svg) {
+    //     svg.addEventListener("click", function () {
+    //         expireInput.value = "";
+    //         svg.classList.add("hidden");
+    //     });
+    // }
 
-    input.addEventListener("input", function () {
-        if (input.value) {
-            svg.classList.remove("hidden");
-        } else {
+    expireInput.addEventListener("input", function () {
+        if (expireInput.text) {
             svg.classList.add("hidden");
+        } else {
+            svg.classList.remove("hidden");
         }
     });
 
@@ -518,25 +632,47 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         // shortened_url api 호출
-        const make_url_response = await fetch(`${ShortenerUrl}/shortener/${urlId}`, data);
+        const modify_url_response = await fetch(`${ShortenerUrl}/shortener/${urlId}`, data);
 
-        if (make_url_response.status === 200) {
+        if (modify_url_response.status === 200) {
             closeModal();
             getUrlList();
         } else {
-            const errorData = await make_url_response.json();
+            const errorData = await modify_url_response.json();
             if (errorData) {
                 console.log(errorData);
-                displayErrorMessage("make-url", errorData.detail);
+                displayErrorMessage("modify-url", errorData.detail);
             }
         }
     }
 
+    // URL List 새로고침 버튼
     const refreshListBtn = getElFromSel(".refresh-list-btn");
     refreshListBtn.addEventListener("click", () => {
-        const currentPageNumber = getElFromSel(".url-list-title").getAttribute("data-id");
+        const currentPageNumber = getElFromSel(".url-list-title").getAttribute("data-page");
         getUrlList(currentPageNumber);
     });
+
+    // // 생성 영역에서 flatpickr가 열린 경우, 외부 영역 클릭 시 flatpickr 닫기
+    // const makeFlatpickrCalendar = document.querySelector(".make-form .flatpickr-calendar");
+
+    // makeExpireInput.addEventListener("click", function () {
+    //     if (makeFlatpickrCalendar) {
+    //         makeFlatpickrCalendar.classList.add("open");
+    //     }
+    // });
+
+    // document.addEventListener("click", function (event) {
+    //     if (
+    //         makeFlatpickrCalendar &&
+    //         // ![makeExpireInput, makeFlatpickrCalendar].includes(event.target)
+    //         ![makeExpireInput, makeFlatpickrCalendar].includes(event.target) &&
+    //         !makeFlatpickrCalendar.contains(event.target)
+    //     ) {
+    //         makeFlatpickrCalendar.classList.remove("open");
+    //         console.log("makeFlatpickrCalendar", makeFlatpickrCalendar);
+    //     }
+    // });
 
     // 화면 로드 시 실행될 함수 목록
     getUrlList(currentPageNumber);
