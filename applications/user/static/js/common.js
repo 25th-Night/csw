@@ -174,6 +174,19 @@ function setKeyForFunction(element, input_key, func) {
     });
 }
 
+function getCurrentPath() {
+    const currentPath = window.location.pathname;
+    return currentPath;
+}
+
+function changeLogoText(path, logoText) {
+    const logo = getElFromId("header_logo");
+    const currentPath = window.location.pathname;
+    if (currentPath.startsWith(path)) {
+        logo.textContent = logoText;
+    }
+}
+
 function getShortenerURL() {
     /* 현재 URL에 따른 Shortener 서비스의 URL을 지정하는 함수 */
 
@@ -329,6 +342,8 @@ export {
     displayErrorMessage,
     displayPermanentErrorMessage,
     setKeyForFunction,
+    getCurrentPath,
+    changeLogoText,
     getShortenerURL,
     createNewElement,
     setElementText,
