@@ -25,3 +25,15 @@ DATABASES = {
         "OPTIONS": {"options": "-c search_path=user,public"},
     }
 }
+
+
+# CORS settings
+
+CORS_ORIGIN_WHITELIST += [
+    URL_DOMAIN,
+    SERVICE_DOMAIN,
+]
+CORS_ALLOWED_ORIGINS += [
+    URL_DOMAIN,
+    SERVICE_DOMAIN,
+]
