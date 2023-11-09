@@ -118,7 +118,7 @@ class ShortenedUrlDetailView(GenericAPIView):
             ShortenedUrl, creator_id=user_id, id=pk, is_active=True
         )
 
-        access = request.data.get("access")
+        access = int(request.data.get("access"))
         if access in range(1, 4):
             shortened_url.access = access
             shortened_url.save()
