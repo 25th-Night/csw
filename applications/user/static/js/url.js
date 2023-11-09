@@ -248,16 +248,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
 
+            // submit 버튼 생성
+            const modifySubmitBtn = createNewElement(
+                "img",
+                "block h-12 mr-6 cursor-pointer",
+                null,
+                "modify_btn_url"
+            );
+            setAttributeToElement(modifySubmitBtn, "src", "/static/img/icon/submit03.png");
+            setAttributeToElement(modifySubmitBtn, "tabIndex", "10");
+
             // submit 버튼 클릭 시 modify API 호출
-            const modifySubmitBtn = getElFromId("modify_btn_url");
-            modifySubmitBtn.addEventListener("click", () => {
+            modifySubmitBtn.addEventListener("click", function (event) {
+                event.preventDefault();
                 modify(url.id);
             });
 
             modalTargetUrl.addEventListener("keydown", function (event) {
                 if (event.key === "Enter") {
                     event.preventDefault();
-                    modify(url.id);
+                    modifySubmitBtn.click();
                 }
             });
 
@@ -267,54 +277,33 @@ document.addEventListener("DOMContentLoaded", function () {
                 "/static/img/icon/submit03.png"
             );
 
+            // x 버튼 생성
+            const closeSvg = `
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#FFFFFF" class="w-8 h-8 cursor-pointer hover:stroke-neutral-400" id="modify_btn_close" tabindex="11">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                `;
+            const closeParser = new DOMParser();
+            const closeSvgDOM = closeParser.parseFromString(closeSvg, "image/svg+xml");
+            const closeSvgElement = closeSvgDOM.documentElement;
+
             // x 버튼 클릭 시 모달창 닫기
-            const closeModalBtn = getElFromId("modify_btn_close");
-            closeModalBtn.addEventListener("click", () => {
+            closeSvgElement.addEventListener("click", () => {
                 closeModal();
+            });
+
+            // 버튼을 모달에 추가
+            const modifyBtnWrap = getElFromSel(".modify-btn-wrap");
+            modifyBtnWrap.appendChild(modifySubmitBtn);
+            modifyBtnWrap.appendChild(closeSvgElement);
+
+            //
+            setKeyForFunction(modifySubmitBtn, "Enter", function () {
+                modifySubmitBtn.click();
             });
 
             // Esc 입력 시 모달창 닫기
             setKeyForFunction(document, "Escape", closeModal);
-
-            // flatpickr가 열린 경우, Expire 글자 클릭 시 닫기
-            // const modifyExpireLabel = getElFromSel(".modify-expire-label");
-
-            // modifyExpireLabel.addEventListener("click", function () {
-            //     const flatpickrCalendar = modifyModal.querySelector("#calendar .flatpickr-calendar");
-            //     if (flatpickrCalendar) {
-            //         flatpickrCalendar.classList.remove("open");
-            //         modifyExpireLabel.style.cursor = "default";
-            //         modifyExpireLabel.style.color = "#ffffff";
-            //     }
-            // });
-            // modalExpire.addEventListener("click", function () {
-            //     const flatpickrCalendar = modifyModal.querySelector("#calendar .flatpickr-calendar");
-            //     if (flatpickrCalendar) {
-            //         flatpickrCalendar.classList.add("open");
-            //         modifyExpireLabel.style.cursor = "pointer";
-            //         modifyExpireLabel.style.color = "#808080";
-            //     }
-            // });
-
-            // modifyExpireLabel.addEventListener("mouseover", function () {
-            //     const flatpickrCalendar = modifyModal.querySelector("#calendar .flatpickr-calendar");
-            //     if (flatpickrCalendar.classList.contains("open")) {
-            //         modifyExpireLabel.style.cursor = "pointer";
-            //         modifyExpireLabel.style.color = "#808080";
-            //     } else {
-            //         modifyExpireLabel.style.cursor = "default";
-            //         modifyExpireLabel.style.color = "#ffffff";
-            //     }
-            // });
-
-            // document.addEventListener("click", function (event) {
-            //     if (
-            //         makeFlatpickrCalendar &&
-            //         ![makeExpireInput, makeFlatpickrCalendar].includes(event.target)
-            //     ) {
-            //         makeFlatpickrCalendar.classList.remove("open");
-            //     }
-            // });
         } else {
             const errorData = await get_url_response.json();
             if (errorData) {
@@ -343,9 +332,13 @@ document.addEventListener("DOMContentLoaded", function () {
             setAttributeToElement(urlListTitle, "data-total", totalCountNum);
 
             // totalCount 업데이트
-            const percentageNum = (totalCountNum / available_url_cnt) * 100;
-            const percentage = `${percentageNum.toFixed(1)}%`;
-            totalCount.textContent = `${totalCountNum} URLs (${percentage})`;
+            if (totalCountNum <= 100) {
+                const percentageNum = (totalCountNum / available_url_cnt) * 100;
+                const percentage = `${percentageNum.toFixed(1)}%`;
+                totalCount.textContent = `${totalCountNum} URLs (${percentage})`;
+            } else {
+                totalCount.textContent = `${totalCountNum} URLs`;
+            }
 
             response_data.results.forEach((url) => {
                 // svg code
@@ -502,7 +495,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     `page_btn_${i}`
                 );
                 pageNumBtn.style.fontWeight = "600";
-                pageNumBtn.style.margin = "10px";
+                pageNumBtn.style.marginRight = "10px";
+                pageNumBtn.style.marginLeft = "10px";
                 pageBtnWrap.appendChild(pageNumBtn);
 
                 const currentPageNumber = getElFromSel(".url-list-title").getAttribute("data-page");
@@ -555,18 +549,16 @@ document.addEventListener("DOMContentLoaded", function () {
             flatpickr.remove();
         }
 
+        const modifySubmitBtn = getElFromId("modify_btn_url");
+        if (modifySubmitBtn) {
+            modifySubmitBtn.remove();
+        }
+        const modifyCloseBtn = getElFromId("modify_btn_close");
+        if (modifyCloseBtn) {
+            modifyCloseBtn.remove();
+        }
+
         removeAttributeToElement(modifyModal, "data-id");
-    }
-
-    // Submit Modify Form
-    const modifySubmitBtn = getElFromId("signup_btn_email");
-
-    if (modifySubmitBtn) {
-        imageHover(
-            modifySubmitBtn,
-            "/static/img/icon/submit02.png",
-            "/static/img/icon/submit03.png"
-        );
     }
 
     // url 입력 칸에서 Enter 키 입력 시 폼 제출
@@ -632,6 +624,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         // shortened_url api 호출
+        console.log("modify url: ", `${ShortenerUrl}/shortener/${urlId}`);
         const modify_url_response = await fetch(`${ShortenerUrl}/shortener/${urlId}`, data);
 
         if (modify_url_response.status === 200) {
