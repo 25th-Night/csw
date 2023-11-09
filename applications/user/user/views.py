@@ -258,11 +258,13 @@ class PasswordCorrectView(GenericAPIView):
         email = request.data.get("email")
         password = request.data.get("password")
 
-        user = get_object_or_404(User, email=email)
+        user: User = User.objects.filter(email=email).last()
 
-        password_check = check_password(password, user.password)
-
-        response_data = {"password_check": password_check}
+        response_data = {}
+        if user:
+            password_check = check_password(password, user.password)
+            if not password_check:
+                response_data = {"password_check": "Please check your password."}
 
         response = Response(response_data, status=status.HTTP_200_OK)
 
@@ -276,7 +278,6 @@ class PasswordFormatView(GenericAPIView):
         password = request.data.get("password")
 
         match = "^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
-        message = "비밀번호는 하나 이상의 문자, 숫자, 특수문자를 포함하여 8자리 이상으로 작성해주세요."
         validation = re.compile(match)
 
         password_format = True if validation.match(password) is not None else False
@@ -290,23 +291,25 @@ class PasswordFormatView(GenericAPIView):
 class UpdateTotalUrlCountView(GenericAPIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request: Request):
+    def patch(self, request: Request):
         user = request.user
 
-        url = get_object_or_404(Url, user=user)
+        url: Url = get_object_or_404(Url, user=user)
         update = request.data.get("update")
 
         response_data = {"detail": "update success"}
-        status = status.HTTP_200_OK
+        response_status = status.HTTP_200_OK
 
         if update == "created":
             url.total_cnt += 1
+            url.save()
         elif update == "deleted":
             url.total_cnt -= 1
+            url.save()
         else:
             response_data = {"detail": "Bad request"}
-            status = status.HTTP_400_BAD_REQUEST
+            response_status = status.HTTP_400_BAD_REQUEST
 
-        response = Response(response_data, status=status.HTTP_200_OK)
+        response = Response(response_data, status=response_status)
 
         return response
