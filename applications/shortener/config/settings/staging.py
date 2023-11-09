@@ -44,10 +44,12 @@ DATABASES = {
 # CORS settings
 
 CORS_ORIGIN_WHITELIST += [
-    "https://csw.kr",
+    SERVICE_HOST,
+    USER_SERVICE_HOST,
 ]
 CORS_ALLOWED_ORIGINS += [
-    "https://csw.kr",
+    SERVICE_HOST,
+    USER_SERVICE_HOST,
 ]
 
 
