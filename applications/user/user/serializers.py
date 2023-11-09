@@ -15,14 +15,17 @@ class SignUpSerializer(serializers.ModelSerializer):
         fields = ("id", "email", "fullname", "phone", "password", "password_confirm")
 
     def validate_email(self, value):
-        message = "이미 사용 중인 이메일입니다."
+        message = "Already in use."
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError(message)
         return value
 
     def validate_fullname(self, value):
         match = "^(?=.*[A-Za-z])[A-Za-z](?:[A-Za-z\s]{0,1}[A-Za-z]){3,}$|^[가-힣]{2,}$"
-        message = "2자 이상의 한글 혹은 5자 이상의 영문으로 작성해주세요.\n영문의 경우, 중간에 최대 1개의 공백을 허용합니다."
+        # message = "2자 이상의 한글 혹은 5자 이상의 영문(1칸의 공백 허용)으로 작성해주세요."
+        message = (
+            "Enter at least '2 chars of Korean' or '5 chars of English(up to 1 space)'."
+        )
         validation = re.compile(match)
         if validation.match(value) is None:
             raise serializers.ValidationError(message)
@@ -30,7 +33,8 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     def validate_phone(self, value):
         match = "^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$"
-        message = "정확한 휴대전화 번호를 입력해주세요"
+        # message = '올바른 형식으로 입력해주세요. (예: 010-1234-1234)'
+        message = 'Allowed format : "010-1234-1234"'
         validation = re.compile(match)
         if validation.match(value) is None:
             raise serializers.ValidationError(message)
@@ -38,7 +42,8 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     def validate_password(self, value):
         match = "^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
-        message = "비밀번호는 하나 이상의 문자, 숫자, 특수문자를 포함하여 8자리 이상으로 작성해주세요."
+        # message = "비밀번호는 하나 이상의 문자, 숫자, 특수문자를 포함하여 8자리 이상으로 작성해주세요."
+        message = "Enter at least 8 chars with at least 1 letter, 1 number, 1 special char(@$!%*#?&)"
         validation = re.compile(match)
         if validation.match(value) is None:
             raise serializers.ValidationError(message)
@@ -46,15 +51,17 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     def validate_password_confirm(self, value):
         match = "^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
-        message = "비밀번호는 하나 이상의 문자, 숫자, 특수문자를 포함하여 8자리 이상으로 작성해주세요."
+        message = "Enter at least 8 chars with at least 1 letter, 1 number, 1 special char(@$!%*#?&)"
         validation = re.compile(match)
         if validation.match(value) is None:
             raise serializers.ValidationError(message)
         return value
 
     def validate(self, data):
+        # message="비밀번호가 일치하지 않습니다."
+        message = "Password not matched."
         if data.get("password") != data.get("password_confirm"):
-            raise serializers.ValidationError("비밀번호가 일치하지 않습니다.")
+            raise serializers.ValidationError(message)
         return data
 
     def create(self, validated_data):
@@ -81,9 +88,12 @@ class UserSerializer(serializers.Serializer):
         email = data.get("email")
         password = data.get("password")
 
-        message_email = "해당 이메일로 가입된 정보가 존재하지 않습니다."
-        message_password1 = "비밀번호는 하나 이상의 문자, 숫자, 특수문자를 포함하여 8자리 이상으로 작성해주세요."
-        message_password2 = "비밀번호가 일치하지 않습니다."
+        # message_email = "해당 이메일로 가입된 정보가 존재하지 않습니다."
+        # message_password1 = "비밀번호는 하나 이상의 문자, 숫자, 특수문자를 포함하여 8자리 이상으로 작성해주세요."
+        # message_password2 = "비밀번호가 일치하지 않습니다."
+        message_email = "Not registered Email."
+        message_password1 = "Enter at least 8 chars with at least 1 letter, 1 number, 1 special char(@$!%*#?&)"
+        message_password2 = "Password not matched."
 
         errors = {}
 
