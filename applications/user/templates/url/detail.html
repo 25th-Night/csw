@@ -28,12 +28,19 @@
             </div>
             <div class="flex mb-4 md:w-[320px] input-second">
                 <div class="w-1/2 md:w-[158px] mx-4 form-field">
-                    <label class="block w-full mb-3 font-semibold" for="url-expire-modify">Expire</label>
-                    <div class="flex items-center w-full date-wrap">
-                        <input class="w-full p-1 text-black outline-none md:w-[150px]" id="url_expire_modify" type="date" name="url-expire-modify" autocomplete="off" tabindex="8" placeholder="Expire" autofocus="">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden w-6 h-6 p-1 cursor-pointer" id="clearDate_modify">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                    <div class="flex items-center justify-between w-full mb-3 date-lable-wrap">
+                        <label class="block font-semibold modify-expire-label" for="url-expire-modify">Expire</label>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="4" stroke="#FFFFFF" class="hidden w-6 h-6 p-1 cursor-pointer" id="clear_modify_date">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
+                    </div>
+                    <div class="flex items-center flatpickr" id="url_expire_modify">
+                        <input type="text" id="url_expire" name="url-expire" autocomplete="off" autofocus tabindex="8" class="w-full p-1 text-black outline-none md:w-[150px]" placeholder="Expire" data-input>
+                        <a class="input-button" title="clear" data-clear>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 p-1 cursor-pointer" id="clearDate_modify">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
                     </div>
                 </div>
                 <div class="w-1/2 md:w-[108px] mx-4 form-field">
