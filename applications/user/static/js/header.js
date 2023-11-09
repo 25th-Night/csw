@@ -44,36 +44,37 @@ document.addEventListener("DOMContentLoaded", function () {
         // admin 메뉴 요소 가져오기
         const adminMenu = getElFromSel(".admin-menu");
 
-        // admin 버튼을 클릭할 때 드롭다운 메뉴의 표시/숨김을 토글
-        adminBtn.addEventListener("click", function () {
+        const onClickAdminBtn = () => {
+            const adminMenu = getElFromSel(".admin-menu");
             if (adminMenu.classList.contains("hidden")) {
                 adminMenu.classList.remove("hidden");
+                adminMenu.classList.add("flex");
             } else {
                 adminMenu.classList.add("hidden");
+                adminMenu.classList.remove("flex");
             }
+        };
 
-            // 다른 곳을 클릭할 때 드롭다운 메뉴를 숨김
-            document.addEventListener("click", function (event) {
-                if (adminMenu && ![adminMenu, adminBtn].includes(event.target)) {
-                    adminMenu.classList.add("hidden");
-                }
-            });
+        // admin 버튼을 클릭할 때 드롭다운 메뉴의 표시/숨김을 토글
+        adminBtn.addEventListener("click", onClickAdminBtn);
 
-            // 드롭다운 메뉴 내부 요소 클릭 시 이벤트가 상위로 전파되지 않도록 막음
-            adminMenu.addEventListener("click", function (event) {
-                event.stopPropagation();
-            });
+        // 드롭다운 메뉴 내부 요소 클릭 시 이벤트가 상위로 전파되지 않도록 막음
+        adminMenu.addEventListener("click", function (event) {
+            event.stopPropagation();
         });
 
         adminBtn.addEventListener("mouseover", function () {
             if (adminMenu.classList.contains("hidden")) {
                 adminMenu.classList.remove("hidden");
+                adminMenu.classList.add("flex");
             }
         });
 
-        adminBtn.addEventListener("mouseout", function () {
-            if (!adminMenu.classList.contains("hidden")) {
+        adminMenu.addEventListener("mouseout", function (event) {
+            if (![adminUserBtn, adminUrlBtn, adminUserBtn.parentNode].includes(event.target)) {
                 adminMenu.classList.add("hidden");
+            } else {
+                adminMenu.classList.remove("hidden");
             }
         });
     }
