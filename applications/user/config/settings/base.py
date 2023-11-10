@@ -255,5 +255,8 @@ LOGIN_URL = reverse_lazy("login")
 # domain
 DOMAIN = SERVICE_HOST
 
+# Request DOMAIN
+REQUEST_URL_DOMAIN = URL_DOMAIN
+
 # secure
 SECURE = False
