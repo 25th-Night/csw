@@ -69,3 +69,16 @@ class ShortenedUrlSerializer(serializers.ModelSerializer):
             if input_date < date.today():
                 raise serializers.ValidationError(message)
         return value
+
+
+class SimpleShortenedUrlSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShortenedUrl
+        fields = (
+            "creator_id",
+            "access",
+            "prefix",
+            "shortened_url",
+            "access_code",
+            "target_url",
+        )
