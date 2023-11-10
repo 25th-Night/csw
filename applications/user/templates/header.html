@@ -1,8 +1,8 @@
 {% load static %}
-    <header class="grid items-center h-20 mb-10 border-b-2 border-black">
+    <header class="grid items-center h-20 mb-5 border-b-2 border-black sm:mb-10">
         <nav class="flex items-center justify-between">
             <a href="{% url 'index' %}" class="block text-4xl font-bold font-yedstreet hover:text-blue-700 header-logo" id="header_logo">csw</a>
-            <div class="flex items-center list-none">
+            <div class="flex items-center list-none header-btn-wrap">
                 {% if user.is_admin %}
                 <div class="relative inline-block text-left">
                     <div>
