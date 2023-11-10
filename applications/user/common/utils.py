@@ -163,3 +163,13 @@ def refresh_access_token_from_request(request: Request):
         return Response(
             {"error": "refresh token failed"}, status=status.HTTP_400_BAD_REQUEST
         )
+
+
+def get_access_value(access_str):
+    ACCESS_INFO = {
+        "public": 1,
+        "private": 2,
+        "secret": 3,
+    }
+
+    return ACCESS_INFO[access_str]
