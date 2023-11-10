@@ -56,7 +56,10 @@ CORS_ALLOWED_ORIGINS += [
 # COOKIE settings
 
 # domain
-DOMAIN = "csw.kr"
+DOMAIN = USER_SERVICE_HOST
+
+# Request DOMAIN
+REQUEST_USER_DOMAIN = USER_DOMAIN
 
 # secure
 SECURE = True

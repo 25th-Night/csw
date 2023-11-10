@@ -4,14 +4,20 @@ from .base import *
 SERVICE_DOMAIN = f"http://{SERVICE_HOST}:82"
 USER_DOMAIN = f"http://{USER_SERVICE_HOST}:81"
 
+ALLOWED_HOSTS += [
+    "shortener",
+]
+
 CSRF_ALLOWED_ORIGINS += [
     USER_DOMAIN,
     SERVICE_DOMAIN,
+    "http://shortener:8000",
 ]
 
 CSRF_TRUSTED_ORIGINS += [
     USER_DOMAIN,
     SERVICE_DOMAIN,
+    "http://shortener:8000",
 ]
 
 DATABASES = {
@@ -39,5 +45,5 @@ CORS_ALLOWED_ORIGINS += [
 ]
 
 
-# Container Network Settings
-USER_DOMAIN = "http://user:8000"
+# Request DOMAIN
+REQUEST_USER_DOMAIN = "http://user:8000"
