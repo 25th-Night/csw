@@ -165,8 +165,6 @@ class AuthView(GenericAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
-        if hasattr(request.user, "is_authenticated") and request.user.is_authenticated:
-            logout(request)
         response_data = {
             "detail": "logout success",
         }
@@ -180,6 +178,8 @@ class AuthView(GenericAPIView):
             "refresh",
             domain=settings.DOMAIN,
         )
+        if hasattr(request.user, "is_authenticated") and request.user.is_authenticated:
+            logout(request)
 
         return response
 
