@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="csw">
+    <meta name="keywords" content="csw, shortener, recruit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}
+            URL
+        {% endblock %}
+    </title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/icon/csw.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    {% block style %}
+    {% endblock %}
+</head>
+<body class="mx-auto w-[90%] min-[900px]:w-[800px]">
+    <header class="grid items-center h-20 mb-3 grid-cols-2 min-[800px]:grid-cols-3 border-b-2 border-black">
+        <a href="{% url 'index' %}" class="block text-4xl font-bold font-yedstreet hover:text-blue-700 header-logo" id="header_logo" target="_blank">csw</a>
+        <div class="flex items-end justify-end min-[800px]:justify-center h-10 text-xl font-semibold header-center">
+            {% block sub-title %}
+            {% endblock %}
+        </div>
+    </header>
+    <div class="flex items-center justify-end h-10 my-2 close-browser-btn-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#373737" class="w-8 h-8 my-3 min-[800px]:m-3 hover:stroke-[#a6a6a6] close-browser-btn" title="현재 탭 닫기">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>          
+    </div>
+    <main>
+        {% block content %}
+            <section class="mx-auto p-2 w-[90%] min-[670px]:w-[600px] bg-[black] text-white">
+                {% block inner_content%}
+                {% endblock %}
+            </section>
+        {% endblock %}
+    </main>
+    {% include 'footer.html' %}
+</body>
+{% block include_js %}
+{% endblock %}
+{% block script %}
+{% endblock %}
+
+</html>
