@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    Url
+    URL
 {% endblock %}
 
 {% block style%}
@@ -101,7 +101,9 @@
 <script type="text/javascript">
     const url_license = {{ user.url.license|escapejs }};
     const available_url_cnt = {{ available_url_cnt|escapejs }};
-  </script>
+</script>
+{% endblock %}
+{% block script %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker-full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mc-datepicker/dist/mc-calendar.min.js"></script>
