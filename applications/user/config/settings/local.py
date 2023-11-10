@@ -37,3 +37,6 @@ CORS_ALLOWED_ORIGINS += [
     URL_DOMAIN,
     SERVICE_DOMAIN,
 ]
+
+# Request DOMAIN
+REQUEST_URL_DOMAIN = "http://shortener:8000"
