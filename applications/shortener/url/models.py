@@ -1,5 +1,8 @@
-from datetime import datetime
 from django.db import models
+from django.utils import timezone
+
+import random
+import string
 
 from common.models import CommonModel
 
@@ -9,6 +12,10 @@ class ShortenedUrl(CommonModel):
         PUBLIC = 1
         PRIVATE = 2
         SECRET = 3
+
+    def init_access_code():
+        str_pool = string.digits + string.ascii_letters
+        return "".join([random.choice(str_pool) for _ in range(4)])
 
     nick_name = models.CharField(
         verbose_name="별칭", max_length=30, blank=True, default="Undefined"
@@ -22,6 +29,9 @@ class ShortenedUrl(CommonModel):
     expired_at = models.DateField(verbose_name="만료일", blank=True, null=True)
     access = models.IntegerField(
         verbose_name="공개범위", choices=Access.choices, default=Access.PUBLIC
+    )
+    access_code = models.CharField(
+        verbose_name="접속 코드", max_length=4, default=init_access_code
     )
 
     class Meta:
@@ -38,7 +48,7 @@ class ShortenedUrl(CommonModel):
 
     def clicked(self):
         self.click += 1
-        self.last_clicked = datetime.now()
+        self.last_clicked = timezone.now()
         self.save()
         return self
 
