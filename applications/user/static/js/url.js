@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 유저 Url 정보에 total_cnt 업데이트하는 함수
     async function updateTotalCount(update_status) {
-        const data = setFetchData("patch", { update: update_status });
+        const data = setFetchData("post", { update: update_status });
         try {
             const update_url_response = await fetch(`/api/user/url`, data);
             if (update_url_response.status === 200) {
@@ -180,6 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const modalClick = getElFromId("url_click_info");
             const modalLastClicked = getElFromId("url_last_clicked_info");
             const modalCreated = getElFromId("url_created_at_info");
+            const modalAccessCode = getElFromId("url_access_code_info");
 
             modalTargetUrl.value = url.target_url;
             modalNickname.value = url.nick_name;
@@ -189,18 +190,15 @@ document.addEventListener("DOMContentLoaded", function () {
             modalClick.textContent = url.click.toString();
             modalLastClicked.textContent = formatDateToCustomFormat(url.last_clicked);
             modalCreated.textContent = formatDateToCustomFormat(url.created_at);
+            modalAccessCode.textContent = url.access_code;
 
             modalShortenedUrl.style.backgroundColor = "#bfbfbf";
             modalClick.style.backgroundColor = "#bfbfbf";
             modalLastClicked.style.backgroundColor = "#bfbfbf";
             modalCreated.style.backgroundColor = "#bfbfbf";
+            modalAccessCode.style.backgroundColor = "#bfbfbf";
 
             modalTargetUrl.focus();
-
-            // 유저 license에 따른 nickname 필드 숨김 처리
-            if (url_license == 1) {
-                url_nickname_modify.parentNode.classList.add("hidden");
-            }
 
             // flatpickr 위치 지정
             let calendar = getElFromId("calendar");
@@ -302,6 +300,64 @@ document.addEventListener("DOMContentLoaded", function () {
                 modifySubmitBtn.click();
             });
 
+            // Access Code Refresh 버튼 생성
+            const refreshCodeSvg = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#FFFFFF" class="w-6 h-6 hover:stroke-[#d9d9d9] cursor-pointer refresh-access-code-btn">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            `;
+            const refreshCodeParser = new DOMParser();
+            const refreshCodeSvgDOM = refreshCodeParser.parseFromString(
+                refreshCodeSvg,
+                "image/svg+xml"
+            );
+            const refreshCodeSvgElement = refreshCodeSvgDOM.documentElement;
+
+            // Refresh 버튼 클릭 시 이벤트 추가
+            refreshCodeSvgElement.addEventListener("click", () => {
+                refreshAccessCode(urlId);
+            });
+
+            async function refreshAccessCode(urlId) {
+                console.log("refresh code");
+                const data = setFetchData("PATCH", {});
+                const change_access_response = await fetch(
+                    `${ShortenerUrl}/shortener/${urlId}/refresh`,
+                    data
+                );
+                if (change_access_response.status === 200) {
+                    const accessCodeDiv = getElFromId("url_access_code_info");
+                    const response_data = await change_access_response.json();
+                    const newAccessCode = response_data.access_code;
+                    console.log("new_access_code", newAccessCode);
+                    accessCodeDiv.textContent = newAccessCode;
+                } else if (change_access_response.status === 400) {
+                    const errorData = await change_access_response.json();
+                    if (errorData) {
+                        displayErrorMessage("list-url", errorData.detail);
+                        console.log(errorData);
+                    }
+                }
+            }
+
+            // Refresh 버튼 추가
+            modalAccessCode.parentNode.appendChild(refreshCodeSvgElement);
+
+            // 유저 license에 따른 nickname, refresh 필드 숨김 처리
+            if (url_license == 1) {
+                modalNickname.parentNode.classList.add("hidden");
+                const refreshAccessCodeBtn = getElFromSel(".refresh-access-code-btn");
+                if (refreshAccessCodeBtn) {
+                    refreshAccessCodeBtn.classList.add("hidden");
+                }
+            }
+
+            // Access Level에 따른 Access code 숨김 처리
+            if (url.access != 2) {
+                console.log("hide");
+                modalAccessCode.parentNode.parentNode.classList.add("hidden");
+            }
+
             // Esc 입력 시 모달창 닫기
             setKeyForFunction(document, "Escape", closeModal);
         } else {
@@ -365,6 +421,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 const removeParser = new DOMParser();
                 const removeSvgDOM = removeParser.parseFromString(removeSvg, "image/svg+xml");
                 const removeSvgElement = removeSvgDOM.documentElement;
+                removeSvgElement.addEventListener("mouseover", function () {
+                    setAttributeToElement(removeSvgElement, "fill", "#d9d9d9");
+                });
+                removeSvgElement.addEventListener("mouseout", function () {
+                    setAttributeToElement(removeSvgElement, "fill", "#373737");
+                });
 
                 // url id
                 const urlId = url.id;
@@ -380,6 +442,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // url 관련 정보를 각각 담을 태그 생성
                 const shortened = `${url.prefix}/${url.shortened_url}`;
                 const urlLink = `${ShortenerUrl}/${shortened}`;
+                console.log("urlLink", urlLink);
                 const targetUrl = createNewElement(
                     "div",
                     `url-list-1 url-link target-url-${urlId}`,
@@ -534,6 +597,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const modalClick = getElFromId("url_click_info");
         const modalLastClicked = getElFromId("url_last_clicked_info");
         const modalCreated = getElFromId("url_created_at_info");
+        const modalAccessCode = getElFromId("url_access_code_info");
 
         modalTargetUrl.value = "";
         modalNickname.value = "";
@@ -543,6 +607,7 @@ document.addEventListener("DOMContentLoaded", function () {
         modalClick.textContent = "";
         modalLastClicked.textContent = "";
         modalCreated.textContent = "";
+        modalAccessCode.textContent = "";
 
         const flatpickr = getElsFromSel(".flatpickr-calendar")[1];
         if (flatpickr) {
@@ -557,6 +622,13 @@ document.addEventListener("DOMContentLoaded", function () {
         if (modifyCloseBtn) {
             modifyCloseBtn.remove();
         }
+
+        const refreshAccessCodeBtn = getElFromSel(".refresh-access-code-btn");
+        if (refreshAccessCodeBtn) {
+            refreshAccessCodeBtn.remove();
+        }
+
+        modalAccessCode.parentNode.parentNode.classList.remove("hidden");
 
         removeAttributeToElement(modifyModal, "data-id");
     }
