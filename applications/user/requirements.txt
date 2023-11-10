@@ -7,3 +7,4 @@ drf-spectacular>=0.26.5
 django-filter>=23.3
 python-dotenv>=1.0.0
 django-cors-headers==4.3.0
+requests==2.31.0
