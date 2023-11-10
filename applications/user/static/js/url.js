@@ -466,7 +466,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
                 const open = createNewElement("div", `url-list-5 open-${urlId}`);
                 const copy = createNewElement("div", `url-list-5 copy-${urlId}`);
-                const remove = createNewElement("div", `url-list-4 remove-${urlId}`);
+                const remove = createNewElement("div", `url-list-6 remove-${urlId}`);
 
                 // access 요소 내에 access select box 복사
                 const originalSelectAccess = getElFromId("url_access");
