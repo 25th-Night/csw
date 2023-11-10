@@ -15,13 +15,13 @@
 <div class="flex flex-col items-start justify-between my-2 title-wrap">
     <div class="flex justify-between w-full make-title-wrap">
         <div class="font-semibold title url-make-title">URL Shortener</div>
-        <img src="{% static 'img/icon/submit01.png' %}" alt="submit" class="block h-12 cursor-pointer" tabindex="5" id="make_btn_url">
+        <img src="{% static 'img/icon/submit01.png' %}" alt="submit" class="block h-10 cursor-pointer sm:h-12" tabindex="5" id="make_btn_url">
     </div>
     <form class="flex flex-col w-full mt-4 url-form sm:flex-row make-form">
         <div class="flex mb-4 input-first sm:w-3/5">
             <div class="w-full mx-2 form-field">
                 <div class="flex label-wrap">
-                    <label for="url-target" class="block mb-3 mr-2 font-semibold">Target Url</label>
+                    <label for="url-target" class="block mr-2 font-semibold sm:mb-3">Target Url</label>
                     <div class="self-center hidden text-sm text-[red] make-url-error"></div>
                 </div>
                 <input type="text" id="url_target" name="url-target" autocomplete="off" autofocus tabindex="1" class="block w-full p-1 outline-none"
@@ -29,15 +29,15 @@
             </div>
             {% if user.url.license > 1 %}
                 <div class="mx-2 form-field">
-                    <label for="url-nickname" class="block mb-3 font-semibold">Nickname</label>
+                    <label for="url-nickname" class="block font-semibold sm:mb-3">Nickname</label>
                     <input type="text" id="url_nickname" name="url-nickname" autocomplete="off" autofocus tabindex="2" class="block w-full p-1 outline-none"
                     placeholder="Nickname">
                 </div>
             {% endif %}
         </div>
-        <div class="flex mb-4 sm:w-2/5 input-second">
+        <div class="flex sm:mb-4 sm:w-2/5 input-second">
             <div class="w-3/5 mx-2 form-field">
-                <label for="url-expire" class="block mb-3 font-semibold make-expire-label">Expire</label>
+                <label for="url-expire" class="block font-semibold sm:mb-3 make-expire-label">Expire</label>
                 <div class="flex items-center flatpickr" id="url_expire_wrap">
                     <input type="text" id="url_expire" name="url-expire" autocomplete="off" autofocus tabindex="3" class="p-1 outline-none w-28" placeholder="Expire" data-input>
                     <a class="input-button" title="clear" data-clear>
@@ -48,7 +48,7 @@
                 </div>
             </div>
             <div class="w-2/5 mx-2 form-field">
-                <label for="url-access" class="block mb-3 font-semibold">Access</label>
+                <label for="url-access" class="block font-semibold sm:mb-3">Access</label>
                 <select id="url_access" name="url-access" class="w-24 p-1 outline-none appearance-none cursor-pointer" autofocus tabindex="4" placeholder="Access">
                     <option value="1" class="select-option">Public</option>
                     <option value="2" class="select-option">Private</option>
@@ -87,7 +87,7 @@
             <div class="px-1 truncate url-list-4 clicked">Click</div>
             <div class="px-1 truncate url-list-5 open">Open</div>
             <div class="px-1 truncate url-list-5 copy">Copy</div>
-            <div class="px-1 truncate url-list-4 remove">Remove</div>
+            <div class="px-1 truncate url-list-6 remove"></div>
     </div>
     <div class="self-center hidden text-sm text-[red] list-url-error"></div>
     <div class="mb-2 text-sm md:text-base" id="url_list">
