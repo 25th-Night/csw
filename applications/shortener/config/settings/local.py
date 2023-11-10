@@ -9,11 +9,15 @@ ALLOWED_HOSTS += [
 ]
 
 CSRF_ALLOWED_ORIGINS += [
-    "shortener",
+    USER_DOMAIN,
+    SERVICE_DOMAIN,
+    "http://shortener:8000",
 ]
 
 CSRF_TRUSTED_ORIGINS += [
-    "shortener",
+    USER_DOMAIN,
+    SERVICE_DOMAIN,
+    "http://shortener:8000",
 ]
 
 DATABASES = {
