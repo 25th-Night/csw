@@ -1,12 +1,17 @@
 server {
     listen 80;
-    server_name csw.kr;
+    server_name USER_SERVICE_HOST;
 
     location / {
         proxy_pass http://user:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header Cookie $http_cookie;
+        
+        add_header 'Access-Control-Allow-Origin' 'https://URL_SERVICE_HOST';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With,X-CSRFToken' always;
+        add_header 'Access-Control-Allow-Credentials' 'true';
 
     }
 
@@ -18,7 +23,7 @@ server {
 
 server {
     listen 80;
-    server_name url.csw.kr;
+    server_name URL_SERVICE_HOST;
 
     underscores_in_headers on;
 
@@ -32,7 +37,11 @@ server {
         proxy_set_header Connection "upgrade";
         proxy_set_header Cookie $http_cookie;
 
-        add_header Cross-Origin-Opener-Policy same-origin;
+        add_header 'Access-Control-Allow-Origin' 'https://USER_SERVICE_HOST';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With,X-CSRFToken' always;
+        add_header 'Access-Control-Allow-Credentials' 'true';
+        add_header 'Cross-Origin-Opener-Policy' 'same-origin';
     }
 
     location /static/ {
