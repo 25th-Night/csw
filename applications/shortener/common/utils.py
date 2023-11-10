@@ -105,7 +105,7 @@ def get_user_id_from_request(request: Request):
 
 def get_user_info_via_authorization(request: Request):
     access_token = get_token_from_request(request)
-    auth_url = f"{settings.USER_DOMAIN}/api/user/auth"
+    auth_url = f"{settings.REQUEST_USER_DOMAIN}/api/user/auth"
     print(f"auth_url: {auth_url}")
     cookies = {"access": access_token}
     print(f"cookies: {cookies}")
@@ -131,7 +131,7 @@ def get_user_info_via_authorization(request: Request):
 def refresh_access_token(request: Request):
     refresh_token = get_refresh_token_from_request(request)
     cookies = {"refresh": refresh_token}
-    refresh_url = f"{settings.USER_DOMAIN}/api/user/refresh"
+    refresh_url = f"{settings.REQUEST_USER_DOMAIN}/api/user/refresh"
     response = requests.post(refresh_url)
 
     if response.status_code == 200:
@@ -161,3 +161,8 @@ def make_shortened_url_and_prefix():
             return prefix, shortened_url
         else:
             continue
+
+
+def make_access_code():
+    str_pool = string.digits + string.ascii_letters
+    return "".join([random.choice(str_pool) for _ in range(4)])
