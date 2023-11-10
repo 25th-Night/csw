@@ -4,6 +4,7 @@ import jwt
 from django.conf import settings
 
 from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -11,9 +12,9 @@ from rest_framework.permissions import AllowAny
 from common.data import LICENSE
 
 from common.permissions import IsAuthenticated
-from common.utils import get_object_or_404
+from common.utils import get_object_or_404, make_access_code
 from url.models import ShortenedUrl
-from url.serializers import ShortenedUrlSerializer
+from url.serializers import ShortenedUrlSerializer, SimpleShortenedUrlSerializer
 
 
 class ShortenedUrlView(GenericAPIView):
@@ -60,38 +61,77 @@ class ShortenedUrlView(GenericAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class UrlRedirectView(GenericAPIView):
+class UrlRedirectView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, prefix, url):
-        shortened_url = get_object_or_404(
+        shortened_url: ShortenedUrl = get_object_or_404(
             ShortenedUrl, prefix=prefix, shortened_url=url, is_active=True
         )
 
-        if shortened_url.access != ShortenedUrl.Access.PUBLIC:
-            response_data = {"detail": "This URL is not Public"}
+        if shortened_url.access == ShortenedUrl.Access.PUBLIC:
+            print("Public")
+            target_url = shortened_url.target_url
+
+            if not target_url.startswith("https://") and not target_url.startswith(
+                "http://"
+            ):
+                target_url = "https://" + target_url
+
+            shortened_url.clicked()
+
+            return redirect(target_url)
+
+        elif shortened_url.access == ShortenedUrl.Access.PRIVATE:
+            print("Private")
+            shortened_url.clicked()
+            return redirect(
+                f"{settings.USER_DOMAIN}/url/private?prefix={prefix}&url={url}"
+            )
+        elif shortened_url.access == ShortenedUrl.Access.SECRET:
+            print("Secret")
+            shortened_url.clicked()
+            return redirect(
+                f"{settings.USER_DOMAIN}/url/secret?prefix={prefix}&url={url}"
+            )
+
+    def post(self, request: Request, prefix, url):
+        shortened_url: ShortenedUrl = get_object_or_404(
+            ShortenedUrl,
+            prefix=prefix,
+            shortened_url=url,
+            access=ShortenedUrl.Access.PRIVATE,
+            is_active=True,
+        )
+
+        access_code = request.data.get("access_code")
+
+        if shortened_url.access_code == access_code:
+            target_url = shortened_url.target_url
+
+            if not target_url.startswith("https://") and not target_url.startswith(
+                "http://"
+            ):
+                target_url = "https://" + target_url
+
+            shortened_url.clicked()
+
+            response_data = {"target_url": shortened_url.target_url}
+            response = Response(response_data, status=status.HTTP_200_OK)
+            return response
+        else:
+            response_data = {"detail": "Access code not matched"}
             response = Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
-            return redirect("http://127.0.0.1:8000/")
-
-        target_url = shortened_url.target_url
-
-        if not target_url.startswith("https://") and not target_url.startswith(
-            "http://"
-        ):
-            target_url = "https://" + target_url
-
-        shortened_url.clicked()
-
-        return redirect(target_url)
+            return response
 
 
-class ShortenedUrlDetailView(GenericAPIView):
+class ShortenedUrlDetailViaIdView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ShortenedUrlSerializer
 
     def get(self, request, pk):
         user_id = request.user.get("id")
-        shortened_url = get_object_or_404(
+        shortened_url: ShortenedUrl = get_object_or_404(
             ShortenedUrl, creator_id=user_id, id=pk, is_active=True
         )
 
@@ -101,7 +141,7 @@ class ShortenedUrlDetailView(GenericAPIView):
 
     def put(self, request, pk):
         user_id = request.user.get("id")
-        shortened_url = get_object_or_404(
+        shortened_url: ShortenedUrl = get_object_or_404(
             ShortenedUrl, creator_id=user_id, id=pk, is_active=True
         )
         request.data["creator_id"] = user_id
@@ -114,7 +154,7 @@ class ShortenedUrlDetailView(GenericAPIView):
 
     def patch(self, request, pk):
         user_id = request.user.get("id")
-        shortened_url = get_object_or_404(
+        shortened_url: ShortenedUrl = get_object_or_404(
             ShortenedUrl, creator_id=user_id, id=pk, is_active=True
         )
 
@@ -134,10 +174,73 @@ class ShortenedUrlDetailView(GenericAPIView):
 
     def delete(self, request, pk):
         user_id = request.user.get("id")
-        shortened_url = get_object_or_404(
+        shortened_url: ShortenedUrl = get_object_or_404(
             ShortenedUrl, creator_id=user_id, id=pk, is_active=True
         )
         shortened_url.is_active = False
         shortened_url.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ShortenedUrlDetailViaUrlView(GenericAPIView):
+    serializer_class = SimpleShortenedUrlSerializer
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        else:
+            return [IsAuthenticated()]
+
+    def get(self, request, prefix, url):
+        shortened_url: ShortenedUrl = get_object_or_404(
+            ShortenedUrl,
+            prefix=prefix,
+            shortened_url=url,
+            is_active=True,
+        )
+
+        serializer: SimpleShortenedUrlSerializer = self.get_serializer(shortened_url)
+        serialized_url_data = serializer.data
+        if shortened_url.access == 1:
+            shortened_url.clicked()
+        elif shortened_url.access != 1:
+            serialized_url_data.pop("target_url")
+        print(f"serialized_url_data:{serialized_url_data}")
+
+        return Response(serialized_url_data, status=status.HTTP_200_OK)
+
+    def patch(self, request, prefix, url):
+        user_id = request.user.get("id")
+        shortened_url: ShortenedUrl = get_object_or_404(
+            ShortenedUrl,
+            creator_id=user_id,
+            prefix=prefix,
+            shortened_url=url,
+            is_active=True,
+        )
+
+        shortened_url.access_code = make_access_code()
+        shortened_url.save()
+
+        serializer: ShortenedUrlSerializer = self.get_serializer(shortened_url)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RefreshAccessCodeView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ShortenedUrlSerializer
+
+    def patch(self, request, pk):
+        user_id = request.user.get("id")
+        shortened_url: ShortenedUrl = get_object_or_404(
+            ShortenedUrl, creator_id=user_id, id=pk, is_active=True
+        )
+
+        shortened_url.access_code = make_access_code()
+        shortened_url.save()
+
+        serializer: ShortenedUrlSerializer = self.get_serializer(shortened_url)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
