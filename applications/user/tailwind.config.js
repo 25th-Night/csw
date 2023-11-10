@@ -26,7 +26,7 @@ module.exports = {
                     "@apply text-sm checked:bg-black checked:text-white": "",
                 },
                 ".url-list-1": {
-                    "@apply w-[calc(100%-90px)] text-center md:max-w-[300px] lg:max-w-[270px] text-sm md:text-base truncate":
+                    "@apply w-[calc(100%-110px)] text-center md:max-w-[320px] lg:max-w-[290px] text-sm md:text-base truncate":
                         "",
                 },
                 ".url-list-2": {
@@ -44,6 +44,9 @@ module.exports = {
                 ".url-list-5": {
                     "@apply flex justify-center w-[45px] md:w-[50px] text-center text-xs md:text-sm":
                         "",
+                },
+                ".url-list-6": {
+                    "@apply flex justify-center w-[40px] text-center text-xs md:text-sm": "",
                 },
                 ".url-link": {
                     "@apply underline cursor-pointer hover:font-semibold text-black hover:text-[#0000FF]":
