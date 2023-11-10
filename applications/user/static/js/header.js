@@ -58,25 +58,25 @@ document.addEventListener("DOMContentLoaded", function () {
         // admin 버튼을 클릭할 때 드롭다운 메뉴의 표시/숨김을 토글
         adminBtn.addEventListener("click", onClickAdminBtn);
 
-        // 드롭다운 메뉴 내부 요소 클릭 시 이벤트가 상위로 전파되지 않도록 막음
-        adminMenu.addEventListener("click", function (event) {
-            event.stopPropagation();
-        });
+        // // 드롭다운 메뉴 내부 요소 클릭 시 이벤트가 상위로 전파되지 않도록 막음
+        // adminMenu.addEventListener("click", function (event) {
+        //     event.stopPropagation();
+        // });
 
-        adminBtn.addEventListener("mouseover", function () {
-            if (adminMenu.classList.contains("hidden")) {
-                adminMenu.classList.remove("hidden");
-                adminMenu.classList.add("flex");
-            }
-        });
+        // adminBtn.addEventListener("mouseover", function () {
+        //     if (adminMenu.classList.contains("hidden")) {
+        //         adminMenu.classList.remove("hidden");
+        //         adminMenu.classList.add("flex");
+        //     }
+        // });
 
-        adminMenu.addEventListener("mouseout", function (event) {
-            if (![adminUserBtn, adminUrlBtn, adminUserBtn.parentNode].includes(event.target)) {
-                adminMenu.classList.add("hidden");
-            } else {
-                adminMenu.classList.remove("hidden");
-            }
-        });
+        // adminMenu.addEventListener("mouseout", function (event) {
+        //     if (![adminUserBtn, adminUrlBtn, adminUserBtn.parentNode].includes(event.target)) {
+        //         adminMenu.classList.add("hidden");
+        //     } else {
+        //         adminMenu.classList.remove("hidden");
+        //     }
+        // });
     }
 
     // User Admin 버튼 마우스 오버 시 효과 + 클릭 시 User 앱 admin 페이지로 이동
