@@ -10,7 +10,21 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+from datetime import timedelta
+import os
+
 from pathlib import Path
+
+import platform
+
+from corsheaders.defaults import default_methods, default_headers
+
+
+if platform.system() in ["Windows", "Darwin"]:
+    from dotenv import load_dotenv
+
+    load_dotenv(dotenv_path="../../.envs/.env_job")
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +34,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-g$d(mf)#mxu^_9*u-_ep!*ax$wsoe)l2+fa2d8sp3h*f&s@(jm"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+SERVICE_HOST = "127.0.0.1"
+USER_SERVICE_HOST = SERVICE_HOST
+USER_DOMAIN = f"http://{USER_SERVICE_HOST}:8000"
+
+ALLOWED_HOSTS = [
+    SERVICE_HOST,
+]
+
+CSRF_ALLOWED_ORIGINS = [
+    USER_DOMAIN,
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    USER_DOMAIN,
+]
 
 
 # Application definition
@@ -37,6 +65,20 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+]
+
+## Third party Apps
+INSTALLED_APPS += [
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "drf_spectacular",
+    "django_filters",
+    "corsheaders",
+]
+
+## Create Apps
+INSTALLED_APPS += [
+    "crawler",
 ]
 
 MIDDLEWARE = [
@@ -116,8 +158,81 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = "/var/www/html/static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# REST_FRAMEWORK
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "config.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+}
+
+# SIMPLE_JWT
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=2),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": os.getenv("JWT_SIGNING_KEY", SECRET_KEY),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+}
+
+
+# CORS settings
+
+# CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ORIGIN_WHITELIST = [
+    USER_DOMAIN,
+]
+CORS_ALLOWED_ORIGINS = [
+    USER_DOMAIN,
+]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+] + []
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+] + []
+
+
+# COOKIE settings
+
+# domain
+DOMAIN = USER_SERVICE_HOST
+
+# Request DOMAIN
+REQUEST_USER_DOMAIN = USER_DOMAIN
+
+# secure
+SECURE = False
