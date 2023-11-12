@@ -8,6 +8,16 @@ from rest_framework.response import Response
 from rest_framework import status
 
 import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium_stealth import stealth
+
+
+from webdriver_manager.chrome import ChromeDriverManager
 
 from common.exceptions import GenericAPIException
 
@@ -136,3 +146,68 @@ def refresh_access_token(request: Request):
         access_token = token.get("access_token")
         refresh_token = token.get("refresh_token")
         return access_token, refresh_token
+
+
+class Chrome:
+    def __init__(self):
+        self.options = Options()
+        # 불필요한 에러 메시지 삭제
+        self.options.add_experimental_option("excludeSwitches", ["enable-logging"])
+
+        # 브라우저 창의 크기 지정
+        self.options.add_argument("--window-size=1280,5000")
+
+        # 백그라운드로 실행
+        # self.options.add_argument("headless")
+
+        # gpu 미사용
+        self.options.add_argument("--disable-gpu")
+
+        # 크롬 드라이버 최신 버전 설정
+        self.service = Service(executable_path=ChromeDriverManager().install())
+
+        # 웹드라이버 생성
+        self.driver = webdriver.Chrome(service=self.service, options=self.options)
+
+        # stealth 라이브러리 사용
+        stealth(
+            self.driver,
+            languages=["ko-KR", "ko", "en-US", "en"],
+            vendor="Google Inc.",
+            platform="Win64",
+            webgl_vendor="Intel Inc.",
+            renderer="Intel Iris OpenGL Engine",
+            fix_hairline=True,
+        )
+
+        # Wait 생성
+        self.wait = WebDriverWait(self.driver, 15)
+        self.short_wait = WebDriverWait(self.driver, 3)
+
+
+# Element 찾는 함수
+def find_visible(wait: WebDriverWait, css_selector: str) -> WebDriverWait:
+    return wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, css_selector)))
+
+
+def finds_visible(driver: webdriver, wait: WebDriverWait, css_selector: str):
+    find_visible(wait, css_selector)
+    return driver.find_elements(By.CSS_SELECTOR, css_selector)
+
+
+def find_present(wait: WebDriverWait, css_selector: str) -> WebDriverWait:
+    return wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, css_selector)))
+
+
+def finds_present(driver: webdriver, wait: WebDriverWait, css_selector: str):
+    find_present(wait, css_selector)
+    return driver.find_elements(By.CSS_SELECTOR, css_selector)
+
+
+def find_visible_x(wait: WebDriverWait, xpath: str) -> WebDriverWait:
+    return wait.until(EC.visibility_of_element_located((By.XPATH, xpath)))
+
+
+def finds_visible_x(driver: webdriver, wait: WebDriverWait, xpath: str):
+    find_visible_x(wait, xpath)
+    return driver.find_elements(By.XPATH, xpath)
