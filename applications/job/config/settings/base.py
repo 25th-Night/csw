@@ -79,6 +79,7 @@ INSTALLED_APPS += [
 ## Create Apps
 INSTALLED_APPS += [
     "crawler",
+    "job",
 ]
 
 MIDDLEWARE = [
