@@ -61,7 +61,7 @@ class Command(BaseCommand):
 
         find_visible(wait, "button[class*=JobGroup_]").click()
 
-        for i in range(1, len_jg):
+        for i in range(0, len_jg):
             # 직업 분류 열기
             find_visible(wait, "button[class*=JobGroup_]").click()
             # 직업 분류 목록
@@ -71,13 +71,12 @@ class Command(BaseCommand):
             job_group = job_groups[i]
             if i >= 10:
                 job_groups[0].send_keys(Keys.ARROW_DOWN)
-                time.sleep(0.5)
+                time.sleep(1)
             job_group_name = job_group.text
             job_group_id = job_group.get_attribute("href").split("/")[-1]
 
             time.sleep(0.5)
-            if i > 1:
-                job_group.click()
+            job_group.click()
 
             driver.execute_script("window.scrollTo(0, 0);")
 
