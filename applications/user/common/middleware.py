@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
+from django.contrib.auth import logout
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -34,20 +35,38 @@ class TokenRefreshMiddleware:
                 response = self.get_response(request)
                 access_token, refresh_token = refresh_access_token_from_request(request)
 
-                response.set_cookie(
-                    "access",
-                    access_token,
-                    domain=settings.DOMAIN,
-                    secure=settings.SECURE,
-                    httponly=True,
-                )
-                response.set_cookie(
-                    "refresh",
-                    refresh_token,
-                    domain=settings.DOMAIN,
-                    secure=settings.SECURE,
-                    httponly=True,
-                )
+                if access_token and refresh_token:
+                    print("Refresh success")
+                    response.set_cookie(
+                        "access",
+                        access_token,
+                        domain=settings.DOMAIN,
+                        secure=settings.SECURE,
+                        httponly=True,
+                    )
+                    response.set_cookie(
+                        "refresh",
+                        refresh_token,
+                        domain=settings.DOMAIN,
+                        secure=settings.SECURE,
+                        httponly=True,
+                    )
+
+                else:
+                    print("Refresh failed")
+                    response.delete_cookie(
+                        "access",
+                        domain=settings.DOMAIN,
+                    )
+                    response.delete_cookie(
+                        "refresh",
+                        domain=settings.DOMAIN,
+                    )
+                    if (
+                        hasattr(request.user, "is_authenticated")
+                        and request.user.is_authenticated
+                    ):
+                        logout(request)
 
                 return response
         else:
