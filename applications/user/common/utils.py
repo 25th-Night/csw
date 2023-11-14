@@ -148,21 +148,21 @@ def get_user_url_license(request: Request):
 
 def refresh_access_token_from_request(request: Request):
     refresh_token = request.COOKIES.get("refresh", None)
+    print(f"refresh_access_token_from_request - refresh_token: {refresh_token}")
 
     if not refresh_token:
-        return Response(
-            {"error": "Refresh Token required"}, status=status.HTTP_400_BAD_REQUEST
-        )
+        print("no refresh token")
+        return None, None
 
     try:
+        print("refresh token!")
         refresh = RefreshToken(refresh_token)
         access_token = str(refresh.access_token)
         return access_token, refresh_token
 
     except Exception as e:
-        return Response(
-            {"error": "refresh token failed"}, status=status.HTTP_400_BAD_REQUEST
-        )
+        print("refresh token error")
+        return None, None
 
 
 def get_access_value(access_str):
