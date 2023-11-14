@@ -1,12 +1,10 @@
-import csv
-
 from django.core.management.base import BaseCommand
+
+from job.models import Country
 
 from common.utils import (
     Chrome,
     find_visible,
-    finds_visible,
-    find_present,
     finds_present,
 )
 
@@ -33,30 +31,15 @@ class Command(BaseCommand):
         region_btn = find_visible(wait, "button[data-filter-name=region]")
         region_btn.click()
 
-        # csv 파일에 추가
-        BASE_DIR = "./static/csv/"
+        country_options = finds_present(
+            driver,
+            wait,
+            "div[id=MODAL_BODY] div[class*=Selector_select] select option",
+        )
 
-        region_file = BASE_DIR + "03_country.csv"
+        for i, country_option in enumerate(country_options):
+            print(i, country_option.text, country_option.get_attribute("value"))
+            Country.objects.get_or_create(name=country_option.text)
 
-        with open(region_file, "w", newline="", encoding="utf-8") as write_file:
-            csv_writer = csv.writer(write_file)
-
-            country_options = finds_present(
-                driver,
-                wait,
-                "div[id=MODAL_BODY] div[class*=Selector_select] select option",
-            )
-
-            for i, country_option in enumerate(country_options):
-                country_name = country_option.text
-                country_value = country_option.get_attribute("value")
-
-                csv_writer.writerow([country_value, country_name])
-
-        with open(region_file, "rt", encoding="UTF8") as read_file:
-            content = read_file.readlines()
-            for row in content:
-                print(row.strip())
-
-        print("크롤링을 종료합니다.")
         driver.quit()
+        print("크롤링을 종료합니다.")

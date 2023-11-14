@@ -4,10 +4,11 @@ from django.core.management.base import BaseCommand
 
 from selenium.webdriver.support.ui import Select
 
+from job.models import Country, Region, DetailRegion
+
 from common.utils import (
     Chrome,
     find_visible,
-    finds_visible,
     find_present,
     finds_present,
 )
@@ -31,64 +32,51 @@ class Command(BaseCommand):
         driver.get(url)
         print("크롤링을 시작합니다.")
 
-        # csv 파일에 추가
-        BASE_DIR = "./static/csv/"
+        # 지역 분류 열기
+        region_btn = find_visible(wait, "button[data-filter-name=region]")
+        region_btn.click()
 
-        detail_region_file = BASE_DIR + "05_detail_region.csv"
+        country_list = finds_present(
+            driver,
+            wait,
+            "div[id=MODAL_BODY] div[class*=Selector_select] select option",
+        )
 
-        with open(detail_region_file, "w", newline="", encoding="utf-8") as write_file:
-            csv_writer = csv.writer(write_file)
+        for i, country_option in enumerate(country_list):
+            if i == 4:
+                country_select = find_present(
+                    wait, "div[id=MODAL_BODY] div[class*=Selector_select] select"
+                )
+                select = Select(country_select)
+                select.select_by_index(i)
+                selected_country = country_option.text
+                print(f"selected_country:{selected_country}")
 
-            # 지역 분류 열기
-            region_btn = find_visible(wait, "button[data-filter-name=region]")
-            region_btn.click()
-
-            country_list = finds_present(
-                driver,
-                wait,
-                "div[id=MODAL_BODY] div[class*=Selector_select] select option",
-            )
-
-            idx = 1
-
-            for i, country_option in enumerate(country_list):
-                if i in [4]:
-                    country_select = find_present(
-                        wait, "div[id=MODAL_BODY] div[class*=Selector_select] select"
-                    )
-                    select = Select(country_select)
-                    select.select_by_index(i)
-                    selected_country = country_list[i].text
-                    print(f"selected_country:{selected_country}")
-
-                    regions_section = finds_present(
-                        driver, wait, "div[class*=Locations_column__]"
-                    )[0]
-                    regions = finds_present(regions_section, wait, "button")
-                    for j, region in enumerate(regions):
-                        if j:
-                            region.click()
-                            detail_regions_section = finds_present(
-                                driver, wait, "div[class*=Locations_column__]"
-                            )[1]
-                            detail_regions = finds_present(
-                                detail_regions_section, wait, "button"
-                            )
-                            for k, detail_region in enumerate(detail_regions):
-                                csv_writer.writerow(
-                                    [idx, detail_region.text, region.text]
+                regions_section = finds_present(
+                    driver, wait, "div[class*=Locations_column__]"
+                )[0]
+                regions = finds_present(regions_section, wait, "button")
+                for j, region in enumerate(regions):
+                    if j:
+                        region.click()
+                        detail_regions_section = finds_present(
+                            driver, wait, "div[class*=Locations_column__]"
+                        )[1]
+                        detail_regions = finds_present(
+                            detail_regions_section, wait, "button"
+                        )
+                        for k, detail_region in enumerate(detail_regions):
+                            if k:
+                                print(selected_country, region.text, detail_region.text)
+                                _region = Region.objects.get(name=region.text)
+                                DetailRegion.objects.get_or_create(
+                                    region=_region, name=detail_region.text
                                 )
-                                idx += 1
-                            x_btn = find_present(
-                                wait,
-                                "li[class*=SelectedLocations_locationItem__] button",
-                            )
-                            x_btn.click()
+                        x_btn = find_present(
+                            wait,
+                            "li[class*=SelectedLocations_locationItem__] button",
+                        )
+                        x_btn.click()
 
-        with open(detail_region_file, "rt", encoding="UTF8") as read_file:
-            content = read_file.readlines()
-            for row in content:
-                print(row.strip())
-
-        print("크롤링을 종료합니다.")
         driver.quit()
+        print("크롤링을 종료합니다.")

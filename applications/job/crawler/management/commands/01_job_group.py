@@ -1,12 +1,14 @@
-import csv
+import os
 
 from django.core.management.base import BaseCommand
+
+from selenium.webdriver.common.keys import Keys
+
+from job.models import Group, Site
 
 from common.utils import (
     Chrome,
     find_visible,
-    finds_visible,
-    find_present,
     finds_present,
 )
 
@@ -36,25 +38,16 @@ class Command(BaseCommand):
             driver, wait, "section[class*=JobGroupOverlay_] li a"
         )
 
-        # csv 파일에 추가
-        BASE_DIR = "./static/csv/"
+        for i, job_group in enumerate(job_groups):
+            if not i:
+                job_group.send_keys(Keys.ARROW_DOWN)
+            job_group_name = job_group.text
+            job_group_id = job_group.get_attribute("href").split("/")[-1]
+            print(i, job_group_name, job_group_id)
 
-        job_group_file = BASE_DIR + "01_job_group.csv"
+            Group.objects.get_or_create(name=job_group_name, index=job_group_id)
 
-        with open(job_group_file, "w", newline="", encoding="utf-8") as write_file:
-            csv_writer = csv.writer(write_file)
+        Site.objects.get_or_create(name="Wanted")
 
-            for i, job_group in enumerate(job_groups):
-                job_group_name = job_group.text
-                job_group_id = job_group.get_attribute("href").split("/")[-1]
-                print(i, job_group.text, job_group.get_attribute("href").split("/")[-1])
-
-                csv_writer.writerow([job_group_id, job_group_name])
-
-        with open(job_group_file, "rt", encoding="UTF8") as read_file:
-            content = read_file.readlines()
-            for row in content:
-                print(row.strip())
-
-        print("크롤링을 종료합니다.")
         driver.quit()
+        print("크롤링을 종료합니다.")
