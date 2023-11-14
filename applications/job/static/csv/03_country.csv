@@ -1,6 +1,6 @@
-all,전세계
-tw,대만
-sg,싱가폴
-jp,일본
-kr,한국
-others,기타
+0,전세계,all
+1,대만,tw
+2,싱가폴,sg
+3,일본,jp
+4,한국,kr
+5,기타,others
