@@ -69,6 +69,7 @@ INSTALLED_APPS = [
 
 ## Third party Apps
 INSTALLED_APPS += [
+    "taggit",
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_spectacular",
@@ -78,6 +79,7 @@ INSTALLED_APPS += [
 
 ## Create Apps
 INSTALLED_APPS += [
+    "common",
     "crawler",
     "job",
 ]
@@ -169,6 +171,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # REST_FRAMEWORK
 REST_FRAMEWORK = {
+    # "DEFAULT_PERMISSION_CLASSES": ["common.permissions.IsAuthenticated"],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "config.authentication.JWTAuthentication",
