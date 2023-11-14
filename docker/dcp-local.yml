@@ -20,6 +20,16 @@ services:
       - ../.envs/.env_shortener
     volumes:
       - postgres-csw-shortener:/var/lib/postgresql/data
+  
+  job-db:
+    container_name: csw-job-db
+    image: postgres:13
+    ports:
+      - 5434:5432
+    env_file:
+      - ../.envs/.env_job
+    volumes:
+      - postgres-csw-job:/var/lib/postgresql/data
 
   user:
     depends_on:
@@ -56,6 +66,24 @@ services:
       - "/start"
     env_file:
       - ../.envs/.env_shortener
+
+  job:
+    depends_on:
+      - job-db
+    container_name: csw-job
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile_job
+    image: csw-job
+    volumes:
+      - ../applications/job:/app
+      - static-csw-job:/var/www/html/static
+    ports:
+      - 8002:8000
+    command:
+      - "/start"
+    env_file:
+      - ../.envs/.env_job
   
   nginx:
     restart: always
@@ -71,6 +99,7 @@ services:
     ports:
       - 81:81
       - 82:82
+      - 83:83
 
   # prometheus:
   #   container_name: csw-prometheus
@@ -104,6 +133,8 @@ services:
 volumes:
   static-csw-user:
   static-csw-shortener:
+  static-csw-job:
   postgres-csw-user:
   postgres-csw-shortener:
+  postgres-csw-job:
   # csw-grafana:
