@@ -155,13 +155,19 @@ class Chrome:
         self.options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
         # 브라우저 창의 크기 지정
-        self.options.add_argument("--window-size=1280,5000")
+        self.options.add_argument("--start-maximized")
+        self.options.add_argument("--window-size=1920,1080")
 
         # 백그라운드로 실행
-        # self.options.add_argument("headless")
+        self.options.add_argument("headless")
 
         # gpu 미사용
         self.options.add_argument("--disable-gpu")
+
+        # # user_agent 설정
+        # self.options.add_argument(
+        #     "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+        # )
 
         # 크롬 드라이버 최신 버전 설정
         self.service = Service(executable_path=ChromeDriverManager().install())
@@ -211,3 +217,15 @@ def find_visible_x(wait: WebDriverWait, xpath: str) -> WebDriverWait:
 def finds_visible_x(driver: webdriver, wait: WebDriverWait, xpath: str):
     find_visible_x(wait, xpath)
     return driver.find_elements(By.XPATH, xpath)
+
+
+def click_skill_btn(wait, input_skill_tag, skill):
+    input_skill_tag.send_keys(skill)
+    try:
+        search_skill_result = find_visible(
+            wait, "div[class*=SkillsSearch_SkillsSearch__] ul"
+        )
+        search_skill_result.click()
+        return True
+    except:
+        return False
