@@ -317,3 +317,7 @@ terraform.rc
 # Nodejs
 node_modules/
 /applications/user/static/css/base.css
+
+
+# CSV
+*/static/csv/*
