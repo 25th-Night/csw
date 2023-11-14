@@ -18,6 +18,7 @@ from job.models import (
 class CrawlingRecruitSerializer(serializers.Serializer):
     site_name = serializers.CharField()
     job_category_name = serializers.CharField()
+    region_name = serializers.CharField()
     detail_region_name = serializers.CharField()
     company_name = serializers.CharField()
     company_tags = serializers.ListField()
@@ -36,6 +37,7 @@ class CrawlingRecruitSerializer(serializers.Serializer):
     def get_or_create(self, validated_data):
         site_name = validated_data.pop("site_name")
         job_category_name = validated_data.pop("job_category_name")
+        region_name = validated_data.pop("region_name")
         detail_region_name = validated_data.pop("detail_region_name")
         company_name = validated_data.pop("company_name")
         company_tags = validated_data.pop("company_tags")
@@ -44,7 +46,13 @@ class CrawlingRecruitSerializer(serializers.Serializer):
 
         site = Site.objects.get(name=site_name)
         category = Category.objects.get(name=job_category_name)
-        detail_region = DetailRegion.objects.get(name=detail_region_name)
+        if detail_region_name != "미등록":
+            detail_region = DetailRegion.objects.get(name=detail_region_name)
+        else:
+            region = Region.objects.get(name=region_name)
+            detail_region = DetailRegion.objects.get_or_create(
+                name=detail_region_name, region=region
+            )[0]
         company, company_created = Company.objects.get_or_create(
             name=company_name, detail_region=detail_region
         )

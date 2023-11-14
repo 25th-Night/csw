@@ -122,6 +122,7 @@ def crawling_recruits(
                                             break
 
                                     break
+                                break
                         break
 
             # _region confirm btn
@@ -175,7 +176,7 @@ def crawling_recruits(
                     "country": country,
                     "reward": reward,
                 }
-                if region_name != "전국" and region_name == region:
+                if region_name == "전국" or region_name != "전국" and region_name == region:
                     crawling_result.append(recruit_info)
 
             driver.quit()

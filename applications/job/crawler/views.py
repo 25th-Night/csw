@@ -153,6 +153,7 @@ class RecruitView(APIView):
             else:
                 time.sleep(1)
                 retry += 1
+                print("retry to crawling recruit list")
                 if retry == 5:
                     return Response(
                         {"detail": "crawling recruit list failed"},
@@ -168,18 +169,33 @@ class RecruitView(APIView):
             response = requests.get(request_url)
             if response.status_code == 200:
                 recruit = response.json()
+                # print(f"recruit:{recruit}")
                 country = recruit["job"]["address"]["country"]
                 region = recruit["job"]["address"]["location"]
-                detail_region_split = (
+                detail_region_split1 = (
                     recruit["job"]["address"]["full_location"].strip().split(" ")
+                )
+                detail_region_split2 = (
+                    recruit["job"]["address"]["geo_location"]["n_location"]["address"]
+                    .strip()
+                    .split(" ")
+                    if recruit["job"]["address"]["geo_location"] is not None
+                    else None
                 )
                 detail_region_list = DetailRegion.objects.all().values_list(
                     "name", flat=True
                 )
-                for detail_region_element in detail_region_split:
+                detail_region_name = "미등록"
+                for detail_region_element in detail_region_split1:
                     if detail_region_element in detail_region_list:
                         detail_region_name = detail_region_element
                         break
+                if detail_region_name == "미등록" and detail_region_split2:
+                    for detail_region_element in detail_region_split2:
+                        if detail_region_element in detail_region_list:
+                            detail_region_name = detail_region_element
+                            break
+
                 position = recruit["job"]["position"]
                 description = recruit["job"]["detail"]["intro"]
                 task = recruit["job"]["detail"]["main_tasks"]
@@ -187,6 +203,7 @@ class RecruitView(APIView):
                 preference = recruit["job"]["detail"]["preferred_points"]
                 benefit = recruit["job"]["detail"]["benefits"]
                 workplace = recruit["job"]["address"]["full_location"]
+                workplace = workplace if workplace else "미등록"
                 skill_tags = [skill["title"] for skill in recruit["job"]["skill_tags"]]
                 company_tags = [
                     company["title"] for company in recruit["job"]["company_tags"]
@@ -198,6 +215,7 @@ class RecruitView(APIView):
                 recruit_data = {
                     "site_name": "Wanted",
                     "job_category_name": job_category_name,
+                    "region_name": region,
                     "detail_region_name": detail_region_name,
                     "company_name": company_name,
                     "company_tags": company_tags,
@@ -213,6 +231,7 @@ class RecruitView(APIView):
                     "workplace": workplace,
                     "status": recruit_status,
                 }
+                # print(f"recruit_data:{recruit_data}")
 
                 serializer: CrawlingRecruitSerializer = CrawlingRecruitSerializer(
                     data=recruit_data
