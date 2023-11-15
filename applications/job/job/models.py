@@ -1,10 +1,15 @@
 from django.db import models
-from common.models import CommonModel
+
 from taggit.managers import TaggableManager
+
+from common.models import CommonModel
 
 
 class Site(CommonModel):
     name = models.CharField(verbose_name="사이트명", max_length=20, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Group(CommonModel):
@@ -103,15 +108,43 @@ class Recruit(CommonModel):
         related_name="recruits",
     )
     categories = models.ManyToManyField(
-        Category, verbose_name="카테고리", related_name="recruits"
+        Category,
+        through="RecruitCategory",
+        verbose_name="카테고리",
+        related_name="recruits",
     )
-    skills = models.ManyToManyField(Skill, verbose_name="스킬", related_name="recruits")
+    skills = models.ManyToManyField(
+        Skill, through="RecruitSkill", verbose_name="스킬", related_name="recruits"
+    )
+    crawling = models.ForeignKey(
+        "crawler.Crawling", verbose_name="크롤링 정보", on_delete=models.CASCADE, null=True
+    )
 
     def __str__(self):
-        return f"{self.company}의 채용공고: No. {self.url}"
+        return f"{self.company}의 채용공고: No. {self.url_id}"
 
     class Meta:
         indexes = [
             models.Index(fields=["-created_at"]),
         ]
         ordering = ["-created_at"]
+
+
+class RecruitCategory(models.Model):
+    recruit = models.ForeignKey(Recruit, verbose_name="채용공고", on_delete=models.CASCADE)
+    category = models.ForeignKey(
+        Category, verbose_name="카테고리", on_delete=models.CASCADE
+    )
+    created_at = models.DateTimeField(verbose_name="생성일", auto_now_add=True)
+
+    class Meta:
+        db_table = "through_recruit_category"
+
+
+class RecruitSkill(models.Model):
+    recruit = models.ForeignKey(Recruit, verbose_name="채용공고", on_delete=models.CASCADE)
+    skill = models.ForeignKey(Skill, verbose_name="스킬", on_delete=models.CASCADE)
+    created_at = models.DateTimeField(verbose_name="생성일", auto_now_add=True)
+
+    class Meta:
+        db_table = "through_recruit_skill"
