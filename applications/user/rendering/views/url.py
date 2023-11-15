@@ -7,7 +7,7 @@ from django.views.generic import TemplateView
 import requests
 
 from common.permissions import LoginRequired
-from common.data import LICENSE
+from common.data import URL_LICENSE
 
 
 class UrlView(LoginRequired, TemplateView):
@@ -15,7 +15,7 @@ class UrlView(LoginRequired, TemplateView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        available_url_cnt = LICENSE.get(user.url.license).get("max_link_cnt")
+        available_url_cnt = URL_LICENSE.get(user.url.license).get("max_link_cnt")
         kwargs["available_url_cnt"] = available_url_cnt
         return super().get(request, *args, **kwargs)
 

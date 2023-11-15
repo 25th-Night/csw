@@ -9,7 +9,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from common.data import LICENSE
+from common.data import URL_LICENSE
 
 from common.permissions import IsAuthenticated
 from common.utils import get_object_or_404, make_access_code
@@ -41,7 +41,7 @@ class ShortenedUrlView(GenericAPIView):
     def post(self, request: Request):
         user_id = request.user.get("id")
         user_license = request.user.get("url_license")
-        available_url_cnt = LICENSE.get(user_license).get("max_link_cnt")
+        available_url_cnt = URL_LICENSE.get(user_license).get("max_link_cnt")
         current_url_cnt = ShortenedUrl.objects.filter(
             creator_id=user_id, is_active=True
         ).count()
