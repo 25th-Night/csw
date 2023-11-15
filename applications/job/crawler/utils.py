@@ -14,6 +14,63 @@ from common.utils import (
     click_skill_btn,
 )
 
+from crawler.models import Crawling
+from job.models import Category, Country, DetailRegion, Group, Region, Site, Skill
+
+
+def make_crawling_data(
+    user_id,
+    site_name=None,
+    min_career=None,
+    job_group_name=None,
+    job_category_name=None,
+    country_name=None,
+    region_name=None,
+    detail_region_name=None,
+    skill=None,
+):
+    ...
+    crawling: Crawling = Crawling.objects.create(user_id)
+
+    if (
+        site_name
+        or min_career
+        or job_group_name
+        or job_category_name
+        or country_name
+        or region_name
+        or detail_region_name
+        or skill
+    ):
+        if site_name:
+            site = Site.objects.get_or_create(name=site_name)[0]
+            crawling.site = site
+        if min_career:
+            crawling.min_career = min_career
+        if job_group_name:
+            group = Group.objects.get_or_create(name=job_group_name)[0]
+            crawling.group = group
+        if job_category_name:
+            category = Category.objects.get_or_create(name=job_category_name)[0]
+            crawling.category = category
+        if country_name:
+            country = Country.objects.get_or_create(name=country_name)[0]
+            crawling.country = country
+        if region_name:
+            region = Region.objects.get_or_create(name=region_name)[0]
+            crawling.region = region
+        if detail_region_name:
+            detail_region = DetailRegion.objects.get_or_create(name=detail_region_name)[
+                0
+            ]
+            crawling.detail_region = detail_region
+        if skill:
+            skill = Skill.objects.get_or_create(name=skill)[0]
+            crawling.skills.add(skill)
+        crawling.save()
+
+    return crawling
+
 
 def crawling_recruits(
     year,
