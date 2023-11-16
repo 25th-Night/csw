@@ -85,6 +85,7 @@ class AuthView(GenericAPIView):
             serializer_data = serializer.data
             serializer_data["is_authenticated"] = True
             serializer_data["url_license"] = user.url.license
+            serializer_data["job_license"] = user.job.license
             return Response(serializer_data, status=status.HTTP_200_OK)
         except ExpiredSignatureError:
             print("ExpiredSignatureError")
