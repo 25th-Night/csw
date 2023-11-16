@@ -13,6 +13,7 @@ module.exports = {
     },
     variants: {},
     plugins: [
+        require("tailwind-scrollbar-hide"),
         ({ addUtilities }) => {
             addUtilities({
                 ".screen-width": {
