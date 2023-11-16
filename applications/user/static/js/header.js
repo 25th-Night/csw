@@ -21,6 +21,7 @@ import {
 document.addEventListener("DOMContentLoaded", function () {
     // Change logo text
     changeLogoText("/url/", "URL");
+    changeLogoText("/job/", "JOB");
 
     // Shortener Url Service URL
     const ShortenerUrl = getShortenerURL();
