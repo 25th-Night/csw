@@ -30,7 +30,7 @@ def make_crawling_data(
     skill=None,
 ):
     ...
-    crawling: Crawling = Crawling.objects.create(user_id)
+    crawling: Crawling = Crawling.objects.create(user_id=user_id)
 
     if (
         site_name
