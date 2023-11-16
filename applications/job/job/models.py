@@ -123,12 +123,6 @@ class Recruit(CommonModel):
     def __str__(self):
         return f"{self.company}의 채용공고: No. {self.url_id}"
 
-    class Meta:
-        indexes = [
-            models.Index(fields=["-created_at"]),
-        ]
-        ordering = ["-created_at"]
-
 
 class RecruitCategory(models.Model):
     recruit = models.ForeignKey(Recruit, verbose_name="채용공고", on_delete=models.CASCADE)
