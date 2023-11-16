@@ -1,38 +1,79 @@
 {% load static %}
-
-<section class="relative z-10 hidden w-full text-white modify-modal" id="modify_modal" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<section class="relative z-10 hidden w-full text-white modify-modal"
+         id="modify_modal"
+         aria-labelledby="modal-title"
+         role="dialog"
+         aria-modal="true">
     <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
     <div class="fixed left-1/2 top-[40%] translate-x-[-50%] translate-y-[-50%] z-10 mx-auto p-2 bg-black overflow-y-auto screen-width modify-modal-wrap">
         <div class="flex items-start justify-between mx-3 my-2 title-wrap">
-            <div class="font-semibold title">URL Info<span class="text-lg font-medium">&nbsp;&nbsp;& Modify</span></div>
+            <div class="font-semibold title">
+                URL Info<span class="text-lg font-medium">&nbsp;&nbsp;& Modify</span>
+            </div>
             <div class="flex modify-btn-wrap"></div>
         </div>
         <form class="flex flex-col w-full mt-4 url-form md:flex-row modify-form">
             <div class="flex mb-4 input-first md:w-2/3">
                 <div class="w-full mx-4 form-field">
                     <div class="flex w-full label-wrap">
-                        <label class="block mb-3 mr-2 font-semibold truncate" for="url-access-modify">Target Url</label>
+                        <label class="block mb-3 mr-2 font-semibold truncate"
+                               for="url-access-modify">Target Url</label>
                         <div class="self-center hidden text-sm text-[yellow] modify-url-error"></div>
                     </div>
-                    <input class="block w-full p-1 text-black outline-none" id="url_target_modify" type="text" name="url-target-modify" autocomplete="off" tabindex="6" placeholder="Target Url" autofocus="">
+                    <input class="block w-full p-1 text-black outline-none"
+                           id="url_target_modify"
+                           type="text"
+                           name="url-target-modify"
+                           autocomplete="off"
+                           tabindex="6"
+                           placeholder="Target Url"
+                           autofocus="">
                 </div>
                 <div class="w-full min-[500px]:w-[150px] mx-4 form-field">
                     <label class="block mb-3 font-semibold">Nickname</label>
-                    <input class="block w-full p-1 text-black outline-none" id="url_nickname_modify" type="text" name="url-nickname-modify" autocomplete="off" tabindex="7" placeholder="Nickname" autofocus="">
+                    <input class="block w-full p-1 text-black outline-none"
+                           id="url_nickname_modify"
+                           type="text"
+                           name="url-nickname-modify"
+                           autocomplete="off"
+                           tabindex="7"
+                           placeholder="Nickname"
+                           autofocus="">
                 </div>
             </div>
             <div class="flex mb-4 md:w-[320px] input-second">
                 <div class="w-1/2 md:w-[158px] mx-4 form-field">
                     <div class="flex items-center justify-between w-full mb-3 date-lable-wrap">
-                        <label class="block font-semibold modify-expire-label" for="url-expire-modify">Expire</label>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="4" stroke="#FFFFFF" class="hidden w-6 h-6 p-1 cursor-pointer" id="clear_modify_date">
+                        <label class="block font-semibold modify-expire-label"
+                               for="url-expire-modify">Expire</label>
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="4"
+                             stroke="#FFFFFF"
+                             class="hidden w-6 h-6 p-1 cursor-pointer"
+                             id="clear_modify_date">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </div>
                     <div class="flex items-center flatpickr" id="url_expire_modify">
-                        <input type="text" id="url_expire" name="url-expire" autocomplete="off" autofocus tabindex="8" class="w-full p-1 text-black outline-none md:w-[150px]" placeholder="Expire" data-input>
+                        <input type="text"
+                               id="url_expire"
+                               name="url-expire"
+                               autocomplete="off"
+                               autofocus
+                               tabindex="8"
+                               class="w-full p-1 text-black outline-none md:w-[150px]"
+                               placeholder="Expire"
+                               data-input>
                         <a class="input-button" title="clear" data-clear>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 p-1 cursor-pointer" id="clearDate_modify">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke-width="1.5"
+                                 stroke="currentColor"
+                                 class="w-6 h-6 p-1 cursor-pointer"
+                                 id="clearDate_modify">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </a>
@@ -40,7 +81,12 @@
                 </div>
                 <div class="w-1/2 md:w-[108px] mx-4 form-field">
                     <label class="block w-full mb-3 font-semibold">Access</label>
-                    <select class="w-full p-1 text-black outline-none appearance-none cursor-pointer md:w-[100px]" id="url_access_modify" name="url-access-modify" tabindex="9" placeholder="Access" autofocus="">
+                    <select class="w-full p-1 text-black outline-none appearance-none cursor-pointer md:w-[100px]"
+                            id="url_access_modify"
+                            name="url-access-modify"
+                            tabindex="9"
+                            placeholder="Access"
+                            autofocus="">
                         <option value="1" class="select-option">Public</option>
                         <option value="2" class="select-option">Private</option>
                         <option value="3" class="select-option">Secret</option>
@@ -51,27 +97,33 @@
         <div class="grid grid-cols-2 md:grid-cols-4 lg:flex more-info">
             <div class="mx-4 mb-4 info-shortened-url-wrap">
                 <div class="mb-3 font-semibold truncate info-label">Shortened Url</div>
-                <div class="w-full h-8 p-1 text-black cursor-default md:w-32 info-shortened-url" id="url_shortened_info"></div>
+                <div class="w-full h-8 p-1 text-black cursor-default md:w-32 info-shortened-url"
+                     id="url_shortened_info"></div>
             </div>
             <div class="mx-4 mb-4 info-click-wrap">
                 <div class="mb-3 font-semibold info-label">Click</div>
-                <div class="w-full h-8 p-1 text-black cursor-default md:w-16 lg:w-32 info-click" id="url_click_info"></div>
+                <div class="w-full h-8 p-1 text-black cursor-default md:w-16 lg:w-32 info-click"
+                     id="url_click_info"></div>
             </div>
             <div class="mx-4 mb-4 info-last-clicked-wrap">
                 <div class="mb-3 font-semibold truncate info-label">Last Clicked</div>
-                <div class="truncate text-sm min-[500px]:text-base h-8 p-1 text-black cursor-default w-full info-click pr-2" id="url_last_clicked_info"></div>
+                <div class="truncate text-sm min-[500px]:text-base h-8 p-1 text-black cursor-default w-full info-click pr-2"
+                     id="url_last_clicked_info"></div>
             </div>
             <div class="mx-4 mb-4 info-created-at-wrap">
                 <div class="mb-3 font-semibold info-label">Created</div>
-                <div class="truncate text-sm min-[500px]:text-base h-8 p-1 text-black cursor-default w-full info-click pr-2" id="url_created_at_info"></div>
+                <div class="truncate text-sm min-[500px]:text-base h-8 p-1 text-black cursor-default w-full info-click pr-2"
+                     id="url_created_at_info"></div>
             </div>
             <div class="mx-4 mb-4 info-access-at-wrap">
                 <div class="mb-3 font-semibold info-label">Access Code</div>
                 <div class="flex items-center access-code-wrap">
-                    <div class="truncate text-sm min-[500px]:text-base h-8 p-1 text-black cursor-default w-full info-click mr-2" id="url_access_code_info"></div>
+                    <div class="truncate text-sm min-[500px]:text-base h-8 p-1 text-black cursor-default w-full info-click mr-2"
+                         id="url_access_code_info"></div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="fixed md:left-1/2 top-[40%] translate-y-[40px] md:translate-x-[-50%] md:translate-y-[calc(-50%+40px)] z-20" id="calendar"></div>
+    <div class="fixed md:left-1/2 top-[40%] translate-y-[40px] md:translate-x-[-50%] md:translate-y-[calc(-50%+40px)] z-20"
+         id="calendar"></div>
 </section>

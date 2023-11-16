@@ -1,43 +1,72 @@
 {% extends "user/base.html" %}
 {% load static %}
-
-{% block title %}
-    Login
-{% endblock %}
-
+{% block title %}Login{% endblock %}
 {% block inner_content %}
-<div class="flex items-start justify-between my-2 title-wrap">
-    <div class="font-semibold title">Login</div>
-    <img src="{% static 'img/icon/submit03.png' %}" alt="submit" class="block h-12 cursor-pointer" tabindex="3" id="login_btn_email">
-</div>
-<form class="m-2 login-form">
-    <div class="form-field">
-        <div class="my-2 label sm:flex">
-            <label for="login-email" class="block mr-4 text-lg">Email</label>
-            <div class="self-center hidden text-sm text-[yellow] login-email-error"></div>
-        </div>
-        <input type="text" id="login_email" name="login-email" autocomplete="off" autofocus tabindex="1" class="block w-full p-1 text-black outline-none"
-        placeholder="Please enter your email.">
+    <div class="flex items-start justify-between my-2 title-wrap">
+        <div class="font-semibold title">Login</div>
+        <img src="{% static 'img/icon/submit03.png' %}"
+             alt="submit"
+             class="block h-12 cursor-pointer"
+             tabindex="3"
+             id="login_btn_email">
     </div>
-    <div class="form-field">
-        <div class="my-2 label sm:flex">
-            <label for="login-password" class="block mr-4 text-lg">Password</label>
-            <div class="self-center hidden text-sm text-[yellow] login-password-error"></div>
+    <form class="m-2 login-form">
+        <div class="form-field">
+            <div class="my-2 label sm:flex">
+                <label for="login-email" class="block mr-4 text-lg">Email</label>
+                <div class="self-center hidden text-sm text-[yellow] login-email-error"></div>
+            </div>
+            <input type="text"
+                   id="login_email"
+                   name="login-email"
+                   autocomplete="off"
+                   autofocus
+                   tabindex="1"
+                   class="block w-full p-1 text-black outline-none"
+                   placeholder="Please enter your email.">
         </div>
-        <input type="password" id="login_password" name="login-password" autocomplete="off" autofocus tabindex="2" class="block w-full p-1 text-black outline-none"
-        placeholder="Please enter your password.">
+        <div class="form-field">
+            <div class="my-2 label sm:flex">
+                <label for="login-password" class="block mr-4 text-lg">Password</label>
+                <div class="self-center hidden text-sm text-[yellow] login-password-error"></div>
+            </div>
+            <input type="password"
+                   id="login_password"
+                   name="login-password"
+                   autocomplete="off"
+                   autofocus
+                   tabindex="2"
+                   class="block w-full p-1 text-black outline-none"
+                   placeholder="Please enter your password.">
+        </div>
+    </form>
+    <hr class="my-5">
+    <div class="flex justify-end mb-2 bottom">
+        <img src="{% static 'img/icon/find_email03.png' %}"
+             onclick="window.location.href='#'"
+             alt="find_email"
+             class="block h-[34px] mx-3 cursor-pointer mt-[2px]"
+             tabindex="4"
+             id="find_email"
+             title="이메일 찾기">
+        <img src="{% static 'img/icon/find_pw05.png' %}"
+             onclick="window.location.href='#'"
+             alt="find_pw"
+             class="block h-[34px] mx-3 cursor-pointer mt-[2px]"
+             tabindex="5"
+             id="find_pw"
+             title="비밀번호 찾기">
+        <img src="{% static 'img/icon/signup02.png' %}"
+             onclick="window.location.href='#'"
+             alt="signup"
+             class="block w-10 mx-3 cursor-pointer"
+             tabindex="6"
+             id="signup"
+             title="회원가입">
     </div>
-</form>
-<hr class="my-5">
-<div class="flex justify-end mb-2 bottom">
-    <img src="{% static 'img/icon/find_email03.png' %}" onclick="window.location.href='#'" alt="find_email" class="block h-[34px] mx-3 cursor-pointer mt-[2px]" tabindex="4" id="find_email" title="이메일 찾기">
-    <img src="{% static 'img/icon/find_pw05.png' %}" onclick="window.location.href='#'" alt="find_pw" class="block h-[34px] mx-3 cursor-pointer mt-[2px]" tabindex="5" id="find_pw" title="비밀번호 찾기">
-    <img src="{% static 'img/icon/signup02.png' %}" onclick="window.location.href='#'" alt="signup" class="block w-10 mx-3 cursor-pointer" tabindex="6" id="signup" title="회원가입">
-</div>
-{% include "user/signup.html" %}
+    {% include "user/signup.html" %}
 {% endblock %}
-
 {% block include_js %}
-<script type="module" src="{% static 'js/login.js' %}" defer></script>
-<script type="module" src="{% static 'js/signup.js' %}" defer></script>
+    <script type="module" src="{% static 'js/login.js' %}" defer></script>
+    <script type="module" src="{% static 'js/signup.js' %}" defer></script>
 {% endblock %}
