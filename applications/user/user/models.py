@@ -20,6 +20,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
 
         url = Url.objects.create(user=user)
+        job = Job.objects.create(user=user)
 
         return user
 
@@ -32,6 +33,10 @@ class UserManager(BaseUserManager):
         url = superuser.url
         url.license = Url.License.MASTER
         url.save()
+
+        job = superuser.job
+        job.license = Job.License.MASTER
+        job.save()
 
         return superuser
 
@@ -80,4 +85,22 @@ class Url(CommonModel):
     total_cnt = models.IntegerField(verbose_name="사용 중인 총 URL 수", default=0)
 
     def __str__(self):
-        return f"{self.user}의 라이선스 : {self.get_license_display()}"
+        return f"{self.user}의 URL 라이선스 : {self.get_license_display()}"
+
+
+class Job(CommonModel):
+    class License(models.IntegerChoices):
+        FREE = 1
+        BASIC = 2
+        PREMIUM = 3
+        MASTER = 4
+
+    user = models.OneToOneField(
+        User, verbose_name="사용자", related_name="job", on_delete=models.CASCADE
+    )
+    license = models.IntegerField(
+        verbose_name="라이선스", choices=License.choices, default=License.FREE
+    )
+
+    def __str__(self):
+        return f"{self.user}의 JOB 라이선스 : {self.get_license_display()}"
