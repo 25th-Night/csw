@@ -30,34 +30,34 @@ class DetailRegionFilter(filters.FilterSet):
 
 class RecruitFilter(filters.FilterSet):
     site_id = filters.NumberFilter(field_name="site", lookup_expr="exact")
-    detail_region_id = filters.NumberFilter(
-        field_name="detail_region", lookup_expr="exact"
+    country_id = filters.NumberFilter(
+        field_name="detail_region__region__country__id", lookup_expr="exact"
     )
     region_id = filters.NumberFilter(
         field_name="detail_region__region__id", lookup_expr="exact"
     )
-    country_id = filters.NumberFilter(
-        field_name="detail_region__region__country__id", lookup_expr="exact"
+    detail_region_id = filters.NumberFilter(
+        field_name="detail_region", lookup_expr="exact"
     )
-    skills = filters.CharFilter(method="filter_by_skills")
-    company_tags = filters.CharFilter(method="filter_by_company_tags")
-    categories = filters.CharFilter(method="filter_by_categories")
+    skill_ids = filters.CharFilter(method="filter_by_skill_ids")
+    company_tag_ids = filters.CharFilter(method="filter_by_company_tag_ids")
+    category_ids = filters.CharFilter(method="filter_by_category_ids")
     group_id = filters.CharFilter(method="filter_by_group_id")
 
     class Meta:
         model = Recruit
         fields = [
             "site_id",
-            "detail_region_id",
-            "region_id",
             "country_id",
-            "skills",
-            "company_tags",
-            "categories",
+            "region_id",
+            "detail_region_id",
+            "skill_ids",
+            "company_tag_ids",
+            "category_ids",
             "group_id",
         ]
 
-    def filter_by_skills(self, queryset, name, value):
+    def filter_by_skill_ids(self, queryset, name, value):
         skills = value.split(",")
         result = queryset
 
@@ -66,7 +66,7 @@ class RecruitFilter(filters.FilterSet):
 
         return result
 
-    def filter_by_company_tags(self, queryset, name, value):
+    def filter_by_company_tag_ids(self, queryset, name, value):
         company_tags = value.split(",")
         result = queryset
 
@@ -75,7 +75,7 @@ class RecruitFilter(filters.FilterSet):
 
         return result
 
-    def filter_by_categories(self, queryset, name, value):
+    def filter_by_category_ids(self, queryset, name, value):
         category_ids = [int(cat_id) for cat_id in value.split(",") if cat_id.isdigit()]
         return queryset.filter(categories__id__in=category_ids)
 
