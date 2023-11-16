@@ -8,7 +8,16 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from job.models import Group, Category, Country, Region, DetailRegion, Company, Recruit
+from job.models import (
+    Group,
+    Category,
+    Country,
+    Region,
+    DetailRegion,
+    Company,
+    Recruit,
+    Site,
+)
 from job.serializers import (
     GroupSerializer,
     CategorySerializer,
@@ -17,8 +26,20 @@ from job.serializers import (
     RegionSerializer,
     DetailRegionSerializer,
     RecruitSerializer,
+    SiteSerializer,
 )
 from job.filters import CategoryFilter, DetailRegionFilter, RecruitFilter, RegionFilter
+from common.utils import get_object_or_404
+
+
+class SiteView(APIView):
+    serializer_class = SiteSerializer
+
+    def get(self, request: Request):
+        sites: Site = Site.objects.all()
+        serializer: SiteSerializer = self.serializer_class(sites, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class GroupView(APIView):
@@ -48,8 +69,8 @@ class CountryView(APIView):
     serializer_class = CountrySerializer
 
     def get(self, request: Request):
-        categories: Category = Category.objects.all()
-        serializer: CategorySerializer = self.serializer_class(categories, many=True)
+        categories: Country = Country.objects.all()
+        serializer: CountrySerializer = self.serializer_class(categories, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -89,5 +110,15 @@ class RecruitView(APIView):
         recruits: Recruit = Recruit.objects.all()
         queryset = self.filter_backends().filter_queryset(request, recruits, self)
         serializer: RecruitSerializer = self.serializer_class(queryset, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RecruitDetailView(APIView):
+    serializer_class = RecruitSerializer
+
+    def get(self, request: Request, pk):
+        recruit: Recruit = get_object_or_404(Recruit, id=pk)
+        serializer: RecruitSerializer = self.serializer_class(recruit)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
