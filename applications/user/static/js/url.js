@@ -26,6 +26,8 @@ import {
     copyTextToClipboard,
     popUpConfirm,
     formatDateToCustomFormat,
+    hoverChangeTextColor,
+    hoverChangeBackgroundColor,
 } from "./common.js";
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -553,7 +555,7 @@ document.addEventListener("DOMContentLoaded", function () {
             for (let i = 1; i <= pageNum; i++) {
                 const pageNumBtn = createNewElement(
                     "div",
-                    `hover:text-[#d9d9d9] cursor-pointer page-btn-${i}`,
+                    `cursor-pointer page-btn-${i}`,
                     i,
                     `page_btn_${i}`
                 );
@@ -566,13 +568,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (i == currentPageNumber) {
                     pageNumBtn.style.cursor = "default";
-                    pageNumBtn.classList.remove("hover:text-[#d9d9d9]");
                     pageNumBtn.style.color = "#bfbfbf";
                 } else {
                     pageNumBtn.addEventListener("click", () => {
                         getUrlList(i);
                         setAttributeToElement(urlListTitle, "data-page", i);
                     });
+                    hoverChangeTextColor(pageNumBtn, "#d9d9d9", "#373737");
                 }
             }
             listTitleWrap.parentNode.insertBefore(pageBtnWrap, listTitleWrap.nextSibling);
