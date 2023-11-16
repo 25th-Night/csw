@@ -1,58 +1,67 @@
 {% extends "url/permission/base.html" %}
 {% load static %}
-
-{% block title %}
-    Private URL
-{% endblock %}
-
-{% block sub-title %}
-    Private URL
-{% endblock %}
-
+{% block title %}Private URL{% endblock %}
+{% block sub-title %}Private URL{% endblock %}
 {% block inner_content %}
-<div class="flex items-start justify-between m-2 title-wrap">
-    <div class="flex items-end title-content">
-        <div class="min-[500px]:text-xl title-label">Shortened URL :&nbsp;</div>
-        <div class="font-semibold min-[500px]:text-2xl url-path cursor-pointer hover:text-[blue]">{{ url_path }}</div>
-    </div>
-    {% if user == undefined %}
-        <img src="{% static 'img/icon/login03.png' %}" alt="login" class="cursor-pointer h-9" id="login_btn" title="로그인">
-    {% else %}
-        <img src="{% static 'img/icon/exit04.png' %}" alt="logout" class="cursor-pointer h-9" id="logout_btn" title="로그아웃">
-    {% endif %}
-</div>
-<form class="block mx-2 my-6 login-form">
-    <div class="form-field">
-        <div class="my-4 label sm:flex">
-            <div class="flex label-wrap">
-                <label for="url-access-code" class="block mr-3 font-semibold">Access Code</label>
-                {% if url.access_code %}
-                    :&nbsp;&nbsp;&nbsp;
-                    <div class="self-center font-semibold access-code text-emerald-200">{{ url.access_code }}</div>
-                {% endif %}</div>
-            <div class="self-center hidden mt-2 sm:mt-0 sm:ml-3 text-sm text-[yellow] access-code-error"></div>
+    <div class="flex items-start justify-between m-2 title-wrap">
+        <div class="flex items-end title-content">
+            <div class="min-[500px]:text-xl title-label">Shortened URL :&nbsp;</div>
+            <div class="font-semibold min-[500px]:text-2xl url-path cursor-pointer hover:text-[blue]">{{ url_path }}</div>
         </div>
-        <div class="flex content">
-            <input type="password" id="url_access_code" name="url-access-code" autocomplete="off" autofocus tabindex="1" class="block w-full p-1 mx-1 text-black outline-none"
-            placeholder="Please enter URL access code.">
-            <img class="block h-10 mx-1 cursor-pointer" id="submit_btn_url" src="{% static 'img/icon/submit03.png' %}" tabindex="10">
-        </div>
-        
+        {% if user == undefined %}
+            <img src="{% static 'img/icon/login03.png' %}"
+                 alt="login"
+                 class="cursor-pointer h-9"
+                 id="login_btn"
+                 title="로그인">
+        {% else %}
+            <img src="{% static 'img/icon/exit04.png' %}"
+                 alt="logout"
+                 class="cursor-pointer h-9"
+                 id="logout_btn"
+                 title="로그아웃">
+        {% endif %}
     </div>
-</form>
-<hr class="my-5">
-<div class="flex flex-col min-[650px]:flex-row justify-end mb-4 mr-2 min-[500px]:text-lg text-emerald-300 bottom">
-    <div class="flex justify-end first-phrase">If you don't know &nbsp;<span class="font-semibold text-[yellow]">Access Code</span>,&nbsp;</div>
-    <div class="flex justify-end second-phrase">contact to &nbsp;<span class="text-[yellow]">URL Creator</span>.</div>
-</div>
-{% include "url/permission/login.html" %}
+    <form class="block mx-2 my-6 login-form">
+        <div class="form-field">
+            <div class="my-4 label sm:flex">
+                <div class="flex label-wrap">
+                    <label for="url-access-code" class="block mr-3 font-semibold">Access Code</label>
+                    {% if url.access_code %}
+                        :&nbsp;&nbsp;&nbsp;
+                        <div class="self-center font-semibold access-code text-emerald-200">{{ url.access_code }}</div>
+                    {% endif %}
+                </div>
+                <div class="self-center hidden mt-2 sm:mt-0 sm:ml-3 text-sm text-[yellow] access-code-error"></div>
+            </div>
+            <div class="flex content">
+                <input type="password"
+                       id="url_access_code"
+                       name="url-access-code"
+                       autocomplete="off"
+                       autofocus
+                       tabindex="1"
+                       class="block w-full p-1 mx-1 text-black outline-none"
+                       placeholder="Please enter URL access code.">
+                <img class="block h-10 mx-1 cursor-pointer"
+                     id="submit_btn_url"
+                     src="{% static 'img/icon/submit03.png' %}"
+                     tabindex="10">
+            </div>
+        </div>
+    </form>
+    <hr class="my-5">
+    <div class="flex flex-col min-[650px]:flex-row justify-end mb-4 mr-2 min-[500px]:text-lg text-emerald-300 bottom">
+        <div class="flex justify-end first-phrase">
+            If you don't know &nbsp;<span class="font-semibold text-[yellow]">Access Code</span>,&nbsp;
+        </div>
+        <div class="flex justify-end second-phrase">
+            contact to &nbsp;<span class="text-[yellow]">URL Creator</span>.
+        </div>
+    </div>
+    {% include "url/permission/login.html" %}
 {% endblock %}
-
-{% block include_js %}
-<script type="text/javascript">
-    const urlPath = "{{ url_path|escapejs }}";
-</script>
-{% endblock %}
+{% block include_js %}<script type="text/javascript">const urlPath = "{{ url_path|escapejs }}";</script>{% endblock %}
 {% block script %}
-<script type="module" src="{% static 'js/private.js' %}" defer></script>
+    <script type="module" src="{% static 'js/private.js' %}" defer></script>
 {% endblock %}
