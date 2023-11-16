@@ -122,11 +122,11 @@ function redirectLogin(response) {
 function imageHover(imageElement, hoverImagePath, normalImagePath) {
     /* 이미지 태그 마우스 오버 시, 이미지를 변경 처리하는 함수 */
 
-    imageElement.addEventListener("mouseover", function () {
+    imageElement.addEventListener("mouseover", () => {
         imageElement.src = hoverImagePath;
     });
 
-    imageElement.addEventListener("mouseout", function () {
+    imageElement.addEventListener("mouseout", () => {
         imageElement.src = normalImagePath;
     });
 }
@@ -222,6 +222,43 @@ function getShortenerURL() {
     }
     console.log(`shortenerURL:${shortenerURL}`);
     return shortenerURL;
+}
+
+function getJobURL() {
+    /* 현재 URL에 따른 Shortener 서비스의 URL을 지정하는 함수 */
+
+    // 현재 URL
+    const currentURL = window.location.href;
+
+    // URL 객체 생성
+    const currentURLObject = new URL(currentURL);
+
+    // 현재 URL에서 호스트 (도메인, 포트 포함) 를 추출
+    const currentHost = currentURLObject.host;
+
+    // 현재 URL에서 호스트 (도메인) 이름을 추출
+    const currentHostName = currentURLObject.hostname;
+
+    // URL 스키마 (http 또는 https)를 조회
+    const currentProtocol = currentURLObject.protocol;
+
+    let JobURL;
+
+    if (currentHost === "127.0.0.1:8000") {
+        console.log("local-window");
+        JobURL = `${currentProtocol}//127.0.0.1:8002`;
+    } else if (currentHost === "127.0.0.1:81") {
+        console.log("local-docker");
+        JobURL = `${currentProtocol}//127.0.0.1:83`;
+    } else if (currentHostName === "csw.kr") {
+        console.log("aws");
+        JobURL = `${currentProtocol}//job.csw.kr`;
+    } else {
+        // 기본 URL 설정
+        JobURL = "";
+    }
+    console.log(`JobURL:${JobURL}`);
+    return JobURL;
 }
 
 function createNewElement(tagName, className, value = null, id = null) {
@@ -323,6 +360,117 @@ function formatDateToCustomFormat(dateTime) {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+const makeSelectOptions = async (
+    URL,
+    optionType,
+    selectElId,
+    AllExist,
+    selectedOptionId = null
+) => {
+    /* select box 내 option 생성 함수 */
+
+    const data = setFetchData("get", {});
+
+    // job api 호출
+    const get_options_response = await fetch(`${URL}/${optionType}`, data);
+
+    if (get_options_response.status === 200) {
+        let options = await get_options_response.json();
+        // let initOption = {};
+        // if (AllExist) {
+        //     initOption = [
+        //         { id: -1, name: "Select" },
+        //         { id: 0, name: "All" },
+        //     ];
+        // } else {
+        //     initOption = [{ id: -1, name: "Select" }];
+        // }
+        // options = initOption.concat(options);
+        if (AllExist) {
+            options = [{ id: 0, name: "All" }].concat(options);
+        }
+
+        const selectBox = getElFromId(selectElId);
+        removeAllNode(selectBox);
+
+        options.forEach((option) => {
+            const new_option = createNewElement(
+                "option",
+                "select-option",
+                option.id,
+                `${selectElId}_${option.id}`
+            );
+            new_option.value = option.id;
+            new_option.textContent = option.name;
+            selectBox.appendChild(new_option);
+        });
+        if (selectedOptionId) {
+            const selectedOption = getElFromId(`${selectElId}_${selectedOptionId}`);
+            selectedOption.selected = true;
+        }
+    } else {
+        const errorData = await get_options_response.json();
+        if (errorData) {
+            console.log(errorData);
+            displayErrorMessage("make-options", errorData.detail);
+        }
+    }
+};
+
+const changeSelectOptions = (
+    URL,
+    changedSelectElId,
+    query_parameter,
+    optionType,
+    changingSelectElId,
+    AllExist,
+    selectedOptionId = null
+) => {
+    /* 부모 select box 값 변경 시, 자식 select box 내 option 신규 생성 함수 */
+
+    const parentSelectBox = getElFromId(changedSelectElId);
+
+    parentSelectBox.addEventListener("change", () => {
+        makeSelectOptions(
+            URL,
+            `${optionType}?${query_parameter}=${parentSelectBox.value}`,
+            changingSelectElId,
+            AllExist,
+            selectedOptionId
+        );
+    });
+};
+
+function makeQueryParameter(queryParamsDict) {
+    let queryParams = new URLSearchParams(queryParamsDict);
+    let queryString = queryParams.toString();
+    return queryString;
+}
+
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+const hoverChangeTextColor = (targetElement, overColor, outColor) => {
+    targetElement.addEventListener("mouseover", function () {
+        targetElement.style.color = overColor;
+    });
+
+    targetElement.addEventListener("mouseout", function () {
+        targetElement.style.color = outColor;
+    });
+};
+
+const hoverChangeBackgroundColor = (targetElement, overColor, outColor) => {
+    targetElement.addEventListener("mouseover", function () {
+        targetElement.style.backgroundColor = overColor;
+    });
+
+    targetElement.addEventListener("mouseout", function () {
+        targetElement.style.backgroundColor = outColor;
+    });
+};
+
 export {
     getElFromSel,
     getElsFromSel,
@@ -345,6 +493,7 @@ export {
     getCurrentPath,
     changeLogoText,
     getShortenerURL,
+    getJobURL,
     createNewElement,
     setElementText,
     addChildToTarget,
@@ -353,4 +502,10 @@ export {
     copyTextToClipboard,
     popUpConfirm,
     formatDateToCustomFormat,
+    makeSelectOptions,
+    changeSelectOptions,
+    makeQueryParameter,
+    capitalize,
+    hoverChangeTextColor,
+    hoverChangeBackgroundColor,
 };
