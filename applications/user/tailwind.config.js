@@ -9,11 +9,15 @@ module.exports = {
                 elice: ["EliceDigitalBaeum", "monospace"],
                 yedstreet: ["YDestreet", "monospace"],
             },
+            ".disabled": {
+                disabled: true,
+            },
         },
     },
     variants: {},
     plugins: [
         require("tailwind-scrollbar-hide"),
+        require("tailwind-scrollbar")({ nocompatible: true }),
         ({ addUtilities }) => {
             addUtilities({
                 ".screen-width": {
