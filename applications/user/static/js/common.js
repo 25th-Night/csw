@@ -365,55 +365,67 @@ const makeSelectOptions = async (
     optionType,
     selectElId,
     AllExist,
-    selectedOptionId = null
+    selectedOptionId = null,
+    parentSelectOptionId = null,
+    parentSelectTitle = null
 ) => {
     /* select box 내 option 생성 함수 */
+    const selectBox = getElFromId(selectElId);
+    removeAllNode(selectBox);
 
-    const data = setFetchData("get", {});
+    if (parentSelectOptionId === null || parentSelectOptionId != 0) {
+        const data = setFetchData("get", {});
 
-    // job api 호출
-    const get_options_response = await fetch(`${URL}/${optionType}`, data);
+        // job api 호출
+        const get_options_response = await fetch(`${URL}/${optionType}`, data);
 
-    if (get_options_response.status === 200) {
-        let options = await get_options_response.json();
-        // let initOption = {};
-        // if (AllExist) {
-        //     initOption = [
-        //         { id: -1, name: "Select" },
-        //         { id: 0, name: "All" },
-        //     ];
-        // } else {
-        //     initOption = [{ id: -1, name: "Select" }];
-        // }
-        // options = initOption.concat(options);
-        if (AllExist) {
-            options = [{ id: 0, name: "All" }].concat(options);
-        }
+        if (get_options_response.status === 200) {
+            let options = await get_options_response.json();
+            // let initOption = {};
+            // if (AllExist) {
+            //     initOption = [
+            //         { id: -1, name: "Select" },
+            //         { id: 0, name: "All" },
+            //     ];
+            // } else {
+            //     initOption = [{ id: -1, name: "Select" }];
+            // }
+            // options = initOption.concat(options);
+            if (AllExist) {
+                options = [{ id: 0, name: "All" }].concat(options);
+            }
 
-        const selectBox = getElFromId(selectElId);
-        removeAllNode(selectBox);
-
-        options.forEach((option) => {
-            const new_option = createNewElement(
-                "option",
-                "select-option",
-                option.id,
-                `${selectElId}_${option.id}`
-            );
-            new_option.value = option.id;
-            new_option.textContent = option.name;
-            selectBox.appendChild(new_option);
-        });
-        if (selectedOptionId) {
-            const selectedOption = getElFromId(`${selectElId}_${selectedOptionId}`);
-            selectedOption.selected = true;
+            options.forEach((option) => {
+                const new_option = createNewElement(
+                    "option",
+                    "select-option",
+                    option.id,
+                    `${selectElId}_${option.id}`
+                );
+                new_option.value = option.id;
+                new_option.textContent = option.name;
+                selectBox.appendChild(new_option);
+            });
+            if (selectedOptionId) {
+                const selectedOption = getElFromId(`${selectElId}_${selectedOptionId}`);
+                selectedOption.selected = true;
+                selectBox.value = selectedOptionId;
+            }
+        } else {
+            const errorData = await get_options_response.json();
+            if (errorData) {
+                console.log(errorData);
+                displayErrorMessage("make-options", errorData.detail);
+            }
         }
     } else {
-        const errorData = await get_options_response.json();
-        if (errorData) {
-            console.log(errorData);
-            displayErrorMessage("make-options", errorData.detail);
-        }
+        const defaultOption = createNewElement(
+            "option",
+            "default-option",
+            `${parentSelectTitle} first`
+        );
+        defaultOption.value = 0;
+        selectBox.appendChild(defaultOption);
     }
 };
 
@@ -431,18 +443,37 @@ const changeSelectOptions = (
     const parentSelectBox = getElFromId(changedSelectElId);
 
     parentSelectBox.addEventListener("change", () => {
-        makeSelectOptions(
-            URL,
-            `${optionType}?${query_parameter}=${parentSelectBox.value}`,
-            changingSelectElId,
-            AllExist,
-            selectedOptionId
-        );
+        if (parentSelectBox.value == 0) {
+            const changingSelectBox = getElFromId(changingSelectElId);
+            removeAllNode(changingSelectBox);
+            const defaultOption = createNewElement(
+                "option",
+                "default-option",
+                `${parentSelectBox.getAttribute("placeholder")} first`
+            );
+            defaultOption.value = 0;
+            changingSelectBox.appendChild(defaultOption);
+            changingSelectBox.value = 0;
+        } else {
+            makeSelectOptions(
+                URL,
+                `${optionType}?${query_parameter}=${parentSelectBox.value}`,
+                changingSelectElId,
+                AllExist,
+                selectedOptionId
+            );
+        }
     });
 };
 
 function makeQueryParameter(queryParamsDict) {
-    let queryParams = new URLSearchParams(queryParamsDict);
+    const checkQueryParamsDict = JSON.parse(JSON.stringify(queryParamsDict));
+    for (let key in checkQueryParamsDict) {
+        if (checkQueryParamsDict[key] == 0) {
+            delete checkQueryParamsDict[key];
+        }
+    }
+    let queryParams = new URLSearchParams(checkQueryParamsDict);
     let queryString = queryParams.toString();
     return queryString;
 }
