@@ -8,7 +8,7 @@ from job.models import (
     Group,
     Recruit,
     RecruitCategory,
-    RecruitSetting,
+    JobSetting,
     RecruitSkill,
     Region,
     Site,
@@ -185,8 +185,8 @@ class RecruitSkillAdmin(admin.ModelAdmin):
     ]
 
 
-@admin.register(RecruitSetting)
-class RecruitSettingAdmin(admin.ModelAdmin):
+@admin.register(JobSetting)
+class JobSettingAdmin(admin.ModelAdmin):
     list_display = [
         "user_id",
         "site",
