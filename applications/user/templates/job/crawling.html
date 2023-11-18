@@ -1,0 +1,75 @@
+{% load static %}
+<div class="crawling-wrap">
+    <div class="flex flex-col items-start justify-between my-2 crawling-title-wrap">
+        <div class="self-center hidden text-sm text-[red] crawling-make-options-error"></div>
+        <form class="flex w-full job-form crawling-form">
+            <div class="flex-1 crawling-btn-wrap">
+                <div class="grid w-full grid-cols-1 sm:grid-cols-3 crawling-select-box-wrap">
+                    <div class="flex w-full col-span-1 p-1 my-1 crawling-filter-1-wrap">
+                        <select class="w-full py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-site"
+                                id="crawling_filter_site"
+                                name="crawling-filter-site"
+                                tabindex="1"
+                                placeholder="Site"
+                                autofocus=""></select>
+                    </div>
+                    <div class="flex w-full p-1 my-1 sm:col-span-2 crawling-filter-2-wrap">
+                        <select class="w-1/2 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-group"
+                                id="crawling_filter_group"
+                                name="crawling-filter-group"
+                                tabindex="1"
+                                placeholder="Group"
+                                autofocus=""></select>
+                        <select class="w-1/2 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-category"
+                                id="crawling_filter_category"
+                                name="crawling-filter-category"
+                                tabindex="2"
+                                placeholder="Category"
+                                autofocus=""></select>
+                    </div>
+                    <div class="flex w-full p-1 my-1 sm:col-span-3 filter-3-wrap">
+                        <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-country"
+                                id="crawling_filter_country"
+                                name="crawling-filter-country"
+                                tabindex="3"
+                                placeholder="Country"
+                                autofocus=""></select>
+                        <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-region"
+                                id="crawling_filter_region"
+                                name="crawling-filter-region"
+                                tabindex="4"
+                                placeholder="Region"
+                                autofocus=""></select>
+                        <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-detail-region"
+                                id="crawling_filter_detail_region"
+                                name="crawling-filter-detail-region"
+                                tabindex="5"
+                                placeholder="Detail-Region"
+                                autofocus=""></select>
+                    </div>
+                    <div class="flex w-full p-1 my-1 sm:col-span-3 crawling-filter-4-wrap">
+                        <input type="text"
+                               class="w-1/2 p-1 mx-3 border-b border-[#d9d9d9] outline-none crawling-filter-skill"
+                               id="crawling_filter_skill"
+                               name="crawling-filter-skill"
+                               tabindex="3"
+                               placeholder="Skill"
+                               autofocus="">
+                        <input type="text"
+                               class="w-1/2 p-1 mx-3 border-b border-[#d9d9d9] outline-none crawling-filter-company-tag"
+                               id="crawling_filter_company_tag"
+                               name="crawling-filter-company-tag"
+                               tabindex="3"
+                               placeholder="Company Tags"
+                               autofocus="">
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center font-semibold cursor-pointer hover:text-white hover:border-none hover:bg-[#373737] justify-center border border-[#d9d9d9] w-10 p-2 my-1 text-xs crawling-search-btn"
+                 id="crawling_search_btn">CRAWLING</div>
+        </form>
+    </div>
+    <div class="grid grid-cols-1 mt-5 mb-10 gap-y-4 md:gap-4 md:grid-cols-2 crawling-job-card-list"
+         id="crawling_job_card_list"></div>
+    {% include "job/modal_crawling.html" %}
+</div>
