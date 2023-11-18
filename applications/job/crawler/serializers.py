@@ -36,13 +36,14 @@ class CrawlingRecruitSerializer(serializers.Serializer):
 
     def get_or_create(self, validated_data):
         site_name = validated_data.pop("site_name")
+        url_id = validated_data.pop("url_id")
         job_category_name = validated_data.pop("job_category_name")
         region_name = validated_data.pop("region_name")
         detail_region_name = validated_data.pop("detail_region_name")
         company_name = validated_data.pop("company_name")
         company_tags = validated_data.pop("company_tags")
         skills = validated_data.pop("skills")
-        min_career = validated_data.pop("min_career")
+        min_career = validated_data.get("min_career")
 
         site = Site.objects.get(name=site_name)
         category = Category.objects.get(name=job_category_name)
@@ -64,15 +65,17 @@ class CrawlingRecruitSerializer(serializers.Serializer):
 
         recruit, created = Recruit.objects.get_or_create(
             site=site,
-            detail_region=detail_region,
-            company=company,
-            **validated_data,
-            defaults={"min_career": min_career},
+            url_id=url_id,
+            defaults={
+                **validated_data,
+                "detail_region": detail_region,
+                "company": company,
+            },
         )
+        recruit.categories.add(category)
+        recruit.skills.add(*skills)
         status = "existed"
         if created:
-            recruit.categories.add(category)
-            recruit.skills.add(*skills)
             status = "created"
         else:
             if recruit.min_career != min(recruit.min_career, min_career):
