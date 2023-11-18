@@ -16,6 +16,7 @@ import {
     getShortenerURL,
     getCurrentPath,
     changeLogoText,
+    getJobURL,
 } from "./common.js";
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -25,11 +26,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Shortener Url Service URL
     const ShortenerUrl = getShortenerURL();
+    const JobUrl = getJobURL();
 
     const adminBtn = getElFromId("header_admin_btn");
     const adminBtnWrap = getElFromId("admin_btn_wrap");
     const adminUserBtn = getElFromId("header_admin_user_btn");
     const adminUrlBtn = getElFromId("header_admin_url_btn");
+    const adminJobBtn = getElFromId("header_admin_job_btn");
     const urlBtn = getElFromId("header_url_btn");
     const jdBtn = getElFromId("header_jd_btn");
     const loginBtn = getElFromId("header_login_btn");
@@ -102,6 +105,19 @@ document.addEventListener("DOMContentLoaded", function () {
         );
         adminUrlBtn.addEventListener("click", function () {
             window.open(`${ShortenerUrl}/admin/`, "_blank");
+            this.parentNode.parentNode.classList.add("hidden");
+        });
+    }
+
+    // Job Admin 버튼 마우스 오버 시 효과 + 클릭 시 Job 앱 admin 페이지로 이동
+    if (adminJobBtn) {
+        imageHover(
+            adminJobBtn,
+            "/static/img/icon/admin_job03.png",
+            "/static/img/icon/admin_job02.png"
+        );
+        adminJobBtn.addEventListener("click", function () {
+            window.open(`${JobUrl}/admin/`, "_blank");
             this.parentNode.parentNode.classList.add("hidden");
         });
     }
