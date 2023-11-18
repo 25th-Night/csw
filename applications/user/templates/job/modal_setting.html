@@ -59,7 +59,8 @@
                                 name="setting-modal-post-filter-company-tag"
                                 tabindex="1"
                                 placeholder="Company Tag"
-                                autofocus=""></select>
+                                autofocus=""
+                                disabled></select>
                         <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-post-filter-min-career"
                                 title="select Minimum Career"
                                 id="setting_modal_post_filter_min_career"
@@ -73,36 +74,11 @@
                             <option class="text-[#373737] select-option"
                                     id="setting_modal_post_filter_min_career_0"
                                     value="-1">newcomer</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_1"
-                                    value="1">1 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_2"
-                                    value="2">2 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_3"
-                                    value="3">3 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_4"
-                                    value="4">4 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_5"
-                                    value="5">5 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_6"
-                                    value="6">6 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_7"
-                                    value="7">7 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_8"
-                                    value="8">8 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_9"
-                                    value="9">9 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_10"
-                                    value="10">10 year ↑</option>
+                            {% for _ in "x"|rjust:10 %}
+                                <option class="text-[#373737] select-option"
+                                        id="setting_modal_crawling_filter_min_career_{{ forloop.counter }}"
+                                        value="{{ forloop.counter }}">{{ forloop.counter }} year ↑</option>
+                            {% endfor %}
                         </select>
                         <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-post-filter-country"
                                 title="select Country"
@@ -173,7 +149,8 @@
                                 name="setting-modal-crawling-filter-company-tag"
                                 tabindex="1"
                                 placeholder="Company Tag"
-                                autofocus=""></select>
+                                autofocus=""
+                                disabled></select>
                         <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-crawling-filter-min-career"
                                 title="select Minimum Career"
                                 id="setting_modal_crawling_filter_min_career"
@@ -187,36 +164,11 @@
                             <option class="text-[#373737] select-option"
                                     id="setting_modal_crawling_filter_min_career_0"
                                     value="-1">newcomer</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_1"
-                                    value="1">1 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_2"
-                                    value="2">2 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_3"
-                                    value="3">3 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_4"
-                                    value="4">4 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_5"
-                                    value="5">5 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_6"
-                                    value="6">6 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_7"
-                                    value="7">7 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_8"
-                                    value="8">8 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_9"
-                                    value="9">9 year ↑</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_10"
-                                    value="10">10 year ↑</option>
+                            {% for _ in "x"|rjust:10 %}
+                                <option class="text-[#373737] select-option"
+                                        id="setting_modal_crawling_filter_min_career_{{ forloop.counter }}"
+                                        value="{{ forloop.counter }}">{{ forloop.counter }} year ↑</option>
+                            {% endfor %}
                         </select>
                         <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-crawling-filter-country"
                                 title="select Country"
