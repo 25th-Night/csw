@@ -14,7 +14,7 @@ from job.models import (
     Group,
     Category,
     Country,
-    RecruitSetting,
+    JobSetting,
     Region,
     DetailRegion,
     Company,
@@ -27,7 +27,7 @@ from job.serializers import (
     CategorySerializer,
     CategorySerializer,
     CountrySerializer,
-    RecruitSettingSerializer,
+    JobSettingSerializer,
     RegionSerializer,
     DetailRegionSerializer,
     RecruitSerializer,
@@ -150,31 +150,34 @@ class RecruitDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class RecruitSettingView(APIView):
-    serializer_class = RecruitSettingSerializer
+class JobSettingView(APIView):
+    serializer_class = JobSettingSerializer
 
-    def get(self, request: Request):
+    def get(self, request: Request, type):
         user_id = request.user.get("id")
-        recruit_setting = RecruitSetting.objects.filter(user_id=user_id)
+        recruit_setting = JobSetting.objects.filter(type=type, user_id=user_id)
         if recruit_setting.exists():
-            recruit_setting: RecruitSetting = recruit_setting.last()
+            recruit_setting: JobSetting = recruit_setting.last()
         else:
-            recruit_setting: RecruitSetting = RecruitSetting.objects.create(
-                user_id=user_id, site_id=1, country_id=5
+            recruit_setting: JobSetting = JobSetting.objects.create(
+                type=type,
+                user_id=user_id,
+                site_id=1,
+                country_id=5,
             )
-        serializer: RecruitSettingSerializer = self.serializer_class(recruit_setting)
+        serializer: JobSettingSerializer = self.serializer_class(recruit_setting)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def put(self, request: Request):
+    def put(self, request: Request, type):
         print(f"request.data:{request.data}")
         user_id = request.user.get("id")
-        recruit_setting = get_object_or_404(RecruitSetting, user_id=user_id)
+        recruit_setting = get_object_or_404(JobSetting, type=type, user_id=user_id)
         print(f"recruit_setting:{recruit_setting.__dict__}")
 
         # return Response(status=status.HTTP_200_OK)
 
-        serializer: RecruitSettingSerializer = self.serializer_class(
+        serializer: JobSettingSerializer = self.serializer_class(
             recruit_setting, data=request.data
         )
 
