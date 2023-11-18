@@ -1,5 +1,5 @@
 {% load static %}
-<div class="crawling-wrap">
+<div class="hidden crawling-wrap" id="crawling_wrap">
     <div class="flex flex-col items-start justify-between my-2 crawling-title-wrap">
         <div class="self-center hidden text-sm text-[red] crawling-make-options-error"></div>
         <form class="flex w-full job-form crawling-form">
@@ -11,7 +11,8 @@
                                 name="crawling-filter-site"
                                 tabindex="1"
                                 placeholder="Site"
-                                autofocus=""></select>
+                                autofocus=""
+                                disabled></select>
                     </div>
                     <div class="flex w-full p-1 my-1 sm:col-span-2 crawling-filter-2-wrap">
                         <select class="w-1/2 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-group"
@@ -27,13 +28,14 @@
                                 placeholder="Category"
                                 autofocus=""></select>
                     </div>
-                    <div class="flex w-full p-1 my-1 sm:col-span-3 filter-3-wrap">
+                    <div class="flex w-full p-1 my-1 sm:col-span-3 crawling-filter-3-wrap">
                         <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-country"
                                 id="crawling_filter_country"
                                 name="crawling-filter-country"
                                 tabindex="3"
                                 placeholder="Country"
-                                autofocus=""></select>
+                                autofocus=""
+                                disabled></select>
                         <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-region"
                                 id="crawling_filter_region"
                                 name="crawling-filter-region"
@@ -48,20 +50,35 @@
                                 autofocus=""></select>
                     </div>
                     <div class="flex w-full p-1 my-1 sm:col-span-3 crawling-filter-4-wrap">
-                        <input type="text"
-                               class="w-1/2 p-1 mx-3 border-b border-[#d9d9d9] outline-none crawling-filter-skill"
-                               id="crawling_filter_skill"
-                               name="crawling-filter-skill"
-                               tabindex="3"
-                               placeholder="Skill"
-                               autofocus="">
-                        <input type="text"
-                               class="w-1/2 p-1 mx-3 border-b border-[#d9d9d9] outline-none crawling-filter-company-tag"
-                               id="crawling_filter_company_tag"
-                               name="crawling-filter-company-tag"
-                               tabindex="3"
-                               placeholder="Company Tags"
-                               autofocus="">
+                        <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-skill"
+                                title="select Skill"
+                                id="crawling_filter_skill"
+                                name="crawling-filter-skill"
+                                tabindex="1"
+                                placeholder="SKill"
+                                autofocus=""></select>
+                        <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-company-tag"
+                                title="select Company Tag"
+                                id="crawling_filter_company_tag"
+                                name="crawling-filter-company-tag"
+                                tabindex="1"
+                                placeholder="Company Tag"
+                                autofocus=""></select>
+                        <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-min-career"
+                                title="select Minimum Career"
+                                id="crawling_filter_min_career"
+                                name="crawling-filter-min-career"
+                                tabindex="1"
+                                placeholder="Minimum Career"
+                                autofocus="">
+                            <option class="select-option" id="crawling_filter_min_career_all" value="0">All</option>
+                            <option class="select-option" id="crawling_filter_min_career_0" value="-1">newcomer</option>
+                            {% for _ in "x"|rjust:10 %}
+                                <option class="text-[#373737] select-option"
+                                        id="setting_modal_crawling_filter_min_career_{{ forloop.counter }}"
+                                        value="{{ forloop.counter }}">{{ forloop.counter }} year ↑</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
             </div>
@@ -71,5 +88,5 @@
     </div>
     <div class="grid grid-cols-1 mt-5 mb-10 gap-y-4 md:gap-4 md:grid-cols-2 crawling-job-card-list"
          id="crawling_job_card_list"></div>
-    {% include "job/modal_crawling.html" %}
+    {% comment %} {% include "job/modal_crawling.html" %} {% endcomment %}
 </div>
