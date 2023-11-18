@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from taggit.serializers import TagListSerializerField
+from taggit.models import Tag
 
 from job.models import (
     Group,
@@ -13,6 +14,8 @@ from job.models import (
     Skill,
     Recruit,
 )
+
+from common.data import MIN_CAREER_TYPE
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -69,9 +72,18 @@ class DetailRegionSerializer(serializers.ModelSerializer):
         )
 
 
+class CompanyTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = (
+            "id",
+            "name",
+        )
+
+
 class CompanySerializer(serializers.ModelSerializer):
     detail_region = DetailRegionSerializer()
-    tags = TagListSerializerField()
+    tags = CompanyTagSerializer(many=True)
 
     class Meta:
         model = Company
@@ -111,3 +123,85 @@ class RecruitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recruit
         exclude = ("is_active",)
+
+
+class RecruitSettingSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    site_id = serializers.IntegerField(required=False, default=0)
+    min_career_id = serializers.IntegerField(
+        required=False, default=0, min_value=0, max_value=10
+    )
+    group_id = serializers.IntegerField(required=False, default=0)
+    country_id = serializers.IntegerField(required=False, default=0)
+    region_id = serializers.IntegerField(required=False, default=0)
+    detail_region_id = serializers.IntegerField(required=False, default=0)
+    category_ids = serializers.CharField(required=False, default="0")
+    skill_ids = serializers.CharField(required=False, default="0")
+
+    def validate(self, attrs):
+        site_id = int(attrs.get("site_id"))
+        group_id = int(attrs.get("group_id"))
+        category_ids = attrs.get("category_ids")
+        country_id = int(attrs.get("country_id"))
+        region_id = int(attrs.get("region_id"))
+        detail_region_id = int(attrs.get("detail_region_id"))
+        skill_ids = attrs.get("skill_ids")
+
+        if site_id and site_id not in Site.objects.all().values_list("id", flat=True):
+            raise serializers.ValidationError("Not valid Site ID")
+
+        if group_id:
+            if group_id not in Group.objects.all().values_list("id", flat=True):
+                raise serializers.ValidationError("Not valid Group ID")
+            if category_ids != "0":
+                category_ids = list(map(int, attrs.get("category_ids").split(",")))
+                category_id_lists = Category.objects.filter(
+                    group_id=group_id
+                ).values_list("id", flat=True)
+                is_sublist = all(
+                    category_id in category_id_lists for category_id in category_ids
+                )
+                if not is_sublist:
+                    raise serializers.ValidationError("Not valid Category IDs")
+        else:
+            if category_ids != "0":
+                raise serializers.ValidationError("Not valid Category IDs")
+
+        if country_id:
+            if country_id not in Country.objects.all().values_list("id", flat=True):
+                raise serializers.ValidationError("Not valid Country ID")
+
+            if region_id:
+                region_ids = Region.objects.filter(country_id=country_id).values_list(
+                    "id", flat=True
+                )
+                if region_id not in region_ids:
+                    raise serializers.ValidationError("Not valid Region ID")
+
+                if detail_region_id:
+                    detail_region_ids = Region.objects.filter(
+                        region_id=region_id
+                    ).values_list("id", flat=True)
+                    if detail_region_id not in detail_region_ids:
+                        raise serializers.ValidationError("Not valid Region ID")
+        else:
+            if not region_id:
+                raise serializers.ValidationError("Not valid Region ID")
+            elif not detail_region_id:
+                raise serializers.ValidationError("Not valid Detail Region ID")
+
+        if skill_ids != "0":
+            skill_ids = list(map(int, attrs.get("skill_ids").split(",")))
+            skill_id_lists = Skill.objects.all().values_list("id", flat=True)
+            is_sublist = all(skill_id in skill_id_lists for skill_id in skill_ids)
+            if not is_sublist:
+                raise serializers.ValidationError("Not valid Skill IDs")
+
+        return attrs
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
