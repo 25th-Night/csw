@@ -40,20 +40,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     const JobURL = getJobURL();
     let getJobListURL = `${JobURL}/recruits`;
 
-    const getPostSetting = async () => {
+    const requestSetting = async (type) => {
         const data = setFetchData("get", queryParameterDict);
-        const requestURL = `${JobURL}/settings/1`;
+        const requestURL = `${JobURL}/settings/${type}`;
         const get_response = await fetch(requestURL, data);
 
         return get_response;
     };
 
-    /////////////////////////////////////////////////////// Page Header
-    const renderSelectBoxInSettingModal = (queryParameterDict) => {
+    const renderSelectBoxForSetting = (queryParameterDict, type) => {
         // Select box 만들기
 
         console.log(
-            "renderPostListInSettingModal - queryParameterDictInSettingModal",
+            `renderListForSetting - queryParameterDictForSetting - ${type}`,
             queryParameterDict
         );
         let groupURL;
@@ -82,21 +81,21 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeSelectOptions(
             JobURL,
             "sites",
-            "setting_modal_post_filter_site",
+            `setting_modal_${type}_filter_site`,
             true,
             queryParameterDict.site_id
         );
         makeSelectOptions(
             JobURL,
             "groups",
-            "setting_modal_post_filter_group",
+            `setting_modal_${type}_filter_group`,
             true,
             queryParameterDict.group_id
         );
         makeSelectOptions(
             JobURL,
             categoryUrl,
-            "setting_modal_post_filter_category",
+            `setting_modal_${type}_filter_category`,
             true,
             queryParameterDict.category_ids,
             queryParameterDict.group_id,
@@ -105,14 +104,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeSelectOptions(
             JobURL,
             "countries",
-            "setting_modal_post_filter_country",
+            `setting_modal_${type}_filter_country`,
             true,
             queryParameterDict.country_id
         );
         makeSelectOptions(
             JobURL,
             regionURL,
-            "setting_modal_post_filter_region",
+            `setting_modal_${type}_filter_region`,
             true,
             queryParameterDict.region_id,
             queryParameterDict.country_id,
@@ -121,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeSelectOptions(
             JobURL,
             detailRegionURL,
-            "setting_modal_post_filter_detail_region",
+            `setting_modal_${type}_filter_detail_region`,
             true,
             queryParameterDict.detail_region_id,
             queryParameterDict.region_id,
@@ -130,23 +129,23 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeSelectOptions(
             JobURL,
             "skills",
-            "setting_modal_post_filter_skill",
+            `setting_modal_${type}_filter_skill`,
             true,
             queryParameterDict.skill_ids
         );
         makeSelectOptions(
             JobURL,
             "company_tags",
-            "setting_modal_post_filter_company_tag",
+            `setting_modal_${type}_filter_company_tag`,
             true,
             queryParameterDict.company_tag_ids
         );
     };
 
-    const savePostSetting = async (queryParameterDict) => {
+    const saveSetting = async (queryParameterDict, type) => {
         const data = setFetchData("put", queryParameterDict);
-        console.log("savePostSetting - queryParameterDict", queryParameterDict);
-        const requestURL = `${JobURL}/settings/1`;
+        console.log(`saveSetting - queryParameterDict : type - ${type}`, queryParameterDict);
+        const requestURL = `${JobURL}/settings/${type}`;
         const get_response = await fetch(requestURL, data);
         if (get_response.status == 200) {
             alert("Saved successfully");
@@ -156,19 +155,237 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     };
 
-    /////////////////////////////////////////////////////// Setting Modal
-    // setting 버튼
+    // 상단 3버튼 - 버튼별 클릭 이벤트 추가
+    const addClickEventToPostBtn = () => {
+        createJobBtn(jobPostBtnImgDict);
+        getElFromId("post_wrap").classList.remove("hidden");
+        getElFromId("crawling_wrap").classList.add("hidden");
+        // getElFromId("manage_wrap").classList.add("hidden");
+        getElFromId("job_crawling_btn").addEventListener("click", () => {
+            addClickEventToCrawlingBtn(jobCrawlingBtnImgDict);
+        });
+        // getElFromId("job_manage_btn").addEventListener("click", () => {
+        //     addClickEventToManageBtn(jobManageBtnImgDict);
+        // });
+        renderPostList(queryParameterDict);
+        removeAllNode(getElFromId("crawling_job_card_list"));
+    };
+
+    const addClickEventToCrawlingBtn = async () => {
+        createJobBtn(jobCrawlingBtnImgDict);
+        getElFromId("crawling_wrap").classList.remove("hidden");
+        getElFromId("post_wrap").classList.add("hidden");
+        // getElFromId("manage_wrap").classList.add("hidden");
+        getElFromId("job_post_btn").addEventListener("click", () => {
+            addClickEventToPostBtn(jobPostBtnImgDict);
+        });
+        // getElFromId("job_manage_btn").addEventListener("click", () => {
+        //     addClickEventToManageBtn(jobManageBtnImgDict);
+        // });
+        removeAllNode(getElFromId("post_job_card_list"));
+
+        let crawlingQueryParameterDict;
+        const crawlingSettingResponse = await requestSetting(2);
+        const getCrawlingSettingStatus = crawlingSettingResponse.status;
+        const crawlingSettingData = await crawlingSettingResponse.json();
+        if (getCrawlingSettingStatus == 200) {
+            crawlingQueryParameterDict = crawlingSettingData;
+        } else {
+            alert("Cannot access Crawling Setting");
+        }
+
+        const siteSelectInCrawling = getElFromId("crawling_filter_site");
+        const groupSelectInCrawling = getElFromId("crawling_filter_group");
+        const categorySelectInCrawling = getElFromId("crawling_filter_category");
+        const countrySelectInCrawling = getElFromId("crawling_filter_country");
+        const regionSelectInCrawling = getElFromId("crawling_filter_region");
+        const detailRegionSelectInCrawling = getElFromId("crawling_filter_detail_region");
+        const skillSelectInCrawling = getElFromId("crawling_filter_skill");
+        const companyTagSelectInCrawling = getElFromId("crawling_filter_company_tag");
+        const minCareerSelectInCrawling = getElFromId("crawling_filter_min_career");
+
+        const crawlingSearchBtn = getElFromId("crawling_search_btn");
+        crawlingSearchBtn.style.writingMode = "vertical-rl";
+        crawlingSearchBtn.style.textOrientation = "upright";
+
+        // Select Box 렌터링
+        const crawlingFilterElementIdDict = {
+            site: "crawling_filter_site",
+            group: "crawling_filter_group",
+            category: "crawling_filter_category",
+            country: "crawling_filter_country",
+            region: "crawling_filter_region",
+            detail_region: "crawling_filter_detail_region",
+            skill: "crawling_filter_skill",
+            company_tag: "crawling_filter_company_tag",
+        };
+        renderSelectBox(crawlingQueryParameterDict, crawlingFilterElementIdDict);
+    };
+
+    const addClickEventToManageBtn = () => {
+        createJobBtn(jobManageBtnImgDict);
+        // getElFromId("manage_wrap").classList.remove("hidden");
+        getElFromId("post_wrap").classList.add("hidden");
+        getElFromId("crawling_wrap").classList.add("hidden");
+        getElFromId("job_crawling_btn").addEventListener("click", () => {
+            addClickEventToCrawlingBtn(jobCrawlingBtnImgDict);
+        });
+        getElFromId("job_post_btn").addEventListener("click", () => {
+            addClickEventToPostBtn(jobPostBtnImgDict);
+        });
+    };
+
+    // 상단 3버튼 - 생성
+    const createJobBtn = (imgListDict) => {
+        const titleBtnWrap = getElFromId("title_btn_wrap");
+
+        const jobPostBtn = createNewElement(
+            "img",
+            "block h-6 ml-2 mr-5 cursor-pointer sm:h-8 job-post-btn",
+            null,
+            "job_post_btn"
+        );
+        jobPostBtn.setAttribute("src", `/static/img/icon/${imgListDict.post.before}`);
+        jobPostBtn.setAttribute("alt", "job-post-btn");
+
+        const jobCrawlingBtn = createNewElement(
+            "img",
+            "block h-6 ml-2 mr-5 cursor-pointer sm:h-8 job-crawling-btn",
+            null,
+            "job_crawling_btn"
+        );
+        jobCrawlingBtn.setAttribute("src", `/static/img/icon/gathering05.png`);
+        jobCrawlingBtn.setAttribute("alt", "job-crawling-btn");
+
+        const jobManageBtn = createNewElement(
+            "img",
+            "block h-6 ml-2 mr-5 cursor-pointer sm:h-8 job-manage-btn",
+            null,
+            "job_manage_btn"
+        );
+        jobManageBtn.setAttribute("src", `/static/img/icon/manage01.png`);
+        jobManageBtn.setAttribute("alt", "job-manage-btn");
+
+        imageHover(
+            jobPostBtn,
+            `/static/img/icon/${imgListDict.post.after}`,
+            `/static/img/icon/${imgListDict.post.before}`
+        );
+        imageHover(
+            jobCrawlingBtn,
+            `/static/img/icon/${imgListDict.crawling.after}`,
+            `/static/img/icon/${imgListDict.crawling.before}`
+        );
+        imageHover(
+            jobManageBtn,
+            `/static/img/icon/${imgListDict.manage.after}`,
+            `/static/img/icon/${imgListDict.manage.before}`
+        );
+
+        removeAllNode(titleBtnWrap);
+        titleBtnWrap.appendChild(jobPostBtn);
+        titleBtnWrap.appendChild(jobCrawlingBtn);
+        titleBtnWrap.appendChild(jobManageBtn);
+    };
+
+    // 상단 3버튼 - 마우스오버
+    const setImgJobBtn = (imgListDict) => {
+        const titleBtnWrap = getElFromId("title_btn_wrap");
+
+        const jobPostBtn = getElFromId("job_post_btn");
+        const jobCrawlingBtn = getElFromId("job_crawling_btn");
+        const jobManageBtn = getElFromId("job_manage_btn");
+
+        imageHover(
+            jobPostBtn,
+            `/static/img/icon/${imgListDict.post.after}`,
+            `/static/img/icon/${imgListDict.post.before}`
+        );
+        imageHover(
+            jobCrawlingBtn,
+            `/static/img/icon/${imgListDict.crawling.after}`,
+            `/static/img/icon/${imgListDict.crawling.before}`
+        );
+        imageHover(
+            jobManageBtn,
+            `/static/img/icon/${imgListDict.manage.after}`,
+            `/static/img/icon/${imgListDict.manage.before}`
+        );
+
+        removeAllNode(titleBtnWrap);
+        titleBtnWrap.appendChild(jobPostBtn);
+        titleBtnWrap.appendChild(jobCrawlingBtn);
+        titleBtnWrap.appendChild(jobManageBtn);
+    };
+
+    /////////////////////////////////////////////////////// Page Header
+
+    //////////////////////////////// Job 관련 3개 버튼
+    // 버튼 생성
+    const jobPostBtnImgDict = {
+        post: {
+            before: "job-post04.png",
+            after: "job-post03.png",
+        },
+        crawling: {
+            before: "gathering05.png",
+            after: "gathering07.png",
+        },
+        manage: {
+            before: "manage01.png",
+            after: "manage02.png",
+        },
+    };
+    const jobCrawlingBtnImgDict = {
+        post: {
+            before: "job-post03.png",
+            after: "job-post04.png",
+        },
+        crawling: {
+            before: "gathering07.png",
+            after: "gathering05.png",
+        },
+        manage: {
+            before: "manage01.png",
+            after: "manage02.png",
+        },
+    };
+    const jobManageBtnImgDict = {
+        post: {
+            before: "job-post03.png",
+            after: "job-post04.png",
+        },
+        crawling: {
+            before: "gathering05.png",
+            after: "gathering07.png",
+        },
+        manage: {
+            before: "manage02.png",
+            after: "manage01.png",
+        },
+    };
+
+    createJobBtn(jobPostBtnImgDict);
+    setImgJobBtn(jobPostBtnImgDict);
+
+    const jobPostBtn = getElFromId("job_post_btn");
+    const jobCrawlingBtn = getElFromId("job_crawling_btn");
+    const jobManageBtn = getElFromId("job_manage_btn");
+    jobPostBtn.addEventListener("click", () => {
+        addClickEventToPostBtn();
+    });
+    jobCrawlingBtn.addEventListener("click", () => {
+        addClickEventToCrawlingBtn();
+    });
+    jobManageBtn.addEventListener("click", () => {
+        addClickEventToManageBtn();
+    });
+
+    //////////////////////////////// setting 버튼
     const settingBtn = getElFromId("job_setting_btn");
+
     // setting 모달 오픈
     const openModalToSetting = async () => {
-        const postSettingResponse = await getPostSetting();
-        const getPostSettingStatus = postSettingResponse.status;
-        const postSettingData = await postSettingResponse.json();
-
-        console.log(getPostSettingStatus, postSettingData);
-
-        let queryParameterDictInSettingModal = postSettingData;
-
         // 모달 요소에서 hidden 속성 제거
         const settingModal = getElFromId("setting_modal");
         settingModal.classList.remove("hidden");
@@ -178,39 +395,46 @@ document.addEventListener("DOMContentLoaded", async function () {
         body.style.overflow = "hidden";
 
         ////////////////////////////////// Post Setting
+        const postSettingResponse = await requestSetting(1);
+        const getPostSettingStatus = postSettingResponse.status;
+        const postSettingData = await postSettingResponse.json();
+
+        console.log(getPostSettingStatus, postSettingData);
+
+        let queryParameterDictForPostSetting = postSettingData;
 
         // Post Settings SelectBox 만들기
-        const siteSelectInSettingModal = getElFromId("setting_modal_post_filter_site");
-        const groupSelectInSettingModal = getElFromId("setting_modal_post_filter_group");
-        const categorySelectInSettingModal = getElFromId("setting_modal_post_filter_category");
-        const countrySelectInSettingModal = getElFromId("setting_modal_post_filter_country");
-        const regionSelectInSettingModal = getElFromId("setting_modal_post_filter_region");
-        const detailRegionSelectInSettingModal = getElFromId(
+        const siteSelectForPostSetting = getElFromId("setting_modal_post_filter_site");
+        const groupSelectForPostSetting = getElFromId("setting_modal_post_filter_group");
+        const categorySelectForPostSetting = getElFromId("setting_modal_post_filter_category");
+        const countrySelectForPostSetting = getElFromId("setting_modal_post_filter_country");
+        const regionSelectForPostSetting = getElFromId("setting_modal_post_filter_region");
+        const detailRegionSelectForPostSetting = getElFromId(
             "setting_modal_post_filter_detail_region"
         );
-        const skillSelectInSettingModal = getElFromId("setting_modal_post_filter_skill");
-        const companyTagSelectInSettingModal = getElFromId("setting_modal_post_filter_company_tag");
-        const minCareerSelectInSettingModal = getElFromId("setting_modal_post_filter_min_career");
-        let groupURL;
-        let categoryUrl = "categories";
-        let countryUrl;
-        let regionURL = "regions";
-        let detailRegionURL = "detail_regions";
+        const skillSelectForPostSetting = getElFromId("setting_modal_post_filter_skill");
+        const companyTagSelectForPostSetting = getElFromId("setting_modal_post_filter_company_tag");
+        const minCareerSelectForPostSetting = getElFromId("setting_modal_post_filter_min_career");
+        let groupURLForPostSetting;
+        let categoryURLForPostSetting = "categories";
+        let countryURLForPostSetting;
+        let regionURLForPostSetting = "regions";
+        let detailRegionURLForPostSetting = "detail_regions";
 
-        if (queryParameterDictInSettingModal.group_id > 0) {
-            categoryUrl += `?group_id=${queryParameterDictInSettingModal.group_id}`;
+        if (queryParameterDictForPostSetting.group_id > 0) {
+            categoryURLForPostSetting += `?group_id=${queryParameterDictForPostSetting.group_id}`;
         }
 
-        if (queryParameterDictInSettingModal.country_id > 0) {
-            regionURL += `?country_id=${queryParameterDictInSettingModal.country_id}`;
-            detailRegionURL += `?country_id=${queryParameterDictInSettingModal.country_id}`;
+        if (queryParameterDictForPostSetting.country_id > 0) {
+            regionURLForPostSetting += `?country_id=${queryParameterDictForPostSetting.country_id}`;
+            detailRegionURLForPostSetting += `?country_id=${queryParameterDictForPostSetting.country_id}`;
         }
 
-        if (queryParameterDictInSettingModal.region_id > 0) {
-            if (queryParameterDictInSettingModal.country_id > 0) {
-                detailRegionURL += `&region_id=${queryParameterDictInSettingModal.region_id}`;
+        if (queryParameterDictForPostSetting.region_id > 0) {
+            if (queryParameterDictForPostSetting.country_id > 0) {
+                detailRegionURLForPostSetting += `&region_id=${queryParameterDictForPostSetting.region_id}`;
             } else {
-                detailRegionURL += `?region_id=${queryParameterDictInSettingModal.region_id}`;
+                detailRegionURLForPostSetting += `?region_id=${queryParameterDictForPostSetting.region_id}`;
             }
         }
 
@@ -219,22 +443,22 @@ document.addEventListener("DOMContentLoaded", async function () {
             "sites",
             "setting_modal_post_filter_site",
             true,
-            queryParameterDictInSettingModal.site_id
+            queryParameterDictForPostSetting.site_id
         );
         makeSelectOptions(
             JobURL,
             "groups",
             "setting_modal_post_filter_group",
             true,
-            queryParameterDictInSettingModal.group_id
+            queryParameterDictForPostSetting.group_id
         );
         makeSelectOptions(
             JobURL,
-            categoryUrl,
+            categoryURLForPostSetting,
             "setting_modal_post_filter_category",
             true,
-            queryParameterDictInSettingModal.category_ids,
-            queryParameterDictInSettingModal.group_id,
+            queryParameterDictForPostSetting.category_ids,
+            queryParameterDictForPostSetting.group_id,
             "Group"
         );
         makeSelectOptions(
@@ -242,24 +466,24 @@ document.addEventListener("DOMContentLoaded", async function () {
             "countries",
             "setting_modal_post_filter_country",
             true,
-            queryParameterDictInSettingModal.country_id
+            queryParameterDictForPostSetting.country_id
         );
         makeSelectOptions(
             JobURL,
-            regionURL,
+            regionURLForPostSetting,
             "setting_modal_post_filter_region",
             true,
-            queryParameterDictInSettingModal.region_id,
-            queryParameterDictInSettingModal.country_id,
+            queryParameterDictForPostSetting.region_id,
+            queryParameterDictForPostSetting.country_id,
             "Country"
         );
         makeSelectOptions(
             JobURL,
-            detailRegionURL,
+            detailRegionURLForPostSetting,
             "setting_modal_post_filter_detail_region",
             true,
-            queryParameterDictInSettingModal.detail_region_id,
-            queryParameterDictInSettingModal.region_id,
+            queryParameterDictForPostSetting.detail_region_id,
+            queryParameterDictForPostSetting.region_id,
             "Region"
         );
         makeSelectOptions(
@@ -267,88 +491,278 @@ document.addEventListener("DOMContentLoaded", async function () {
             "skills",
             "setting_modal_post_filter_skill",
             true,
-            queryParameterDictInSettingModal.skill_ids
+            queryParameterDictForPostSetting.skill_ids
         );
         makeSelectOptions(
             JobURL,
             "company_tags",
             "setting_modal_post_filter_company_tag",
             true,
-            queryParameterDictInSettingModal.company_tag_ids
+            queryParameterDictForPostSetting.company_tag_ids
         );
-        changeJobListURL(siteSelectInSettingModal, queryParameterDictInSettingModal, "site_id", [
+        changeJobListURL(siteSelectForPostSetting, queryParameterDictForPostSetting, "site_id", [
             "group_id",
             "category_ids",
             "country_id",
             "region_id",
             "detail_region_id",
         ]);
-        changeJobListURL(groupSelectInSettingModal, queryParameterDictInSettingModal, "group_id", [
+        changeJobListURL(groupSelectForPostSetting, queryParameterDictForPostSetting, "group_id", [
             "category_ids",
         ]);
         changeJobListURL(
-            categorySelectInSettingModal,
-            queryParameterDictInSettingModal,
+            categorySelectForPostSetting,
+            queryParameterDictForPostSetting,
             "category_ids"
         );
         changeJobListURL(
-            countrySelectInSettingModal,
-            queryParameterDictInSettingModal,
+            countrySelectForPostSetting,
+            queryParameterDictForPostSetting,
             "country_id",
             ["region_id", "detail_region_id"]
         );
         changeJobListURL(
-            regionSelectInSettingModal,
-            queryParameterDictInSettingModal,
+            regionSelectForPostSetting,
+            queryParameterDictForPostSetting,
             "region_id",
             ["detail_region_id"]
         );
         changeJobListURL(
-            detailRegionSelectInSettingModal,
-            queryParameterDictInSettingModal,
+            detailRegionSelectForPostSetting,
+            queryParameterDictForPostSetting,
             "detail_region_id"
         );
-        changeJobListURL(skillSelectInSettingModal, queryParameterDictInSettingModal, "skill_ids");
+        changeJobListURL(skillSelectForPostSetting, queryParameterDictForPostSetting, "skill_ids");
         changeJobListURL(
-            companyTagSelectInSettingModal,
-            queryParameterDictInSettingModal,
+            companyTagSelectForPostSetting,
+            queryParameterDictForPostSetting,
             "company_tag_ids"
         );
         changeJobListURL(
-            minCareerSelectInSettingModal,
-            queryParameterDictInSettingModal,
+            minCareerSelectForPostSetting,
+            queryParameterDictForPostSetting,
             "min_career"
         );
 
-        siteSelectInSettingModal.addEventListener("change", () => {
-            renderSelectBoxInSettingModal(queryParameterDictInSettingModal);
+        siteSelectForPostSetting.addEventListener("change", () => {
+            renderSelectBoxForSetting(queryParameterDictForPostSetting, "post");
         });
-        groupSelectInSettingModal.addEventListener("change", () => {
-            renderSelectBoxInSettingModal(queryParameterDictInSettingModal);
+        groupSelectForPostSetting.addEventListener("change", () => {
+            renderSelectBoxForSetting(queryParameterDictForPostSetting, "post");
         });
-        countrySelectInSettingModal.addEventListener("change", () => {
-            renderSelectBoxInSettingModal(queryParameterDictInSettingModal);
+        countrySelectForPostSetting.addEventListener("change", () => {
+            renderSelectBoxForSetting(queryParameterDictForPostSetting, "post");
         });
-        regionSelectInSettingModal.addEventListener("change", () => {
-            renderSelectBoxInSettingModal(queryParameterDictInSettingModal);
+        regionSelectForPostSetting.addEventListener("change", () => {
+            renderSelectBoxForSetting(queryParameterDictForPostSetting, "post");
         });
 
         // save 버튼
-        const saveBtnInSettingModal = createNewElement(
+        const saveBtnForPostSetting = createNewElement(
             "div",
             "flex items-center font-semibold cursor-pointer hover:text-[#373737] hover:border-none hover:bg-white justify-center border border-white w-10 p-2 text-sm setting-modal-post-save-btn",
             "SAVE",
             "setting_modal_post_save_btn"
         );
 
-        saveBtnInSettingModal.addEventListener("click", () => {
-            savePostSetting(queryParameterDictInSettingModal);
+        saveBtnForPostSetting.addEventListener("click", () => {
+            saveSetting(queryParameterDictForPostSetting, 1);
         });
 
         const settingModalPostData = getElFromId("setting_modal_post_data");
-        settingModalPostData.appendChild(saveBtnInSettingModal);
+        settingModalPostData.appendChild(saveBtnForPostSetting);
 
         ////////////////////////////////// Crawling Setting
+        const crawlingSettingResponse = await requestSetting(2);
+        const getCrawlingSettingStatus = crawlingSettingResponse.status;
+        const crawlingSettingData = await crawlingSettingResponse.json();
+
+        console.log(getCrawlingSettingStatus, crawlingSettingData);
+
+        let queryParameterDictForCrawlingSetting = crawlingSettingData;
+
+        // Crawling Settings SelectBox 만들기
+        const siteSelectForCrawlingSetting = getElFromId("setting_modal_crawling_filter_site");
+        const groupSelectForCrawlingSetting = getElFromId("setting_modal_crawling_filter_group");
+        const categorySelectForCrawlingSetting = getElFromId(
+            "setting_modal_crawling_filter_category"
+        );
+        const countrySelectForCrawlingSetting = getElFromId(
+            "setting_modal_crawling_filter_country"
+        );
+        const regionSelectForCrawlingSetting = getElFromId("setting_modal_crawling_filter_region");
+        const detailRegionSelectForCrawlingSetting = getElFromId(
+            "setting_modal_crawling_filter_detail_region"
+        );
+        const skillSelectForCrawlingSetting = getElFromId("setting_modal_crawling_filter_skill");
+        const companyTagSelectForCrawlingSetting = getElFromId(
+            "setting_modal_crawling_filter_company_tag"
+        );
+        const minCareerSelectForCrawlingSetting = getElFromId(
+            "setting_modal_crawling_filter_min_career"
+        );
+        let groupURLForCrawlingSetting;
+        let categoryURLForCrawlingSetting = "categories";
+        let countryURLForCrawlingSetting;
+        let regionURLForCrawlingSetting = "regions";
+        let detailRegionURLForCrawlingSetting = "detail_regions";
+
+        if (queryParameterDictForCrawlingSetting.group_id > 0) {
+            categoryURLForCrawlingSetting += `?group_id=${queryParameterDictForCrawlingSetting.group_id}`;
+        }
+
+        if (queryParameterDictForCrawlingSetting.country_id > 0) {
+            regionURLForCrawlingSetting += `?country_id=${queryParameterDictForCrawlingSetting.country_id}`;
+            detailRegionURLForCrawlingSetting += `?country_id=${queryParameterDictForCrawlingSetting.country_id}`;
+        }
+
+        if (queryParameterDictForCrawlingSetting.region_id > 0) {
+            if (queryParameterDictForCrawlingSetting.country_id > 0) {
+                detailRegionURLForCrawlingSetting += `&region_id=${queryParameterDictForCrawlingSetting.region_id}`;
+            } else {
+                detailRegionURLForCrawlingSetting += `?region_id=${queryParameterDictForCrawlingSetting.region_id}`;
+            }
+        }
+
+        makeSelectOptions(
+            JobURL,
+            "sites",
+            "setting_modal_crawling_filter_site",
+            true,
+            queryParameterDictForCrawlingSetting.site_id
+        );
+        makeSelectOptions(
+            JobURL,
+            "groups",
+            "setting_modal_crawling_filter_group",
+            true,
+            queryParameterDictForCrawlingSetting.group_id
+        );
+        makeSelectOptions(
+            JobURL,
+            categoryURLForCrawlingSetting,
+            "setting_modal_crawling_filter_category",
+            true,
+            queryParameterDictForCrawlingSetting.category_ids,
+            queryParameterDictForCrawlingSetting.group_id,
+            "Group"
+        );
+        makeSelectOptions(
+            JobURL,
+            "countries",
+            "setting_modal_crawling_filter_country",
+            true,
+            queryParameterDictForCrawlingSetting.country_id
+        );
+        makeSelectOptions(
+            JobURL,
+            regionURLForCrawlingSetting,
+            "setting_modal_crawling_filter_region",
+            true,
+            queryParameterDictForCrawlingSetting.region_id,
+            queryParameterDictForCrawlingSetting.country_id,
+            "Country"
+        );
+        makeSelectOptions(
+            JobURL,
+            detailRegionURLForCrawlingSetting,
+            "setting_modal_crawling_filter_detail_region",
+            true,
+            queryParameterDictForCrawlingSetting.detail_region_id,
+            queryParameterDictForCrawlingSetting.region_id,
+            "Region"
+        );
+        makeSelectOptions(
+            JobURL,
+            "skills",
+            "setting_modal_crawling_filter_skill",
+            true,
+            queryParameterDictForCrawlingSetting.skill_ids
+        );
+        makeSelectOptions(
+            JobURL,
+            "company_tags",
+            "setting_modal_crawling_filter_company_tag",
+            true,
+            queryParameterDictForCrawlingSetting.company_tag_ids
+        );
+        changeJobListURL(
+            siteSelectForCrawlingSetting,
+            queryParameterDictForCrawlingSetting,
+            "site_id",
+            ["group_id", "category_ids", "country_id", "region_id", "detail_region_id"]
+        );
+        changeJobListURL(
+            groupSelectForCrawlingSetting,
+            queryParameterDictForCrawlingSetting,
+            "group_id",
+            ["category_ids"]
+        );
+        changeJobListURL(
+            categorySelectForCrawlingSetting,
+            queryParameterDictForCrawlingSetting,
+            "category_ids"
+        );
+        changeJobListURL(
+            countrySelectForCrawlingSetting,
+            queryParameterDictForCrawlingSetting,
+            "country_id",
+            ["region_id", "detail_region_id"]
+        );
+        changeJobListURL(
+            regionSelectForCrawlingSetting,
+            queryParameterDictForCrawlingSetting,
+            "region_id",
+            ["detail_region_id"]
+        );
+        changeJobListURL(
+            detailRegionSelectForCrawlingSetting,
+            queryParameterDictForCrawlingSetting,
+            "detail_region_id"
+        );
+        changeJobListURL(
+            skillSelectForCrawlingSetting,
+            queryParameterDictForCrawlingSetting,
+            "skill_ids"
+        );
+        changeJobListURL(
+            companyTagSelectForCrawlingSetting,
+            queryParameterDictForCrawlingSetting,
+            "company_tag_ids"
+        );
+        changeJobListURL(
+            minCareerSelectForCrawlingSetting,
+            queryParameterDictForCrawlingSetting,
+            "min_career"
+        );
+
+        siteSelectForCrawlingSetting.addEventListener("change", () => {
+            renderSelectBoxForSetting(queryParameterDictForCrawlingSetting, "crawling");
+        });
+        groupSelectForCrawlingSetting.addEventListener("change", () => {
+            renderSelectBoxForSetting(queryParameterDictForCrawlingSetting, "crawling");
+        });
+        countrySelectForCrawlingSetting.addEventListener("change", () => {
+            renderSelectBoxForSetting(queryParameterDictForCrawlingSetting, "crawling");
+        });
+        regionSelectForCrawlingSetting.addEventListener("change", () => {
+            renderSelectBoxForSetting(queryParameterDictForCrawlingSetting, "crawling");
+        });
+
+        // save 버튼
+        const saveBtnForCrawlingSetting = createNewElement(
+            "div",
+            "flex items-center font-semibold cursor-pointer hover:text-[#373737] hover:border-none hover:bg-white justify-center border border-white w-10 p-2 text-sm setting-modal-crawling-save-btn",
+            "SAVE",
+            "setting_modal_crawling_save_btn"
+        );
+
+        saveBtnForCrawlingSetting.addEventListener("click", () => {
+            saveSetting(queryParameterDictForCrawlingSetting, 2);
+        });
+
+        const settingModalCrawlingData = getElFromId("setting_modal_crawling_data");
+        settingModalCrawlingData.appendChild(saveBtnForCrawlingSetting);
 
         ////////////////////////////////// Manage Setting
 
@@ -379,16 +793,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             // 모달 내부 데이터 비우기
             removeAllNode(getElFromId("setting_modal_btn_wrap"));
-            removeAllNode(siteSelectInSettingModal);
-            removeAllNode(groupSelectInSettingModal);
-            removeAllNode(categorySelectInSettingModal);
-            removeAllNode(countrySelectInSettingModal);
-            removeAllNode(regionSelectInSettingModal);
-            removeAllNode(detailRegionSelectInSettingModal);
-            removeAllNode(skillSelectInSettingModal);
-            removeAllNode(companyTagSelectInSettingModal);
-            minCareerSelectInSettingModal.value = 0;
-            saveBtnInSettingModal.remove();
+            removeAllNode(siteSelectForPostSetting);
+            removeAllNode(groupSelectForPostSetting);
+            removeAllNode(categorySelectForPostSetting);
+            removeAllNode(countrySelectForPostSetting);
+            removeAllNode(regionSelectForPostSetting);
+            removeAllNode(detailRegionSelectForPostSetting);
+            removeAllNode(skillSelectForPostSetting);
+            removeAllNode(companyTagSelectForPostSetting);
+            minCareerSelectForPostSetting.value = 0;
+            saveBtnForPostSetting.remove();
+            saveBtnForCrawlingSetting.remove();
 
             // body의 스크롤 원상복구
             const body = getElFromSel("body");
@@ -404,16 +819,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             // 모달 내부 데이터 비우기
             removeAllNode(getElFromId("setting_modal_btn_wrap"));
-            removeAllNode(siteSelectInSettingModal);
-            removeAllNode(groupSelectInSettingModal);
-            removeAllNode(categorySelectInSettingModal);
-            removeAllNode(countrySelectInSettingModal);
-            removeAllNode(regionSelectInSettingModal);
-            removeAllNode(detailRegionSelectInSettingModal);
-            removeAllNode(skillSelectInSettingModal);
-            removeAllNode(companyTagSelectInSettingModal);
-            minCareerSelectInSettingModal.value = 0;
-            saveBtnInSettingModal.remove();
+            removeAllNode(siteSelectForPostSetting);
+            removeAllNode(groupSelectForPostSetting);
+            removeAllNode(categorySelectForPostSetting);
+            removeAllNode(countrySelectForPostSetting);
+            removeAllNode(regionSelectForPostSetting);
+            removeAllNode(detailRegionSelectForPostSetting);
+            removeAllNode(skillSelectForPostSetting);
+            removeAllNode(companyTagSelectForPostSetting);
+            minCareerSelectForPostSetting.value = 0;
+            saveBtnForPostSetting.remove();
+            saveBtnForCrawlingSetting.remove();
 
             // body의 스크롤 원상복구
             const body = getElFromSel("body");
@@ -423,7 +839,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     /////////////////////////////////////////////////////// POST page
     let queryParameterDict;
-    const postSettingResponse = await getPostSetting();
+    const postSettingResponse = await requestSetting(1);
     const getPostSettingStatus = postSettingResponse.status;
     const postSettingData = await postSettingResponse.json();
     if (getPostSettingStatus == 200) {
@@ -443,8 +859,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     const minCareerSelect = getElFromId("post_filter_min_career");
 
     const searchBtn = getElFromId("post_search_btn");
-    searchBtn.style.writingMode = "vertical-rl";
-    searchBtn.style.textOrientation = "upright";
+    // searchBtn.style.writingMode = "vertical-rl";
+    // searchBtn.style.textOrientation = "upright";
 
     const changeJobListURL = (
         selectEl,
@@ -864,7 +1280,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     };
 
-    const renderSelectBox = (queryParameterDict) => {
+    const renderSelectBox = (queryParameterDict, filterElementIdDict) => {
         // Select box 만들기
 
         console.log("renderPostList - queryParameterDict", queryParameterDict);
@@ -891,12 +1307,24 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
 
-        makeSelectOptions(JobURL, "sites", "post_filter_site", true, queryParameterDict.site_id);
-        makeSelectOptions(JobURL, "groups", "post_filter_group", true, queryParameterDict.group_id);
+        makeSelectOptions(
+            JobURL,
+            "sites",
+            filterElementIdDict.site,
+            true,
+            queryParameterDict.site_id
+        );
+        makeSelectOptions(
+            JobURL,
+            "groups",
+            filterElementIdDict.group,
+            true,
+            queryParameterDict.group_id
+        );
         makeSelectOptions(
             JobURL,
             categoryUrl,
-            "post_filter_category",
+            filterElementIdDict.category,
             true,
             queryParameterDict.category_ids,
             queryParameterDict.group_id,
@@ -905,14 +1333,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeSelectOptions(
             JobURL,
             "countries",
-            "post_filter_country",
+            filterElementIdDict.country,
             true,
             queryParameterDict.country_id
         );
         makeSelectOptions(
             JobURL,
             regionURL,
-            "post_filter_region",
+            filterElementIdDict.region,
             true,
             queryParameterDict.region_id,
             queryParameterDict.country_id,
@@ -921,7 +1349,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeSelectOptions(
             JobURL,
             detailRegionURL,
-            "post_filter_detail_region",
+            filterElementIdDict.detail_region,
             true,
             queryParameterDict.detail_region_id,
             queryParameterDict.region_id,
@@ -930,19 +1358,20 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeSelectOptions(
             JobURL,
             "skills",
-            "post_filter_skill",
+            filterElementIdDict.skill,
             true,
             queryParameterDict.skill_ids
         );
         makeSelectOptions(
             JobURL,
             "company_tags",
-            "post_filter_company_tag",
+            filterElementIdDict.company_tag,
             true,
             queryParameterDict.company_tag_ids
         );
     };
 
+    // 채용공고 리스트 렌더링
     const renderPostList = async (queryParameterDict) => {
         let initJobListURL = `${JobURL}/recruits?${makeQueryParameter(queryParameterDict)}`;
         console.log("initJobListURL", initJobListURL);
@@ -964,23 +1393,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
         // Select Box 렌터링
-        renderSelectBox(queryParameterDict);
-
-        // 상위 버튼 3개 마우스오버
-        const jobListBtn = getElFromId("job_list_btn");
-        const jobCrawlingBtn = getElFromId("job_crawling_btn");
-        const jobManageBtn = getElFromId("job_manage_btn");
-        imageHover(
-            jobListBtn,
-            "/static/img/icon/job-post03.png",
-            "/static/img/icon/job-post04.png"
-        );
-        imageHover(
-            jobCrawlingBtn,
-            "/static/img/icon/gathering07.png",
-            "/static/img/icon/gathering05.png"
-        );
-        imageHover(jobManageBtn, "/static/img/icon/manage02.png", "/static/img/icon/manage01.png");
+        const postFilterElementIdDict = {
+            site: "post_filter_site",
+            group: "post_filter_group",
+            category: "post_filter_category",
+            country: "post_filter_country",
+            region: "post_filter_region",
+            detail_region: "post_filter_detail_region",
+            skill: "post_filter_skill",
+            company_tag: "post_filter_company_tag",
+        };
+        renderSelectBox(queryParameterDict, postFilterElementIdDict);
     };
 
     const fromChangedSelectElementRenderPostList = (SelectElement, queryParameterDict) => {
