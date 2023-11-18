@@ -6,7 +6,7 @@ from job.views import (
     CategoryView,
     GroupView,
     RecruitDetailView,
-    RecruitSettingView,
+    JobSettingView,
     RegionView,
     RecruitView,
     SiteView,
@@ -25,6 +25,6 @@ urlpatterns = [
     path("regions", RegionView.as_view(), name="regions"),
     path("detail_regions", DetailRegionView.as_view(), name="detail_region"),
     path("recruits/<int:pk>", RecruitDetailView.as_view(), name="recruit"),
-    path("recruits/setting", RecruitSettingView.as_view(), name="recruits_setting"),
     path("recruits", RecruitView.as_view(), name="recruits"),
+    path("settings/<int:type>", JobSettingView.as_view(), name="settings"),
 ]
