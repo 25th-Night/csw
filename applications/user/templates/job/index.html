@@ -8,19 +8,12 @@
 {% endblock %}
 {% block inner_content %}
     <div class="flex justify-between title-btn-wrap">
-        <div class="flex w-[168px] sm:w-48 border-b border-[#373737] title-btn-wrap pb-4 mb-4">
-            <img src="{% static 'img/icon/job-post04.png' %}"
-                 alt="job-list-btn"
+        <div class="flex w-[168px] sm:w-48 border-b border-[#373737] title-btn-wrap pb-4 mb-4"
+             id="title_btn_wrap">
+            <img src=""
+                 alt="job-sample-btn"
                  class="block h-6 ml-2 mr-5 cursor-pointer sm:h-8"
-                 id="job_list_btn">
-            <img src="{% static 'img/icon/gathering05.png' %}"
-                 alt="job-crawling-btn"
-                 class="block h-6 mx-5 cursor-pointer sm:h-8"
-                 id="job_crawling_btn">
-            <img src="{% static 'img/icon/manage01.png' %}"
-                 alt="job-manage-btn"
-                 class="block h-6 ml-5 mr-2 cursor-pointer sm:h-8"
-                 id="job_manage_btn">
+                 id="job_sample_btn">
         </div>
         <svg xmlns="http://www.w3.org/2000/svg"
              fill="none"
@@ -34,7 +27,7 @@
         </svg>
     </div>
     {% include "job/post.html" %}
-    {% comment %} {% include "job/crawling.html" %} {% endcomment %}
+    {% include "job/crawling.html" %}
     {% include "job/manage.html" %}
     {% include "job/modal_setting.html" %}
 {% endblock %}
