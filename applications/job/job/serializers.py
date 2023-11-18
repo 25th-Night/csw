@@ -10,6 +10,7 @@ from job.models import (
     Region,
     DetailRegion,
     Company,
+    JobSetting,
     Site,
     Skill,
     Recruit,
@@ -125,7 +126,8 @@ class RecruitSerializer(serializers.ModelSerializer):
         exclude = ("is_active",)
 
 
-class RecruitSettingSerializer(serializers.Serializer):
+class JobSettingSerializer(serializers.Serializer):
+    type = serializers.IntegerField(required=False)
     user_id = serializers.IntegerField()
     site_id = serializers.IntegerField(required=False, default=0)
     min_career_id = serializers.IntegerField(
@@ -139,6 +141,7 @@ class RecruitSettingSerializer(serializers.Serializer):
     skill_ids = serializers.CharField(required=False, default="0")
 
     def validate(self, attrs):
+        type = int(attrs.get("type"))
         site_id = int(attrs.get("site_id"))
         group_id = int(attrs.get("group_id"))
         category_ids = attrs.get("category_ids")
@@ -146,6 +149,9 @@ class RecruitSettingSerializer(serializers.Serializer):
         region_id = int(attrs.get("region_id"))
         detail_region_id = int(attrs.get("detail_region_id"))
         skill_ids = attrs.get("skill_ids")
+
+        if type not in [choice.value for choice in JobSetting.TypeChoices]:
+            raise serializers.ValidationError("Not valid Type")
 
         if site_id and site_id not in Site.objects.all().values_list("id", flat=True):
             raise serializers.ValidationError("Not valid Site ID")
