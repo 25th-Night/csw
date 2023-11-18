@@ -394,6 +394,37 @@ document.addEventListener("DOMContentLoaded", async function () {
         const body = getElFromSel("body");
         body.style.overflow = "hidden";
 
+        // save 버튼 추가
+        // - Post Setting Save 버튼
+        const saveBtnForPostSetting = createNewElement(
+            "div",
+            "flex items-center font-semibold cursor-pointer hover:text-[#373737] hover:border-none hover:bg-white justify-center border border-white w-10 p-2 text-sm setting-modal-post-save-btn",
+            "SAVE",
+            "setting_modal_post_save_btn"
+        );
+
+        const settingModalPostData = getElFromId("setting_modal_post_data");
+        settingModalPostData.appendChild(saveBtnForPostSetting);
+
+        saveBtnForPostSetting.addEventListener("click", () => {
+            saveSetting(queryParameterDictForPostSetting, 1);
+        });
+
+        // - Crawling Setting Save 버튼
+        const saveBtnForCrawlingSetting = createNewElement(
+            "div",
+            "flex items-center font-semibold cursor-pointer hover:text-[#373737] hover:border-none hover:bg-white justify-center border border-white w-10 p-2 text-sm setting-modal-crawling-save-btn",
+            "SAVE",
+            "setting_modal_crawling_save_btn"
+        );
+
+        const settingModalCrawlingData = getElFromId("setting_modal_crawling_data");
+        settingModalCrawlingData.appendChild(saveBtnForCrawlingSetting);
+
+        saveBtnForCrawlingSetting.addEventListener("click", () => {
+            saveSetting(queryParameterDictForCrawlingSetting, 2);
+        });
+
         ////////////////////////////////// Post Setting
         const postSettingResponse = await requestSetting(1);
         const getPostSettingStatus = postSettingResponse.status;
@@ -556,21 +587,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         regionSelectForPostSetting.addEventListener("change", () => {
             renderSelectBoxForSetting(queryParameterDictForPostSetting, "post");
         });
-
-        // save 버튼
-        const saveBtnForPostSetting = createNewElement(
-            "div",
-            "flex items-center font-semibold cursor-pointer hover:text-[#373737] hover:border-none hover:bg-white justify-center border border-white w-10 p-2 text-sm setting-modal-post-save-btn",
-            "SAVE",
-            "setting_modal_post_save_btn"
-        );
-
-        saveBtnForPostSetting.addEventListener("click", () => {
-            saveSetting(queryParameterDictForPostSetting, 1);
-        });
-
-        const settingModalPostData = getElFromId("setting_modal_post_data");
-        settingModalPostData.appendChild(saveBtnForPostSetting);
 
         ////////////////////////////////// Crawling Setting
         const crawlingSettingResponse = await requestSetting(2);
@@ -748,21 +764,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         regionSelectForCrawlingSetting.addEventListener("change", () => {
             renderSelectBoxForSetting(queryParameterDictForCrawlingSetting, "crawling");
         });
-
-        // save 버튼
-        const saveBtnForCrawlingSetting = createNewElement(
-            "div",
-            "flex items-center font-semibold cursor-pointer hover:text-[#373737] hover:border-none hover:bg-white justify-center border border-white w-10 p-2 text-sm setting-modal-crawling-save-btn",
-            "SAVE",
-            "setting_modal_crawling_save_btn"
-        );
-
-        saveBtnForCrawlingSetting.addEventListener("click", () => {
-            saveSetting(queryParameterDictForCrawlingSetting, 2);
-        });
-
-        const settingModalCrawlingData = getElFromId("setting_modal_crawling_data");
-        settingModalCrawlingData.appendChild(saveBtnForCrawlingSetting);
 
         ////////////////////////////////// Manage Setting
 
