@@ -148,7 +148,12 @@ class RecruitSkill(models.Model):
         db_table = "through_recruit_skill"
 
 
-class RecruitSetting(CommonModel):
+class JobSetting(CommonModel):
+    class TypeChoices(models.IntegerChoices):
+        RECRUIT = 1
+        CRAWLING = 2
+
+    type = models.IntegerField(verbose_name="설정 종류", choices=TypeChoices.choices)
     user_id = models.IntegerField(verbose_name="이용자 ID")
     site_id = models.IntegerField(verbose_name="사이트 ID", default=0)
     min_career = models.IntegerField(
@@ -164,4 +169,4 @@ class RecruitSetting(CommonModel):
     skill_ids = models.CharField(verbose_name="스킬 ID 목록", default="0", max_length=50)
 
     def __str__(self):
-        return f"{self.user_id}번 유저의 채용공고 검색 설정"
+        return f"{self.user_id}번 유저의 {self.get_type_display()} 설정"
