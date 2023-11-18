@@ -4,6 +4,8 @@ from taggit.managers import TaggableManager
 
 from common.models import CommonModel
 
+from common.data import MIN_CAREER_TYPE
+
 
 class Site(CommonModel):
     name = models.CharField(verbose_name="사이트명", max_length=20, unique=True)
@@ -82,7 +84,9 @@ class Skill(CommonModel):
 
 
 class Recruit(CommonModel):
-    min_career = models.IntegerField(verbose_name="최소 경력년수", default=0)
+    min_career = models.IntegerField(
+        verbose_name="최소 경력년수", choices=MIN_CAREER_TYPE, default=0
+    )
     url_id = models.IntegerField(verbose_name="URL ID")
     position = models.CharField(verbose_name="포지션", max_length=50)
     description = models.TextField(verbose_name="세부사항")
@@ -142,3 +146,22 @@ class RecruitSkill(models.Model):
 
     class Meta:
         db_table = "through_recruit_skill"
+
+
+class RecruitSetting(CommonModel):
+    user_id = models.IntegerField(verbose_name="이용자 ID")
+    site_id = models.IntegerField(verbose_name="사이트 ID", default=0)
+    min_career = models.IntegerField(
+        verbose_name="최소 경력년수", choices=MIN_CAREER_TYPE, default=0
+    )
+    group_id = models.IntegerField(verbose_name="그룹 ID", default=0)
+    country_id = models.IntegerField(verbose_name="국가 ID", default=0)
+    region_id = models.IntegerField(verbose_name="지역 ID", default=0)
+    detail_region_id = models.IntegerField(verbose_name="세부 지역 ID", default=0)
+    category_ids = models.CharField(
+        verbose_name="카테고리 ID 목록", default="0", max_length=50
+    )
+    skill_ids = models.CharField(verbose_name="스킬 ID 목록", default="0", max_length=50)
+
+    def __str__(self):
+        return f"{self.user_id}번 유저의 채용공고 검색 설정"
