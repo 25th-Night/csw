@@ -49,6 +49,8 @@ class RecruitView(APIView):
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     )
 
+        year = 0 if year == -1 else year
+
         crawling = make_crawling_data(
             user_id=request.user.get("id"),
             site_name="Wanted",
