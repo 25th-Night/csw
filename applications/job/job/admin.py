@@ -8,11 +8,14 @@ from job.models import (
     Group,
     Recruit,
     RecruitCategory,
+    RecruitSetting,
     RecruitSkill,
     Region,
     Site,
     Skill,
 )
+
+from common.data import MIN_CAREER_TYPE
 
 
 @admin.register(Site)
@@ -180,3 +183,72 @@ class RecruitSkillAdmin(admin.ModelAdmin):
         "recruit",
         "skill",
     ]
+
+
+@admin.register(RecruitSetting)
+class RecruitSettingAdmin(admin.ModelAdmin):
+    list_display = [
+        "user_id",
+        "site",
+        "min_career",
+        "group",
+        "country",
+        "region",
+        "detail_region",
+        "categories",
+        "skills",
+        "created_at",
+        "updated_at",
+    ]
+
+    @admin.display(description="사이트명")
+    def site(self, obj):
+        site_name = Site.objects.get(id=obj.site_id).name if obj.site_id else "전체"
+        return site_name
+
+    @admin.display(description="최소 경력년수")
+    def min_career(self, obj):
+        min_career = MIN_CAREER_TYPE[obj.min_career][1]
+        return min_career
+
+    @admin.display(description="그룹명")
+    def group(self, obj):
+        group_name = Group.objects.get(id=obj.group_id).name if obj.group_id else "전체"
+        return group_name
+
+    @admin.display(description="국가명")
+    def country(self, obj):
+        country_name = (
+            Country.objects.get(id=obj.country_id).name if obj.country_id else "전체"
+        )
+        return country_name
+
+    @admin.display(description="지역명")
+    def region(self, obj):
+        region_name = (
+            Region.objects.get(id=obj.region_id).name if obj.region_id else "전체"
+        )
+        return region_name
+
+    @admin.display(description="세부 지역명")
+    def detail_region(self, obj):
+        detail_region_name = (
+            DetailRegion.objects.get(id=obj.detail_region_id).name
+            if obj.detail_region_id
+            else "전체"
+        )
+        return detail_region_name
+
+    @admin.display(description="카테고리 목록")
+    def categories(self, obj):
+        category_ids = list(map(int, obj.category_ids.split(",")))
+        category_list = [
+            Category.objects.get(id=category_id).name for category_id in category_ids
+        ]
+        return ", ".join(category_list)
+
+    @admin.display(description="스킬 목록")
+    def skills(self, obj):
+        skill_ids = list(map(int, obj.skill_ids.split(",")))
+        skill_list = [Skill.objects.get(id=skill_id).name for skill_id in skill_ids]
+        return ", ".join(skill_list)
