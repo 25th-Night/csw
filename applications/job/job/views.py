@@ -8,25 +8,31 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from taggit.models import Tag
+
 from job.models import (
     Group,
     Category,
     Country,
+    RecruitSetting,
     Region,
     DetailRegion,
     Company,
     Recruit,
     Site,
+    Skill,
 )
 from job.serializers import (
     GroupSerializer,
     CategorySerializer,
     CategorySerializer,
     CountrySerializer,
+    RecruitSettingSerializer,
     RegionSerializer,
     DetailRegionSerializer,
     RecruitSerializer,
     SiteSerializer,
+    SkillSerializer,
 )
 from job.filters import CategoryFilter, DetailRegionFilter, RecruitFilter, RegionFilter
 from common.utils import get_object_or_404
@@ -58,7 +64,7 @@ class CategoryView(APIView):
     filterset_class = CategoryFilter
 
     def get(self, request: Request):
-        categories: Category = Category.objects.all()
+        categories: Category = Category.objects.exclude(name__contains="전체")
         queryset = self.filter_backends().filter_queryset(request, categories, self)
         serializer: CategorySerializer = self.serializer_class(queryset, many=True)
 
@@ -69,7 +75,7 @@ class CountryView(APIView):
     serializer_class = CountrySerializer
 
     def get(self, request: Request):
-        categories: Country = Country.objects.all()
+        categories: Country = Country.objects.exclude(name__contains="전세계")
         serializer: CountrySerializer = self.serializer_class(categories, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -101,6 +107,26 @@ class DetailRegionView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class SkillView(APIView):
+    serializer_class = SkillSerializer
+
+    def get(self, request: Request):
+        skills: Skill = Skill.objects.all()
+        serializer: SkillSerializer = self.serializer_class(skills, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CompanyTagView(APIView):
+    serializer_class = SkillSerializer
+
+    def get(self, request: Request):
+        company_tags: Tag = Tag.objects.all()
+        serializer: SkillSerializer = self.serializer_class(company_tags, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class RecruitView(APIView):
     serializer_class = RecruitSerializer
     filter_backends = DjangoFilterBackend
@@ -120,5 +146,41 @@ class RecruitDetailView(APIView):
     def get(self, request: Request, pk):
         recruit: Recruit = get_object_or_404(Recruit, id=pk)
         serializer: RecruitSerializer = self.serializer_class(recruit)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RecruitSettingView(APIView):
+    serializer_class = RecruitSettingSerializer
+
+    def get(self, request: Request):
+        user_id = request.user.get("id")
+        recruit_setting = RecruitSetting.objects.filter(user_id=user_id)
+        if recruit_setting.exists():
+            recruit_setting: RecruitSetting = recruit_setting.last()
+        else:
+            recruit_setting: RecruitSetting = RecruitSetting.objects.create(
+                user_id=user_id, site_id=1, country_id=5
+            )
+        serializer: RecruitSettingSerializer = self.serializer_class(recruit_setting)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request: Request):
+        print(f"request.data:{request.data}")
+        user_id = request.user.get("id")
+        recruit_setting = get_object_or_404(RecruitSetting, user_id=user_id)
+        print(f"recruit_setting:{recruit_setting.__dict__}")
+
+        # return Response(status=status.HTTP_200_OK)
+
+        serializer: RecruitSettingSerializer = self.serializer_class(
+            recruit_setting, data=request.data
+        )
+
+        if not serializer.is_valid():
+            print(serializer.errors)
+        serializer.is_valid(raise_exception=True)
+        recruit_setting = serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
