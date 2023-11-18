@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const getPostSetting = async () => {
         const data = setFetchData("get", queryParameterDict);
-        const requestURL = `${getJobListURL}/setting`;
+        const requestURL = `${JobURL}/settings/1`;
         const get_response = await fetch(requestURL, data);
 
         return get_response;
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const savePostSetting = async (queryParameterDict) => {
         const data = setFetchData("put", queryParameterDict);
         console.log("savePostSetting - queryParameterDict", queryParameterDict);
-        const requestURL = `${getJobListURL}/setting`;
+        const requestURL = `${JobURL}/settings/1`;
         const get_response = await fetch(requestURL, data);
         if (get_response.status == 200) {
             alert("Saved successfully");
