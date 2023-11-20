@@ -47,3 +47,7 @@ CORS_ALLOWED_ORIGINS += [
 
 # Request DOMAIN
 REQUEST_USER_DOMAIN = "http://user:8000"
+
+
+# CHROME DRIVER Path
+CHROME_DRIVER = os.getenv("CHROME_DRIVER", None)
