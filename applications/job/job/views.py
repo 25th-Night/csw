@@ -23,6 +23,7 @@ from job.models import (
     Skill,
 )
 from job.serializers import (
+    CompanyTagSerializer,
     GroupSerializer,
     CategorySerializer,
     CategorySerializer,
@@ -34,7 +35,13 @@ from job.serializers import (
     SiteSerializer,
     SkillSerializer,
 )
-from job.filters import CategoryFilter, DetailRegionFilter, RecruitFilter, RegionFilter
+from job.filters import (
+    CategoryFilter,
+    DetailRegionFilter,
+    RecruitFilter,
+    RegionFilter,
+    SkillFilter,
+)
 from common.utils import get_object_or_404
 
 
@@ -109,20 +116,25 @@ class DetailRegionView(APIView):
 
 class SkillView(APIView):
     serializer_class = SkillSerializer
+    filter_backends = DjangoFilterBackend
+    filterset_class = SkillFilter
 
     def get(self, request: Request):
-        skills: Skill = Skill.objects.all()
-        serializer: SkillSerializer = self.serializer_class(skills, many=True)
+        skills: Skill = Skill.objects.all().order_by("name")
+        queryset = self.filter_backends().filter_queryset(request, skills, self)
+        serializer: SkillSerializer = self.serializer_class(queryset, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CompanyTagView(APIView):
-    serializer_class = SkillSerializer
+    serializer_class = CompanyTagSerializer
 
     def get(self, request: Request):
         company_tags: Tag = Tag.objects.all()
-        serializer: SkillSerializer = self.serializer_class(company_tags, many=True)
+        serializer: CompanyTagSerializer = self.serializer_class(
+            company_tags, many=True
+        )
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
