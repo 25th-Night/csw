@@ -359,7 +359,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const crawlingBtn = createNewElement(
             "div",
             "flex items-center font-semibold cursor-pointer hover:text-white hover:border-none hover:bg-[#373737] justify-center border border-[#d9d9d9] w-10 p-2 my-1 text-xs crawling-submit-btn",
-            "CRAWLING",
+            "START",
             "crawling_submit_btn"
         );
         crawlingBtn.style.writingMode = "vertical-rl";
