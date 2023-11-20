@@ -188,14 +188,18 @@ class JobSettingView(APIView):
         print(f"recruit_setting:{recruit_setting.__dict__}")
 
         # return Response(status=status.HTTP_200_OK)
-
+        request_data = request.data
+        request_data["user_id"] = user_id
         serializer: JobSettingSerializer = self.serializer_class(
-            recruit_setting, data=request.data
+            recruit_setting, data=request_data
         )
 
         if not serializer.is_valid():
             print(serializer.errors)
         serializer.is_valid(raise_exception=True)
-        recruit_setting = serializer.save()
+        serializer.save()
+        response_data = serializer.data
+        response_data.pop("skill_ids")
+        print(f"response_data:{response_data}")
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(response_data, status=status.HTTP_200_OK)
