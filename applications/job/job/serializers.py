@@ -126,7 +126,8 @@ class RecruitSerializer(serializers.ModelSerializer):
 class JobSettingSerializer(serializers.Serializer):
     type = serializers.IntegerField(required=False)
     user_id = serializers.IntegerField()
-    site_id = serializers.IntegerField(required=False, default=0)
+    site_id = serializers.IntegerField(required=False, default=0, write_only=True)
+    skills = serializers.SerializerMethodField()
     min_career = serializers.IntegerField(
         required=False, default=0, min_value=-1, max_value=10
     )
@@ -136,6 +137,12 @@ class JobSettingSerializer(serializers.Serializer):
     detail_region_id = serializers.IntegerField(required=False, default=0)
     category_ids = serializers.CharField(required=False, default="0")
     skill_ids = serializers.CharField(required=False, default="0")
+
+    def get_skills(self, obj):
+        skill_ids = list(map(int, obj.skill_ids.split(",")))
+        skills = Skill.objects.filter(id__in=skill_ids)
+        serialized_skills = SkillSerializer(skills, many=True)
+        return serialized_skills.data
 
     def validate(self, attrs):
         type = int(attrs.get("type"))
@@ -203,6 +210,7 @@ class JobSettingSerializer(serializers.Serializer):
         return attrs
 
     def update(self, instance, validated_data):
+        print(f"instance:{instance}")
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
