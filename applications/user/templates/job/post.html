@@ -2,7 +2,7 @@
 <div class="post-wrap" id="post_wrap">
     <div class="flex flex-col items-start justify-between my-2 post-title-wrap">
         <div class="self-center hidden text-sm text-[red] post-make-options-error"></div>
-        <form class="flex w-full job-form post-form">
+        <form class="flex w-full job-form post-form" id="post_form">
             <div class="flex-1 post-btn-wrap">
                 <div class="grid w-full grid-cols-1 sm:grid-cols-3 post-select-box-wrap">
                     <div class="flex w-full col-span-1 p-1 my-1 post-filter-1-wrap">
@@ -94,5 +94,4 @@
     </div>
     <div class="grid grid-cols-1 mt-5 mb-10 gap-y-4 md:gap-4 md:grid-cols-2 post-job-card-list"
          id="post_job_card_list"></div>
-    {% include "job/modal_post.html" %}
 </div>
