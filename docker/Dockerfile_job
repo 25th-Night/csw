@@ -1,14 +1,25 @@
-FROM python:3.11-alpine
+FROM python:3.11-slim
 
 ARG APP_HOME=/app
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
+WORKDIR /usr/src
+RUN apt-get update && \
+    apt-get install -y wget unzip dpkg curl bash jq nano gnupg
+
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+RUN apt-get -y update
+RUN apt-get install -y google-chrome-stable
+
+RUN wget -O /tmp/chromedriver.zip https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/119.0.6045.105/linux64/chromedriver-linux64.zip
+RUN mkdir chrome
+RUN unzip /tmp/chromedriver.zip chromedriver-linux64/chromedriver -d /usr/src/chrome
+
 RUN mkdir ${APP_HOME}
 WORKDIR ${APP_HOME}
-
-RUN apk add --no-cache --upgrade bash jq curl
 
 COPY ./applications/job/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
