@@ -17,29 +17,32 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("hello, it's custom command file")
 
-        # set Driver
-        chrome = Chrome()
-        driver = chrome.driver
-        wait = chrome.wait
+        if not Country.objects.exists():
+            # set Driver
+            chrome = Chrome()
+            driver = chrome.driver
+            wait = chrome.wait
 
-        url = "https://www.wanted.co.kr/wdlist?country=kr&job_sort=job.latest_order&years=-1&locations=all"
+            url = "https://www.wanted.co.kr/wdlist?country=kr&job_sort=job.latest_order&years=-1&locations=all"
 
-        driver.get(url)
-        print("크롤링을 시작합니다.")
+            driver.get(url)
+            print("크롤링을 시작합니다.")
 
-        # 지역 분류 열기
-        region_btn = find_visible(wait, "button[data-filter-name=region]")
-        region_btn.click()
+            # 지역 분류 열기
+            region_btn = find_visible(wait, "button[data-filter-name=region]")
+            region_btn.click()
 
-        country_options = finds_present(
-            driver,
-            wait,
-            "div[id=MODAL_BODY] div[class*=Selector_select] select option",
-        )
+            country_options = finds_present(
+                driver,
+                wait,
+                "div[id=MODAL_BODY] div[class*=Selector_select] select option",
+            )
 
-        for i, country_option in enumerate(country_options):
-            print(i, country_option.text, country_option.get_attribute("value"))
-            Country.objects.get_or_create(name=country_option.text)
+            for i, country_option in enumerate(country_options):
+                print(i, country_option.text, country_option.get_attribute("value"))
+                Country.objects.get_or_create(name=country_option.text)
 
-        driver.quit()
-        print("크롤링을 종료합니다.")
+            driver.quit()
+            print("크롤링을 종료합니다.")
+        else:
+            print("데이터가 존재하기 때문에 크롤링을 진행하지 않습니다.")
