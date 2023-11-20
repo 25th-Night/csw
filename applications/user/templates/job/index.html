@@ -9,12 +9,7 @@
 {% block inner_content %}
     <div class="flex justify-between title-btn-wrap">
         <div class="flex w-[168px] sm:w-48 border-b border-[#373737] title-btn-wrap pb-4 mb-4"
-             id="title_btn_wrap">
-            <img src=""
-                 alt="job-sample-btn"
-                 class="block h-6 ml-2 mr-5 cursor-pointer sm:h-8"
-                 id="job_sample_btn">
-        </div>
+             id="title_btn_wrap"></div>
         <svg xmlns="http://www.w3.org/2000/svg"
              fill="none"
              viewBox="0 0 24 24"
@@ -29,6 +24,7 @@
     {% include "job/post.html" %}
     {% include "job/crawling.html" %}
     {% include "job/manage.html" %}
+    {% include "job/modal_post.html" %}
     {% include "job/modal_setting.html" %}
 {% endblock %}
 {% block include_js %}
