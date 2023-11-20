@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from taggit.serializers import TagListSerializerField
 from taggit.models import Tag
 
 from job.models import (
@@ -15,8 +14,6 @@ from job.models import (
     Skill,
     Recruit,
 )
-
-from common.data import MIN_CAREER_TYPE
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -130,8 +127,8 @@ class JobSettingSerializer(serializers.Serializer):
     type = serializers.IntegerField(required=False)
     user_id = serializers.IntegerField()
     site_id = serializers.IntegerField(required=False, default=0)
-    min_career_id = serializers.IntegerField(
-        required=False, default=0, min_value=0, max_value=10
+    min_career = serializers.IntegerField(
+        required=False, default=0, min_value=-1, max_value=10
     )
     group_id = serializers.IntegerField(required=False, default=0)
     country_id = serializers.IntegerField(required=False, default=0)
