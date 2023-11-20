@@ -2,7 +2,7 @@
 <div class="hidden crawling-wrap" id="crawling_wrap">
     <div class="flex flex-col items-start justify-between my-2 crawling-title-wrap">
         <div class="self-center hidden text-sm text-[red] crawling-make-options-error"></div>
-        <form class="flex w-full job-form crawling-form">
+        <form class="flex w-full job-form crawling-form" id="crawling_form">
             <div class="flex-1 crawling-btn-wrap">
                 <div class="grid w-full grid-cols-1 sm:grid-cols-3 crawling-select-box-wrap">
                     <div class="flex w-full col-span-1 p-1 my-1 crawling-filter-1-wrap">
@@ -18,13 +18,13 @@
                         <select class="w-1/2 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-group"
                                 id="crawling_filter_group"
                                 name="crawling-filter-group"
-                                tabindex="1"
+                                tabindex="2"
                                 placeholder="Group"
                                 autofocus=""></select>
                         <select class="w-1/2 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-category"
                                 id="crawling_filter_category"
                                 name="crawling-filter-category"
-                                tabindex="2"
+                                tabindex="3"
                                 placeholder="Category"
                                 autofocus=""></select>
                     </div>
@@ -32,43 +32,52 @@
                         <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-country"
                                 id="crawling_filter_country"
                                 name="crawling-filter-country"
-                                tabindex="3"
+                                tabindex="4"
                                 placeholder="Country"
                                 autofocus=""
                                 disabled></select>
                         <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-region"
                                 id="crawling_filter_region"
                                 name="crawling-filter-region"
-                                tabindex="4"
+                                tabindex="5"
                                 placeholder="Region"
                                 autofocus=""></select>
                         <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-detail-region"
                                 id="crawling_filter_detail_region"
                                 name="crawling-filter-detail-region"
-                                tabindex="5"
+                                tabindex="6"
                                 placeholder="Detail-Region"
                                 autofocus=""></select>
                     </div>
                     <div class="flex w-full p-1 my-1 sm:col-span-3 crawling-filter-4-wrap">
-                        <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-skill"
-                                title="select Skill"
-                                id="crawling_filter_skill"
-                                name="crawling-filter-skill"
-                                tabindex="1"
-                                placeholder="SKill"
-                                autofocus=""></select>
+                        <div class="w-1/3 py-1 mx-3 relative inline-block text-left border-b border-[#d9d9d9] crawling-filter-skill"
+                             title="search Skill"
+                             id="crawling_filter_skill">
+                            <div class="flex justify-between w-full crawling-search-skill-wrap"
+                                 id="crawling_search_skill_wrap">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="2"
+                                     stroke="currentColor"
+                                     class="hidden w-6 h-6 p-1 cursor-pointer"
+                                     id="search_skill_remove_btn">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </div>
+                        </div>
                         <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-company-tag"
                                 title="select Company Tag"
                                 id="crawling_filter_company_tag"
                                 name="crawling-filter-company-tag"
-                                tabindex="1"
+                                tabindex="8"
                                 placeholder="Company Tag"
                                 autofocus=""></select>
                         <select class="w-1/3 py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md crawling-filter-min-career"
                                 title="select Minimum Career"
                                 id="crawling_filter_min_career"
                                 name="crawling-filter-min-career"
-                                tabindex="1"
+                                tabindex="9"
                                 placeholder="Minimum Career"
                                 autofocus="">
                             <option class="select-option" id="crawling_filter_min_career_all" value="0">All</option>
@@ -82,8 +91,6 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center font-semibold cursor-pointer hover:text-white hover:border-none hover:bg-[#373737] justify-center border border-[#d9d9d9] w-10 p-2 my-1 text-xs crawling-search-btn"
-                 id="crawling_search_btn">CRAWLING</div>
         </form>
     </div>
     <div class="grid grid-cols-1 mt-5 mb-10 gap-y-4 md:gap-4 md:grid-cols-2 crawling-job-card-list"
