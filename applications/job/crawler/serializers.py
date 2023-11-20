@@ -17,7 +17,7 @@ from job.models import (
 
 class CrawlingRecruitSerializer(serializers.Serializer):
     site_name = serializers.CharField()
-    job_category_name = serializers.CharField()
+    job_categories = serializers.ListField(required=False)
     region_name = serializers.CharField()
     detail_region_name = serializers.CharField()
     company_name = serializers.CharField()
@@ -29,7 +29,7 @@ class CrawlingRecruitSerializer(serializers.Serializer):
     description = serializers.CharField()
     task = serializers.CharField()
     requirement = serializers.CharField()
-    preference = serializers.CharField()
+    preference = serializers.CharField(required=False)
     benefit = serializers.CharField()
     workplace = serializers.CharField()
     status = serializers.BooleanField()
@@ -37,7 +37,7 @@ class CrawlingRecruitSerializer(serializers.Serializer):
     def get_or_create(self, validated_data):
         site_name = validated_data.pop("site_name")
         url_id = validated_data.pop("url_id")
-        job_category_name = validated_data.pop("job_category_name")
+        job_categories = validated_data.pop("job_categories")
         region_name = validated_data.pop("region_name")
         detail_region_name = validated_data.pop("detail_region_name")
         company_name = validated_data.pop("company_name")
@@ -46,9 +46,14 @@ class CrawlingRecruitSerializer(serializers.Serializer):
         min_career = validated_data.get("min_career")
 
         site = Site.objects.get(name=site_name)
-        category = Category.objects.get(name=job_category_name)
+        categories = [
+            Category.objects.get_or_create(name=category_name)[0]
+            for category_name in job_categories
+        ]
         if detail_region_name != "미등록":
-            detail_region = DetailRegion.objects.get(name=detail_region_name)
+            detail_region = DetailRegion.objects.get(
+                region__name=region_name, name=detail_region_name
+            )
         else:
             region = Region.objects.get(name=region_name)
             detail_region = DetailRegion.objects.get_or_create(
@@ -72,7 +77,7 @@ class CrawlingRecruitSerializer(serializers.Serializer):
                 "company": company,
             },
         )
-        recruit.categories.add(category)
+        recruit.categories.add(*categories)
         recruit.skills.add(*skills)
         status = "existed"
         if created:
