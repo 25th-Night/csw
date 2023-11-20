@@ -189,8 +189,9 @@ class RecruitSkillAdmin(admin.ModelAdmin):
 class JobSettingAdmin(admin.ModelAdmin):
     list_display = [
         "user_id",
+        "type",
         "site",
-        "min_career",
+        "get_min_career",
         "group",
         "country",
         "region",
@@ -203,12 +204,21 @@ class JobSettingAdmin(admin.ModelAdmin):
 
     @admin.display(description="사이트명")
     def site(self, obj):
+        return obj.get_type_display()
+
+    @admin.display(description="유형")
+    def site(self, obj):
         site_name = Site.objects.get(id=obj.site_id).name if obj.site_id else "전체"
         return site_name
 
     @admin.display(description="최소 경력년수")
-    def min_career(self, obj):
-        min_career = MIN_CAREER_TYPE[obj.min_career][1]
+    def get_min_career(self, obj):
+        if obj.min_career > 0:
+            min_career = MIN_CAREER_TYPE[obj.min_career][1]
+        elif obj.min_career == 0:
+            min_career = None
+        elif obj.min_career == -1:
+            min_career = "newcomer"
         return min_career
 
     @admin.display(description="그룹명")
