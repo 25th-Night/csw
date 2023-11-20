@@ -152,6 +152,22 @@ class RecruitView(APIView):
                 if response.status_code == 200:
                     recruit = response.json()
                     # print(f"recruit:{recruit}")
+
+                    skill_found = True
+                    recruit_skill_list = recruit["job"]["skill_tags"]
+                    if recruit_skill_list:
+                        recruit_skill_name_list = [
+                            recruit_skill["title"]
+                            for recruit_skill in recruit_skill_list
+                        ]
+                        for skill_name in skill_name_list:
+                            if skill_name not in recruit_skill_name_list:
+                                skill_found = False
+                                break
+
+                    if not skill_found:
+                        continue
+
                     country = recruit["job"]["address"]["country"]
                     region = recruit["job"]["address"]["location"]
                     detail_region_split1 = (
@@ -258,6 +274,10 @@ class RecruitView(APIView):
                     print(f'crawling "/{recruit_url_id}" recruit failed')
         except:
             crawling.delete()
+            return Response(
+                {"detail": "Failed to Crawling"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         serializer: RecruitSerializer = RecruitSerializer(
             crawling_recruit_list, many=True
