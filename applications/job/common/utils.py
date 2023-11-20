@@ -154,11 +154,17 @@ class Chrome:
         self.options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
         # 브라우저 창의 크기 지정
-        self.options.add_argument("--start-maximized")
         self.options.add_argument("--window-size=1920,1080")
+        self.options.add_argument("--disable-dev-shm-usage")
+        self.options.add_argument("--no-sandbox")
+        self.options.add_argument("--disable-extensions")
+        self.options.add_argument("--disable-infobars")
+        self.options.add_argument("--disable-notifications")
+        self.options.add_argument("--disable-features=VizDisplayCompositor")
+        self.options.add_argument("--disable-software-rasterizer")
 
         # 백그라운드로 실행
-        self.options.add_argument("headless")
+        self.options.add_argument("--headless")
 
         # gpu 미사용
         self.options.add_argument("--disable-gpu")
@@ -169,7 +175,13 @@ class Chrome:
         # )
 
         # 크롬 드라이버 최신 버전 설정
-        self.service = Service(executable_path=ChromeDriverManager().install())
+        chrome_driver_manager = (
+            settings.CHROME_DRIVER
+            if settings.CHROME_DRIVER is not None
+            else ChromeDriverManager().install()
+        )
+        print(f"settings.CHROME_DRIVER:{settings.CHROME_DRIVER}")
+        self.service = Service(executable_path=chrome_driver_manager)
 
         # 웹드라이버 생성
         self.driver = webdriver.Chrome(service=self.service, options=self.options)
