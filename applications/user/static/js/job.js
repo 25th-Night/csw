@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const JobURL = getJobURL();
     let getJobListURL = `${JobURL}/recruits`;
 
-    // Post Select Box 렌터링
+    // Post Select Box 렌더링
     const postFilterElementIdDict = {
         site: "post_filter_site",
         group: "post_filter_group",
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         company_tag: "post_filter_company_tag",
     };
 
-    // CrawlingSelect Box 렌터링
+    // CrawlingSelect Box 렌더링
     const crawlingFilterElementIdDict = {
         site: "crawling_filter_site",
         group: "crawling_filter_group",
@@ -206,30 +206,173 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     };
 
-    const saveSettingInCrawling = async (queryParameterDict, type) => {
-        console.log("saveSetting - queryParameterDict", queryParameterDict);
-        if (queryParameterDict.category_ids == "0") {
-            alert("Please search Category and select one");
+    // Setting 모달에서 SAVE 버튼 클릭 시 처리 이벤트
+    const saveSettingInCrawling = async (type_) => {
+        const saveSiteSetting = getElFromId(`setting_modal_${type_}_filter_site`).value;
+        const saveGroupSetting = getElFromId(`setting_modal_${type_}_filter_group`).value;
+        const saveCategorySetting = getElFromId(`setting_modal_${type_}_filter_category`).value;
+        const saveCountrySetting = getElFromId(`setting_modal_${type_}_filter_country`).value;
+        const saveRegionSetting = getElFromId(`setting_modal_${type_}_filter_region`).value;
+        const saveDetailRegionSetting = getElFromId(
+            `setting_modal_${type_}_filter_detail_region`
+        ).value;
+        const saveSkillSetting = getElFromId(`setting_modal_${type_}_search_skill`).getAttribute(
+            "data-id"
+        );
+        const saveCompanyTagSetting = getElFromId(
+            `setting_modal_${type_}_filter_company_tag`
+        ).value;
+        const saveMinCareerTagSetting = getElFromId(
+            `setting_modal_${type_}_filter_min_career`
+        ).value;
+
+        let type;
+        if (type_ == "post") {
+            type = 1;
+        } else if (type_ == "crawling") {
+            type = 2;
+        }
+
+        const saveSettingData = {
+            type: type,
+            site_id: saveSiteSetting,
+            group_id: saveGroupSetting,
+            category_ids: saveCategorySetting,
+            country_id: saveCountrySetting,
+            region_id: saveRegionSetting,
+            detail_region_id: saveDetailRegionSetting,
+            skill_ids: saveSkillSetting,
+            company_tag: saveCompanyTagSetting,
+            min_career: saveMinCareerTagSetting,
+        };
+
+        console.log("saveSettingData", saveSettingData);
+
+        if (saveGroupSetting == "0") {
+            alert("Please select Group");
+        } else if (saveCategorySetting == "0") {
+            alert("Please select Category");
         } else if (
-            queryParameterDict.group_id == "1" &&
-            queryParameterDict.category_ids != "0" &&
-            queryParameterDict.skill_ids == "0"
+            saveGroupSetting == "1" &&
+            saveCategorySetting != "0" &&
+            saveSkillSetting == "0"
         ) {
             alert("Please search Skill and select one");
-        } else if (queryParameterDict.min_career == "0") {
+        } else if (saveMinCareerTagSetting == "0") {
             alert("Please select Minimum Career Year");
         } else {
-            const data = setFetchData("put", queryParameterDict);
+            const data = setFetchData("put", saveSettingData);
             const requestURL = `${JobURL}/settings/${type}`;
             const get_response = await fetch(requestURL, data);
+            const responseData = await get_response.json();
             if (get_response.status == 200) {
                 alert("Saved successfully");
-                console.log("Saved Crawling Setting - queryParameterDict", queryParameterDict);
-                return get_response;
+                console.log("responseData", responseData);
+                return responseData;
             } else {
-                alert(await get_response.json());
+                console.log("errorData", responseData);
             }
         }
+    };
+
+    // Select Box 렌더링
+    const handleSelectBox = (type) => {
+        const siteSelectForCrawlingSetting = getElFromId(`${type}_filter_site`);
+        const groupSelectForCrawlingSetting = getElFromId(`${type}_filter_group`);
+        const categorySelectForCrawlingSetting = getElFromId(`${type}_filter_category`);
+        const countrySelectForCrawlingSetting = getElFromId(`${type}_filter_country`);
+        const regionSelectForCrawlingSetting = getElFromId(`${type}_filter_region`);
+
+        siteSelectForCrawlingSetting.addEventListener("change", () => {
+            const settingData = { site_id: getElFromId(`${type}_filter_site`) };
+            renderSelectBoxInCrawling(settingData, `${type}`);
+        });
+        groupSelectForCrawlingSetting.addEventListener("change", () => {
+            let categoryUrl = "categories";
+            const groupId = getElFromId(`${type}_filter_group`).value;
+            if (groupId > 0) {
+                categoryUrl += `?group_id=${groupId}`;
+            }
+            makeSelectOptions(
+                JobURL,
+                categoryUrl,
+                `${type}_filter_category`,
+                true,
+                null,
+                groupId,
+                "Group"
+            );
+
+            const skillInputBox = getElFromId(`${type}_search_skill`);
+            if (groupId != 1) {
+                skillInputBox.disabled = true;
+                skillInputBox.value = "";
+                skillInputBox.setAttribute("data-id", 0);
+                skillInputBox.placeholder = "Cannot use";
+                const skillRemoveBtn = getElFromId(`${type}_search_skill_remove_btn`);
+                if (skillRemoveBtn) {
+                    skillRemoveBtn.remove();
+                }
+            }
+        });
+
+        categorySelectForCrawlingSetting.addEventListener("change", () => {
+            const groupId = getElFromId(`${type}_filter_group`).value;
+            const categoryId = getElFromId(`${type}_filter_category`).value;
+
+            const skillInputBox = getElFromId(`${type}_search_skill`);
+            if (groupId == 1 && categoryId != 0) {
+                skillInputBox.disabled = false;
+                skillInputBox.placeholder = "search Skill";
+            } else {
+                skillInputBox.disabled = true;
+                skillInputBox.value = "";
+                skillInputBox.setAttribute("data-id", 0);
+                skillInputBox.placeholder = "Cannot use";
+                const skillRemoveBtn = getElFromId(`${type}_search_skill_remove_btn`);
+                if (skillRemoveBtn) {
+                    skillRemoveBtn.remove();
+                }
+            }
+        });
+
+        countrySelectForCrawlingSetting.addEventListener("change", () => {
+            let regionURL = "regions";
+            const countryId = getElFromId(`${type}_filter_country`).value;
+            if (countryId > 0) {
+                regionURL += `?country_id=${countryId}`;
+            }
+            makeSelectOptions(
+                JobURL,
+                regionURL,
+                `${type}_filter_region`,
+                true,
+                null,
+                countryId,
+                "Country"
+            );
+            const detailRegionSelect = getElFromId(`${type}_filter_detail_region`);
+            removeAllNode(detailRegionSelect);
+            const defaultOption = createNewElement("option", "default-option", `Country first`);
+            defaultOption.value = 0;
+            detailRegionSelect.appendChild(defaultOption);
+        });
+        regionSelectForCrawlingSetting.addEventListener("change", () => {
+            let detailRegionURL = "detail_regions";
+            const regionId = getElFromId(`${type}_filter_region`).value;
+            if (regionId > 0) {
+                detailRegionURL += `?region_id=${regionId}`;
+            }
+            makeSelectOptions(
+                JobURL,
+                detailRegionURL,
+                `${type}_filter_detail_region`,
+                true,
+                null,
+                regionId,
+                "Region"
+            );
+        });
     };
 
     // Wanted API를 통해 skill 존재 여부 확인
@@ -289,7 +432,10 @@ document.addEventListener("DOMContentLoaded", async function () {
                         crawlingSearchSkillList.appendChild(skillDiv);
                         skillDiv.addEventListener("click", () => {
                             queryParameterDict.skill_ids = skill.id;
+                            console.log("click - queryParameterDict", queryParameterDict);
                             crawlingSkillInput.value = skill.name;
+                            crawlingSkillInput.setAttribute("data-id", skill.id);
+                            removeAllNode(crawlingSearchSkillList);
                             crawlingSearchSkillList.classList.add("hidden");
                         });
                     });
@@ -316,7 +462,137 @@ document.addEventListener("DOMContentLoaded", async function () {
         // });
     }
 
-    // 상단 3버튼 - 버튼별 클릭 이벤트 추가
+    // setting 모달에 추가할 select box
+    const createSelectBoxInSetting = (type, selectType, idx = null, disable = false) => {
+        const className = `py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-${type}-filter-${selectType}`;
+        const id = `setting_modal_${type}_filter_${selectType.replace(/-/g, "_")}`;
+        const createdSelectBox = createNewElement("select", className, null, id);
+        const capitalizedSelectType = capitalize(selectType);
+        createdSelectBox.title = `select ${capitalizedSelectType}`;
+        createdSelectBox.placeholder = capitalizedSelectType;
+        createdSelectBox.tabIndex = idx;
+        createdSelectBox.disabled = disable;
+
+        return createdSelectBox;
+    };
+
+    const createInputBoxInSetting = async (type, selectType, idx = null, disabled = false) => {
+        const filterSkill = createNewElement(
+            "div",
+            `relative h-[35px] mx-3 text-left text-black bg-white setting-modal-${type}-filter-${selectType}`,
+            null,
+            `setting_modal_${type}_filter_${selectType.replace(/-/g, "_")}`
+        );
+        const capitalizedSelectType = capitalize(selectType);
+        filterSkill.title = `search ${capitalizedSelectType}`;
+        const filterSkillWrap = createNewElement(
+            "div",
+            `absolute flex justify-between w-full origin-top-left left-1 top-1 setting-modal-${type}-filter-${selectType}-wrap`,
+            null,
+            `setting_modal_${type}_filter_${selectType.replace(/-/g, "_")}-wrap`
+        );
+        const filterSkillInput = createNewElement(
+            "input",
+            `w-[calc(100%-24px)] outline-none setting-modal-${type}-search-${selectType}`,
+            null,
+            `setting_modal_${type}_search_${selectType.replace(/-/g, "_")}`
+        );
+
+        const filterSearchList = createNewElement(
+            "div",
+            `absolute left-1 z-10 items-center hidden origin-top-left bg-white rounded-md shadow-lg w-44 justify-evenly top-10 ring-1 ring-black ring-opacity-5 focus:outline-none setting-modal-${type}-search-${selectType}-list`,
+            null,
+            `setting_modal_${type}_search_${selectType.replace(/-/g, "_")}_list`
+        );
+
+        const createSearchRemoveBtn = (type, selectType, filterSearchList) => {
+            const filterRemoveSvg = `
+            <svg xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="#000000"
+                    class="w-6 h-6 p-1 mr-1 cursor-pointer"
+                    id="setting_modal_${type}_search_${selectType}_remove_btn">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>`;
+            const filterRemoveParser = new DOMParser();
+            const filterRemoveSvgDOM = filterRemoveParser.parseFromString(
+                filterRemoveSvg,
+                "image/svg+xml"
+            );
+            const filterRemoveSvgElement = filterRemoveSvgDOM.documentElement;
+            filterRemoveSvgElement.addEventListener("click", () => {
+                filterSkillInput.value = "";
+                filterSkillInput.setAttribute("data-id", 0);
+                queryParameterDict.skill_ids = 0;
+                filterRemoveSvgElement.remove();
+                removeAllNode(filterSearchList);
+                filterSearchList.classList.add("hidden");
+            });
+            return filterRemoveSvgElement;
+        };
+
+        const filterRemoveBtn = createSearchRemoveBtn(type, selectType, filterSearchList);
+
+        filterSkillWrap.appendChild(filterSkillInput);
+        filterSkillWrap.appendChild(filterRemoveBtn);
+        filterSkill.appendChild(filterSkillWrap);
+        filterSkill.appendChild(filterSearchList);
+
+        filterSkillInput.addEventListener(
+            "input",
+            debounce(() => {
+                skillSearch(
+                    filterSkillInput.value,
+                    `setting_modal_${type}`,
+                    crawlingQueryParameterDict
+                );
+            }, 500)
+        );
+
+        filterSkillInput.addEventListener("input", () => {
+            if (getElFromId(`setting_modal_${type}_search_${selectType}_remove_btn`)) {
+            } else {
+                const newFilterRemoveSvgElement = createSearchRemoveBtn(
+                    type,
+                    selectType,
+                    filterSearchList
+                );
+                filterSkillWrap.appendChild(newFilterRemoveSvgElement);
+            }
+            crawlingQueryParameterDict.skill_ids = 0;
+            filterSkillInput.setAttribute("data-id", 0);
+            console.log("change - crawlingQueryParameterDict", crawlingQueryParameterDict);
+        });
+
+        // Skill Input에 초기 데이터 설정
+        const getSkillResponse = await fetch(
+            `${JobURL}/skills?skill_ids=${crawlingQueryParameterDict.skill_ids}`
+        );
+        const getSkillData = await getSkillResponse.json();
+
+        if (getSkillResponse.status === 200) {
+            if (getSkillData.length) {
+                const skillInitName = getSkillData[0].name;
+                filterSkillInput.value = skillInitName;
+                filterSkillInput.setAttribute("data-id", getSkillData[0].id);
+            } else {
+                filterSkillInput.value = "All";
+                crawlingQueryParameterDict.skill_ids = "0";
+                filterSkillInput.setAttribute("data-id", 0);
+            }
+        } else {
+            console.log(getSkillData);
+            // displayErrorMessage("make-url", errorData);
+        }
+
+        return filterSkill;
+    };
+
+    /////////////////////////////////////////////////////// Page Header
+
+    //////////////////////////////// Job 관련 3개 버튼에 추가할 이벤트 정의
     const addClickEventToPostBtn = async () => {
         console.log("queryParameterDict", queryParameterDict);
         console.log("crawlingQueryParameterDict", crawlingQueryParameterDict);
@@ -490,8 +766,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         getElFromId("crawling_wrap").classList.add("hidden");
     };
 
-    /////////////////////////////////////////////////////// Page Header
-
     //////////////////////////////// Job 관련 3개 버튼 이벤트 추가
 
     const jobPostBtn = getElFromId("job_post_btn");
@@ -548,8 +822,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         settingModalPostData.appendChild(saveBtnForPostSetting);
 
         saveBtnForPostSetting.addEventListener("click", () => {
-            getElFromId();
-            saveSetting(queryParameterDict, 1);
+            saveSettingInCrawling("post");
         });
 
         // - Crawling Setting Save 버튼
@@ -564,241 +837,229 @@ document.addEventListener("DOMContentLoaded", async function () {
         settingModalCrawlingData.appendChild(saveBtnForCrawlingSetting);
 
         saveBtnForCrawlingSetting.addEventListener("click", () => {
-            saveSettingInCrawling(crawlingQueryParameterDict, 2);
+            saveSettingInCrawling("crawling");
         });
 
         ////////////////////////////////// Post Setting
         const postSettingResponse = await requestSetting(1);
         const getPostSettingStatus = postSettingResponse.status;
         const postSettingData = await postSettingResponse.json();
-
-        console.log(getPostSettingStatus, postSettingData);
+        console.log("postSettingData", postSettingData);
 
         let queryParameterDict = postSettingData;
 
         // Post Settings SelectBox 만들기
-        const siteSelectForPostSetting = getElFromId("setting_modal_post_filter_site");
-        const groupSelectForPostSetting = getElFromId("setting_modal_post_filter_group");
-        const categorySelectForPostSetting = getElFromId("setting_modal_post_filter_category");
-        const countrySelectForPostSetting = getElFromId("setting_modal_post_filter_country");
-        const regionSelectForPostSetting = getElFromId("setting_modal_post_filter_region");
-        const detailRegionSelectForPostSetting = getElFromId(
-            "setting_modal_post_filter_detail_region"
+        const siteSelectForPostSetting = createSelectBoxInSetting("post", "site", 1, true);
+        const groupSelectForPostSetting = createSelectBoxInSetting("post", "group", 2, false);
+        const categorySelectForPostSetting = createSelectBoxInSetting("post", "category", 3, false);
+        const countrySelectForPostSetting = createSelectBoxInSetting("post", "country", 4, true);
+        const regionSelectForPostSetting = createSelectBoxInSetting("post", "region", 5, false);
+        const detailRegionSelectForPostSetting = createSelectBoxInSetting(
+            "post",
+            "detail-region",
+            6,
+            false
         );
-        const skillSelectForPostSetting = getElFromId("setting_modal_post_filter_skill");
-        const companyTagSelectForPostSetting = getElFromId("setting_modal_post_filter_company_tag");
-        const minCareerSelectForPostSetting = getElFromId("setting_modal_post_filter_min_career");
+        const skillSearchForPostSetting = await createInputBoxInSetting("post", "skill", 7, false);
+        const companyTagSelectForPostSetting = createSelectBoxInSetting(
+            "post",
+            "company-tag",
+            8,
+            true
+        );
+        const minCareerSelectForPostSetting = createSelectBoxInSetting(
+            "post",
+            "min-career",
+            9,
+            false
+        );
 
-        renderSelectBox(queryParameterDict, "setting_modal_post");
+        const postSelectWrap = getElFromId("setting_modal_post_select_wrap");
+        postSelectWrap.appendChild(siteSelectForPostSetting);
+        postSelectWrap.appendChild(groupSelectForPostSetting);
+        postSelectWrap.appendChild(categorySelectForPostSetting);
+        postSelectWrap.appendChild(countrySelectForPostSetting);
+        postSelectWrap.appendChild(regionSelectForPostSetting);
+        postSelectWrap.appendChild(detailRegionSelectForPostSetting);
+        postSelectWrap.appendChild(skillSearchForPostSetting);
+        postSelectWrap.appendChild(companyTagSelectForPostSetting);
+        postSelectWrap.appendChild(minCareerSelectForPostSetting);
 
-        changeJobListURL(siteSelectForPostSetting, queryParameterDict, "site_id", [
-            "group_id",
-            "category_ids",
-            "country_id",
-            "region_id",
-            "detail_region_id",
-        ]);
-        changeJobListURL(groupSelectForPostSetting, queryParameterDict, "group_id", [
-            "category_ids",
-        ]);
-        changeJobListURL(categorySelectForPostSetting, queryParameterDict, "category_ids");
-        changeJobListURL(countrySelectForPostSetting, queryParameterDict, "country_id", [
-            "region_id",
-            "detail_region_id",
-        ]);
-        changeJobListURL(regionSelectForPostSetting, queryParameterDict, "region_id", [
-            "detail_region_id",
-        ]);
-        changeJobListURL(detailRegionSelectForPostSetting, queryParameterDict, "detail_region_id");
-        changeJobListURL(skillSelectForPostSetting, queryParameterDict, "skill_ids");
-        changeJobListURL(companyTagSelectForPostSetting, queryParameterDict, "company_tag_ids");
-        changeJobListURL(minCareerSelectForPostSetting, queryParameterDict, "min_career");
+        renderSelectBoxInCrawling(postSettingData, "setting_modal_post");
 
-        siteSelectForPostSetting.addEventListener("change", () => {
-            renderSelectBox(queryParameterDict, "setting_modal_post");
-        });
-        groupSelectForPostSetting.addEventListener("change", () => {
-            renderSelectBox(queryParameterDict, "setting_modal_post");
-        });
-        categorySelectForPostSetting.addEventListener("change", () => {
-            renderSelectBox(queryParameterDict, "setting_modal_post");
-        });
-        countrySelectForPostSetting.addEventListener("change", () => {
-            renderSelectBox(queryParameterDict, "setting_modal_post");
-        });
-        regionSelectForPostSetting.addEventListener("change", () => {
-            renderSelectBox(queryParameterDict, "setting_modal_post");
-        });
+        handleSelectBox("setting_modal_post");
+
+        // siteSelectForPostSetting.addEventListener("change", () => {
+        //     renderSelectBox(queryParameterDict, "setting_modal_post");
+        // });
+        // groupSelectForPostSetting.addEventListener("change", () => {
+        //     renderSelectBox(queryParameterDict, "setting_modal_post");
+        // });
+        // categorySelectForPostSetting.addEventListener("change", () => {
+        //     renderSelectBox(queryParameterDict, "setting_modal_post");
+        // });
+        // countrySelectForPostSetting.addEventListener("change", () => {
+        //     renderSelectBox(queryParameterDict, "setting_modal_post");
+        // });
+        // regionSelectForPostSetting.addEventListener("change", () => {
+        //     renderSelectBox(queryParameterDict, "setting_modal_post");
+        // });
 
         ////////////////////////////////// Crawling Setting
         const crawlingSettingResponse = await requestSetting(2);
         const getCrawlingSettingStatus = crawlingSettingResponse.status;
         const crawlingSettingData = await crawlingSettingResponse.json();
+        console.log("crawlingSettingData", crawlingSettingData);
 
         let crawlingQueryParameterDict = crawlingSettingData;
 
-        // Skill Input 버튼
-        const crawlingSkillInputInSetting = createNewElement(
-            "input",
-            "w-[calc(100%-24px)] outline-none setting-modal-crawling-search-skill",
-            null,
-            "setting_modal_crawling_search_skill"
-        );
-        crawlingSkillInputInSetting.setAttribute("type", "text");
-        const crawlingSkillInputWrapInSetting = getElFromId(
-            "setting_modal_crawling_search_skill_wrap"
-        );
-        crawlingSkillInputWrapInSetting.insertBefore(
-            crawlingSkillInputInSetting,
-            crawlingSkillInputWrapInSetting.firstChild
-        );
-
-        // Skill Input에 초기 데이터 설정
-        const getSkillResponse = await fetch(
-            `${JobURL}/skills?skill_ids=${crawlingQueryParameterDict.skill_ids}`
-        );
-        const getSkillData = await getSkillResponse.json();
-        console.log("getSkillData", getSkillData);
-
-        if (getSkillResponse.status === 200) {
-            if (getSkillData.length) {
-                const skillInitName = getSkillData[0].name;
-                crawlingSkillInputInSetting.value = skillInitName;
-            } else {
-                crawlingSkillInputInSetting.value = "All";
-                crawlingQueryParameterDict.skill_ids = "0";
-            }
-            const searchSKillInputRemoveSvgBtn = getElFromId(
-                "setting_modal_crawling_search_skill_remove_btn"
-            );
-            searchSKillInputRemoveSvgBtn.classList.remove("hidden");
-
-            searchSKillInputRemoveSvgBtn.addEventListener("click", () => {
-                crawlingSkillInputInSetting.value = "";
-                crawlingQueryParameterDict.skill_ids = 0;
-                searchSKillInputRemoveSvgBtn.classList.add("hidden");
-            });
-        } else {
-            console.log(getSkillData);
-            // displayErrorMessage("make-url", errorData);
-        }
-        crawlingSkillInputInSetting.setAttribute("placeholder", "search Skill");
-
-        crawlingSkillInputInSetting.addEventListener(
-            "input",
-            debounce(() => {
-                skillSearch(
-                    crawlingSkillInputInSetting.value,
-                    "setting_modal_crawling",
-                    crawlingQueryParameterDict
-                );
-                getElFromId("setting_modal_crawling_search_skill_remove_btn").classList.remove(
-                    "hidden"
-                );
-            }, 500)
-        );
-
         // Crawling Settings SelectBox 만들기
-        renderSelectBoxInCrawling(crawlingQueryParameterDict, "setting_modal_crawling");
-
-        const siteSelectForCrawlingSetting = getElFromId("setting_modal_crawling_filter_site");
-        const groupSelectForCrawlingSetting = getElFromId("setting_modal_crawling_filter_group");
-        const categorySelectForCrawlingSetting = getElFromId(
-            "setting_modal_crawling_filter_category"
+        const siteSelectForCrawlingSetting = createSelectBoxInSetting("crawling", "site", 10, true);
+        const groupSelectForCrawlingSetting = createSelectBoxInSetting(
+            "crawling",
+            "group",
+            11,
+            false
         );
-        const countrySelectForCrawlingSetting = getElFromId(
-            "setting_modal_crawling_filter_country"
+        const categorySelectForCrawlingSetting = createSelectBoxInSetting(
+            "crawling",
+            "category",
+            12,
+            false
         );
-        const regionSelectForCrawlingSetting = getElFromId("setting_modal_crawling_filter_region");
-        const detailRegionSelectForCrawlingSetting = getElFromId(
-            "setting_modal_crawling_filter_detail_region"
+        const countrySelectForCrawlingSetting = createSelectBoxInSetting(
+            "crawling",
+            "country",
+            13,
+            true
         );
-        const skillSearchForCrawlingSetting = getElFromId("setting_modal_crawling_search_skill");
-        const companyTagSelectForCrawlingSetting = getElFromId(
-            "setting_modal_crawling_filter_company_tag"
+        const regionSelectForCrawlingSetting = createSelectBoxInSetting(
+            "crawling",
+            "region",
+            14,
+            false
         );
-        const minCareerSelectForCrawlingSetting = getElFromId(
-            "setting_modal_crawling_filter_min_career"
+        const detailRegionSelectForCrawlingSetting = createSelectBoxInSetting(
+            "crawling",
+            "detail-region",
+            15,
+            false
         );
-
-        changeJobListURL(siteSelectForCrawlingSetting, crawlingQueryParameterDict, "site_id", [
-            "group_id",
-            "category_ids",
-            "country_id",
-            "region_id",
-            "detail_region_id",
-        ]);
-        changeJobListURL(groupSelectForCrawlingSetting, crawlingQueryParameterDict, "group_id", [
-            "category_ids",
-        ]);
-        changeJobListURL(
-            categorySelectForCrawlingSetting,
-            crawlingQueryParameterDict,
-            "category_ids"
+        const skillSearchForCrawlingSetting = await createInputBoxInSetting(
+            "crawling",
+            "skill",
+            16,
+            false
         );
-        changeJobListURL(
-            countrySelectForCrawlingSetting,
-            crawlingQueryParameterDict,
-            "country_id",
-            ["region_id", "detail_region_id"]
+        const companyTagSelectForCrawlingSetting = createSelectBoxInSetting(
+            "crawling",
+            "company-tag",
+            17,
+            true
         );
-        changeJobListURL(regionSelectForCrawlingSetting, crawlingQueryParameterDict, "region_id", [
-            "detail_region_id",
-        ]);
-        changeJobListURL(
-            detailRegionSelectForCrawlingSetting,
-            crawlingQueryParameterDict,
-            "detail_region_id"
-        );
-        changeJobListURL(
-            companyTagSelectForCrawlingSetting,
-            crawlingQueryParameterDict,
-            "company_tag_ids"
-        );
-        changeJobListURL(
-            minCareerSelectForCrawlingSetting,
-            crawlingQueryParameterDict,
-            "min_career"
+        const minCareerSelectForCrawlingSetting = createSelectBoxInSetting(
+            "crawling",
+            "min-career",
+            18,
+            false
         );
 
-        siteSelectForCrawlingSetting.addEventListener("change", () => {
-            renderSelectBoxInCrawling(crawlingQueryParameterDict, "setting_modal_crawling");
-        });
-        groupSelectForCrawlingSetting.addEventListener("change", () => {
-            renderSelectBoxInCrawling(crawlingQueryParameterDict, "setting_modal_crawling");
-        });
-        categorySelectForCrawlingSetting.addEventListener("change", () => {
-            const crawlingSkillInputInSetting = getElFromId("setting_modal_crawling_search_skill");
-            if (
-                crawlingQueryParameterDict.group_id == 1 &&
-                crawlingQueryParameterDict.category_ids != 0
-            ) {
-                if (crawlingSkillInputInSetting) {
-                    crawlingSkillInputInSetting.disabled = false;
-                }
-            } else {
-                crawlingSkillInputInSetting.value = "";
-                crawlingQueryParameterDict.skill_ids = 0;
-                crawlingSkillInputInSetting.disabled = true;
-            }
-        });
-        countrySelectForCrawlingSetting.addEventListener("change", () => {
-            renderSelectBoxInCrawling(crawlingQueryParameterDict, "setting_modal_crawling");
-        });
-        regionSelectForCrawlingSetting.addEventListener("change", () => {
-            renderSelectBoxInCrawling(crawlingQueryParameterDict, "setting_modal_crawling");
-        });
+        const crawlingSelectWrap = getElFromId("setting_modal_crawling_select_wrap");
+        crawlingSelectWrap.appendChild(siteSelectForCrawlingSetting);
+        crawlingSelectWrap.appendChild(groupSelectForCrawlingSetting);
+        crawlingSelectWrap.appendChild(categorySelectForCrawlingSetting);
+        crawlingSelectWrap.appendChild(countrySelectForCrawlingSetting);
+        crawlingSelectWrap.appendChild(regionSelectForCrawlingSetting);
+        crawlingSelectWrap.appendChild(detailRegionSelectForCrawlingSetting);
+        crawlingSelectWrap.appendChild(skillSearchForCrawlingSetting);
+        crawlingSelectWrap.appendChild(companyTagSelectForCrawlingSetting);
+        crawlingSelectWrap.appendChild(minCareerSelectForCrawlingSetting);
 
-        // Skill Search
-        const crawlingSearchSkillListInSetting = createNewElement(
-            "div",
-            "absolute left-1 z-20 items-center hidden origin-top-left bg-white rounded-md shadow-lg w-44 justify-evenly top-10 ring-1 ring-black ring-opacity-5 focus:outline-none setting-modal-crawling-search-skill-list",
-            null,
-            "setting_modal_crawling_search_skill_list"
-        );
+        renderSelectBoxInCrawling(crawlingSettingData, "setting_modal_crawling");
 
-        const skillBtnWrapInSetting = getElFromId("setting_modal_crawling_filter_skill");
-        skillBtnWrapInSetting.appendChild(crawlingSearchSkillListInSetting);
+        handleSelectBox("setting_modal_crawling");
+
+        // siteSelectForCrawlingSetting.addEventListener("change", () => {
+        //     const settingData = { site_id: getElFromId("setting_modal_crawling_filter_site") };
+        //     renderSelectBoxInCrawling(settingData, "setting_modal_crawling");
+        // });
+        // groupSelectForCrawlingSetting.addEventListener("change", () => {
+        //     let categoryUrl = "categories";
+        //     const groupId = getElFromId("setting_modal_crawling_filter_group").value;
+        //     if (groupId > 0) {
+        //         categoryUrl += `?group_id=${groupId}`;
+        //     }
+        //     makeSelectOptions(
+        //         JobURL,
+        //         categoryUrl,
+        //         "setting_modal_crawling_filter_category",
+        //         true,
+        //         null,
+        //         groupId,
+        //         "Group"
+        //     );
+
+        //     const skillInputBox = getElFromId(`setting_modal_crawling_search_skill`);
+        //     if (groupId != 1) {
+        //         skillInputBox.disabled = true;
+        //         skillInputBox.value = "";
+        //         skillInputBox.setAttribute("data-id", 0);
+        //         getElFromId("setting_modal_crawling_search_skill_remove_btn").remove();
+        //     }
+        // });
+
+        // categorySelectForCrawlingSetting.addEventListener("change", () => {
+        //     const groupId = getElFromId("setting_modal_crawling_filter_group").value;
+        //     const categoryId = getElFromId("setting_modal_crawling_filter_category").value;
+
+        //     const skillInputBox = getElFromId(`setting_modal_crawling_search_skill`);
+        //     if (groupId == 1 && categoryId != 0) {
+        //         skillInputBox.disabled = false;
+        //     } else {
+        //         skillInputBox.disabled = true;
+        //         skillInputBox.value = "";
+        //         skillInputBox.setAttribute("data-id", 0);
+        //         getElFromId("setting_modal_crawling_search_skill_remove_btn").remove();
+        //     }
+        // });
+
+        // countrySelectForCrawlingSetting.addEventListener("change", () => {
+        //     let regionURL = "regions";
+        //     const countryId = getElFromId("setting_modal_crawling_filter_country").value;
+        //     if (countryId > 0) {
+        //         regionURL += `?country_id=${countryId}`;
+        //     }
+        //     makeSelectOptions(
+        //         JobURL,
+        //         regionURL,
+        //         "setting_modal_crawling_filter_region",
+        //         true,
+        //         null,
+        //         countryId,
+        //         "Country"
+        //     );
+        //     const detailRegionSelect = getElFromId("setting_modal_crawling_filter_detail_region");
+        //     removeAllNode(detailRegionSelect);
+        //     const defaultOption = createNewElement("option", "default-option", `Country first`);
+        //     defaultOption.value = 0;
+        //     detailRegionSelect.appendChild(defaultOption);
+        // });
+        // regionSelectForCrawlingSetting.addEventListener("change", () => {
+        //     let detailRegionURL = "detail_regions";
+        //     const regionId = getElFromId("setting_modal_crawling_filter_region").value;
+        //     if (regionId > 0) {
+        //         detailRegionURL += `?region_id=${regionId}`;
+        //     }
+        //     makeSelectOptions(
+        //         JobURL,
+        //         detailRegionURL,
+        //         "setting_modal_crawling_filter_detail_region",
+        //         true,
+        //         null,
+        //         regionId,
+        //         "Region"
+        //     );
+        // });
 
         // 3개 영역 중 클릭한 버튼의 영역만 보이게 하기
         getElFromId("crawling_wrap").classList.remove("hidden");
@@ -831,31 +1092,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         settingModalCloseSvgBtn.addEventListener("click", async () => {
             // 모달 숨기기
             settingModal.classList.add("hidden");
+            // close 버튼 제거
+            settingModalCloseSvgBtn.remove();
 
             // 모달 내부 데이터 비우기
-            removeAllNode(getElFromId("setting_modal_btn_wrap"));
-            removeAllNode(siteSelectForPostSetting);
-            removeAllNode(groupSelectForPostSetting);
-            removeAllNode(categorySelectForPostSetting);
-            removeAllNode(countrySelectForPostSetting);
-            removeAllNode(regionSelectForPostSetting);
-            removeAllNode(detailRegionSelectForPostSetting);
-            removeAllNode(skillSelectForPostSetting);
-            removeAllNode(companyTagSelectForPostSetting);
-            minCareerSelectForPostSetting.value = 0;
+            const postSelectWrap = getElFromId("setting_modal_post_select_wrap");
+            removeAllNode(postSelectWrap);
             saveBtnForPostSetting.remove();
-            removeAllNode(siteSelectForCrawlingSetting);
-            removeAllNode(groupSelectForCrawlingSetting);
-            removeAllNode(categorySelectForCrawlingSetting);
-            removeAllNode(countrySelectForCrawlingSetting);
-            removeAllNode(regionSelectForCrawlingSetting);
-            removeAllNode(detailRegionSelectForCrawlingSetting);
-            removeAllNode(companyTagSelectForCrawlingSetting);
-            minCareerSelectForCrawlingSetting.value = 0;
+
+            const crawlingSelectWrap = getElFromId("setting_modal_crawling_select_wrap");
+            removeAllNode(crawlingSelectWrap);
             saveBtnForCrawlingSetting.remove();
-            if (skillSearchForCrawlingSetting) {
-                skillSearchForCrawlingSetting.remove();
-            }
 
             // body의 스크롤 원상복구
             const body = getElFromSel("body");
@@ -1512,52 +1759,70 @@ document.addEventListener("DOMContentLoaded", async function () {
             queryParameterDict.company_tag_ids
         );
 
-        // min career year에 초기 데이터 설정
-        getElFromId(`${type}_filter_min_career`).value = queryParameterDict.min_career;
+        const minCareerSelectBox = getElFromId(`${type}_filter_min_career`);
+        const minCareerInfo = [
+            [0, "All"],
+            [-1, "newcomer"],
+            [1, "1 year ↑"],
+            [2, "2 year ↑"],
+            [3, "3 year ↑"],
+            [4, "4 year ↑"],
+            [5, "5 year ↑"],
+            [6, "6 year ↑"],
+            [7, "7 year ↑"],
+            [8, "8 year ↑"],
+            [9, "9 year ↑"],
+            [10, "10 year ↑"],
+        ];
+        minCareerInfo.forEach((minCareer) => {
+            const minCareerOption = createNewElement(
+                "option",
+                "text-[#373737] select-option",
+                null,
+                `${type}_filter_min_career_${minCareer[0]}`
+            );
+            minCareerOption.value = minCareer[0];
+            minCareerOption.textContent = minCareer[1];
+            minCareerSelectBox.appendChild(minCareerOption);
+        });
+        minCareerSelectBox.value = queryParameterDict.min_career;
     };
 
-    const renderSelectBoxInCrawling = async (queryParameterDict, type) => {
+    const renderSelectBoxInCrawling = async (settingData, type) => {
         // Select box 만들기
 
-        console.log("renderSelectBoxInCrawling - queryParameterDict", queryParameterDict);
         let groupURL;
         let categoryUrl = "categories";
         let countryUrl;
         let regionURL = "regions";
         let detailRegionURL = "detail_regions";
 
-        if (queryParameterDict.group_id > 0) {
-            categoryUrl += `?group_id=${queryParameterDict.group_id}`;
+        if (settingData.group_id > 0) {
+            categoryUrl += `?group_id=${settingData.group_id}`;
         }
 
-        if (queryParameterDict.country_id > 0) {
-            regionURL += `?country_id=${queryParameterDict.country_id}`;
-            detailRegionURL += `?country_id=${queryParameterDict.country_id}`;
+        if (settingData.country_id > 0) {
+            regionURL += `?country_id=${settingData.country_id}`;
+            detailRegionURL += `?country_id=${settingData.country_id}`;
         }
 
-        if (queryParameterDict.region_id > 0) {
-            if (queryParameterDict.country_id > 0) {
-                detailRegionURL += `&region_id=${queryParameterDict.region_id}`;
+        if (settingData.region_id > 0) {
+            if (settingData.country_id > 0) {
+                detailRegionURL += `&region_id=${settingData.region_id}`;
             } else {
-                detailRegionURL += `?region_id=${queryParameterDict.region_id}`;
+                detailRegionURL += `?region_id=${settingData.region_id}`;
             }
         }
 
-        makeSelectOptions(JobURL, "sites", `${type}_filter_site`, true, queryParameterDict.site_id);
-        makeSelectOptions(
-            JobURL,
-            "groups",
-            `${type}_filter_group`,
-            true,
-            queryParameterDict.group_id
-        );
+        makeSelectOptions(JobURL, "sites", `${type}_filter_site`, true, settingData.site_id);
+        makeSelectOptions(JobURL, "groups", `${type}_filter_group`, true, settingData.group_id);
         makeSelectOptions(
             JobURL,
             categoryUrl,
             `${type}_filter_category`,
             true,
-            queryParameterDict.category_ids,
-            queryParameterDict.group_id,
+            settingData.category_ids,
+            settingData.group_id,
             "Group"
         );
         makeSelectOptions(
@@ -1565,15 +1830,15 @@ document.addEventListener("DOMContentLoaded", async function () {
             "countries",
             `${type}_filter_country`,
             true,
-            queryParameterDict.country_id
+            settingData.country_id
         );
         makeSelectOptions(
             JobURL,
             regionURL,
             `${type}_filter_region`,
             true,
-            queryParameterDict.region_id,
-            queryParameterDict.country_id,
+            settingData.region_id,
+            settingData.country_id,
             "Country"
         );
         makeSelectOptions(
@@ -1581,8 +1846,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             detailRegionURL,
             `${type}_filter_detail_region`,
             true,
-            queryParameterDict.detail_region_id,
-            queryParameterDict.region_id,
+            settingData.detail_region_id,
+            settingData.region_id,
             "Region"
         );
         makeSelectOptions(
@@ -1590,55 +1855,51 @@ document.addEventListener("DOMContentLoaded", async function () {
             "company_tags",
             `${type}_filter_company_tag`,
             true,
-            queryParameterDict.company_tag_ids
+            settingData.company_tag_ids
         );
-        getElFromId(`${type}_filter_company_tag`).disabled = true;
 
-        // min career year에 초기 데이터 설정
-        getElFromId(`${type}_filter_min_career`).value = queryParameterDict.min_career;
-
-        // Skill Input에 초기 데이터 설정
-        if (queryParameterDict.group_id == 1 && queryParameterDict.category_ids != 0) {
-            const crawlingSkillInput = getElFromId(`${type}_search_skill`);
-
-            if (crawlingSkillInput) {
-                crawlingSkillInput.disabled = false;
-                // const getSkillResponse = await fetch(
-                //     `${JobURL}/skills?skill_ids=${queryParameterDict.skill_ids}`
-                // );
-                // const getSkillData = await getSkillResponse.json();
-                // console.log("getSkillData", getSkillData);
-
-                // if (getSkillResponse.status === 200) {
-                //     if (getSkillData.length) {
-                //         const skillInitName = getSkillData[0].name;
-                //         crawlingSkillInput.value = skillInitName;
-                //     } else {
-                //         crawlingSkillInput.value = "All";
-                //         queryParameterDict.skill_ids = "0";
-                //     }
-                // } else {
-                //     console.log(getSkillData);
-                //     // displayErrorMessage("make-url", errorData);
-                // }
-                // crawlingSkillInput.setAttribute("placeholder", "search Skill");
-
-                // crawlingSkillInput.addEventListener(
-                //     "input",
-                //     debounce(() => {
-                //         skillSearch(crawlingSkillInput.value, "crawling_search_skill_list");
-                //         getElFromId("search_skill_remove_btn").classList.remove("hidden");
-                //     }, 500)
-                // );
-            }
+        const skillInputBox = getElFromId(`${type}_search_skill`);
+        if (settingData.skills.length) {
+            skillInputBox.value = settingData.skills[0].name;
+            skillInputBox.setAttribute("data-id", settingData.skills[0].id);
         } else {
-            const crawlingSkillInput = getElFromId(`${type}_search_skill`);
-            if (crawlingSkillInput) {
-                crawlingSkillInput.value = "";
-                crawlingSkillInput.disabled = true;
-            }
-            queryParameterDict.skill_ids = 0;
+            skillInputBox.value = "All";
+            skillInputBox.setAttribute("data-id", 0);
         }
+
+        if (settingData.group_id == 1 && settingData.category_ids != 0) {
+            skillInputBox.disabled = false;
+        } else {
+            skillInputBox.disabled = true;
+        }
+
+        const minCareerSelectBox = getElFromId(`${type}_filter_min_career`);
+        const minCareerInfo = [
+            [0, "All"],
+            [-1, "newcomer"],
+            [1, "1 year ↑"],
+            [2, "2 year ↑"],
+            [3, "3 year ↑"],
+            [4, "4 year ↑"],
+            [5, "5 year ↑"],
+            [6, "6 year ↑"],
+            [7, "7 year ↑"],
+            [8, "8 year ↑"],
+            [9, "9 year ↑"],
+            [10, "10 year ↑"],
+        ];
+        minCareerInfo.forEach((minCareer) => {
+            const minCareerOption = createNewElement(
+                "option",
+                "text-[#373737] select-option",
+                null,
+                `${type}_filter_min_career_${minCareer[0]}`
+            );
+            minCareerOption.value = minCareer[0];
+            minCareerOption.textContent = minCareer[1];
+            minCareerSelectBox.appendChild(minCareerOption);
+        });
+        minCareerSelectBox.value = settingData.min_career;
     };
 
     // 채용공고 리스트 렌더링
@@ -1746,8 +2007,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         const copyRight = createNewElement(
             "a",
             "hover:text-[blue] font-semibold underline fixed left-1/2 top-[calc(50%+50px)] lg:top-[calc(50%+100px)] translate-x-[-50%] z-10 loading-io",
-            "Loding Icon is provided by loading.io",
-            "loding_io"
+            "Loading Icon is provided by loading.io",
+            "loading_io"
         );
         copyRight.href = "https://loading.io/";
         const loadingImg = createNewElement(
