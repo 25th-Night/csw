@@ -23,7 +23,7 @@ class Group(CommonModel):
 
 
 class Category(CommonModel):
-    name = models.CharField(verbose_name="카테고리명", max_length=20, unique=True)
+    name = models.CharField(verbose_name="카테고리명", max_length=50, unique=True)
     group = models.ForeignKey(
         Group, verbose_name="그룹", on_delete=models.CASCADE, related_name="categories"
     )
