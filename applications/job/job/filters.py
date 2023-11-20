@@ -1,7 +1,7 @@
 from django_filters import rest_framework as filters
 from django.db.models.query import QuerySet
 
-from job.models import Category, DetailRegion, Recruit, Region
+from job.models import Category, DetailRegion, Recruit, Region, Skill
 
 
 class CategoryFilter(filters.FilterSet):
@@ -31,6 +31,28 @@ class DetailRegionFilter(filters.FilterSet):
         fields = ["region_id"]
 
 
+class SkillFilter(filters.FilterSet):
+    skill_ids = filters.CharFilter(method="filter_by_skill_ids")
+    name = filters.CharFilter(field_name="name", lookup_expr="icontains")
+
+    class Meta:
+        model = Skill
+        fields = [
+            "skill_ids",
+            "name",
+        ]
+
+    def filter_by_skill_ids(self, queryset, name, value):
+        skill_list = list(map(int, value.split(",")))
+        print(f"skill_list:{skill_list}")
+        result = queryset
+
+        result: QuerySet = result.filter(id__in=skill_list)
+        print(f"result:{result}")
+
+        return result
+
+
 class RecruitFilter(filters.FilterSet):
     site_id = filters.NumberFilter(field_name="site", lookup_expr="exact")
     country_id = filters.NumberFilter(
@@ -46,7 +68,7 @@ class RecruitFilter(filters.FilterSet):
     company_tag_ids = filters.CharFilter(method="filter_by_company_tag_ids")
     category_ids = filters.CharFilter(method="filter_by_category_ids")
     group_id = filters.CharFilter(method="filter_by_group_id")
-    min_career = filters.NumberFilter(field_name="min_career", lookup_expr="exact")
+    min_career = filters.NumberFilter(method="filter_by_min_career")
     # min_career = filters.CharFilter(method="filter_by_min_career")
 
     class Meta:
@@ -96,6 +118,13 @@ class RecruitFilter(filters.FilterSet):
 
     def filter_by_group_id(self, queryset, name, value):
         return queryset.filter(categories__group__id=value)
+
+    def filter_by_min_career(self, queryset, name, value):
+        if value == -1:
+            result = queryset.filter(min_career=0)
+        else:
+            result = queryset.filter(min_career=value)
+        return result
 
     # def filter_by_min_career(self, queryset, name, value):
     #     result = queryset
