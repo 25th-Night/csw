@@ -14,7 +14,7 @@
                      id="setting_modal_btn_wrap"></div>
             </div>
         </div>
-        <div class="h-[600px] overflow-y-scroll scrollbar-hide  setting-modal-body-wrap"
+        <div class="h-[600px] overflow-y-scroll scrollbar-hide setting-modal-body-wrap"
              id="setting_modal_body_wrap">
             <div class="flex flex-col items-center justify-start w-full my-6 lg:flex-row setting-modal-post-wrap"
                  id="setting_modal_post_wrap">
@@ -23,86 +23,7 @@
                 <div class="flex w-full pt-4 whitespace-pre border-white lg:pl-4 lg:flex-1 lg:border-l lg:pt-0 post-data"
                      id="setting_modal_post_data">
                     <div class="grid flex-1 grid-cols-2 min-[800px]:grid-cols-3 gap-y-4 text-black setting-modal-post-select-wrap"
-                         id="setting_modal_post_select_wrap">
-                        <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-post-filter-site"
-                                title="select Site"
-                                id="setting_modal_post_filter_site"
-                                name="setting-modal-post-filter-site"
-                                tabindex="1"
-                                placeholder="Site"
-                                autofocus=""
-                                disabled></select>
-                        <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-post-filter-group"
-                                title="select Group"
-                                id="setting_modal_post_filter_group"
-                                name="setting-modal-post-filter-group"
-                                tabindex="1"
-                                placeholder="Group"
-                                autofocus=""></select>
-                        <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-post-filter-category"
-                                title="select Category"
-                                id="setting_modal_post_filter_category"
-                                name="setting-modal-post-filter-category"
-                                tabindex="2"
-                                placeholder="Category"
-                                autofocus=""></select>
-                        <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-post-filter-skill"
-                                title="select Skill"
-                                id="setting_modal_post_filter_skill"
-                                name="setting-modal-post-filter-skill"
-                                tabindex="1"
-                                placeholder="SKill"
-                                autofocus=""></select>
-                        <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-post-filter-company-tag"
-                                title="select Company Tag"
-                                id="setting_modal_post_filter_company_tag"
-                                name="setting-modal-post-filter-company-tag"
-                                tabindex="1"
-                                placeholder="Company Tag"
-                                autofocus=""
-                                disabled></select>
-                        <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-post-filter-min-career"
-                                title="select Minimum Career"
-                                id="setting_modal_post_filter_min_career"
-                                name="setting-modal-post-filter-min-career"
-                                tabindex="1"
-                                placeholder="Minimum Career"
-                                autofocus="">
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_all"
-                                    value="0">All</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_post_filter_min_career_0"
-                                    value="-1">newcomer</option>
-                            {% for _ in "x"|rjust:10 %}
-                                <option class="text-[#373737] select-option"
-                                        id="setting_modal_crawling_filter_min_career_{{ forloop.counter }}"
-                                        value="{{ forloop.counter }}">{{ forloop.counter }} year ↑</option>
-                            {% endfor %}
-                        </select>
-                        <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-post-filter-country"
-                                title="select Country"
-                                id="setting_modal_post_filter_country"
-                                name="setting-modal-post-filter-country"
-                                tabindex="3"
-                                placeholder="Country"
-                                autofocus=""
-                                disabled></select>
-                        <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-post-filter-region"
-                                title="select Region"
-                                id="setting_modal_post_filter_region"
-                                name="setting-modal-post-filter-region"
-                                tabindex="4"
-                                placeholder="Region"
-                                autofocus=""></select>
-                        <select class="py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-post-filter-detail-region"
-                                title="select Detail Region"
-                                id="setting_modal_post_filter_detail_region"
-                                name="setting-modal-post-filter-detail-region"
-                                tabindex="5"
-                                placeholder="Detail-Region"
-                                autofocus=""></select>
-                    </div>
+                         id="setting_modal_post_select_wrap"></div>
                 </div>
             </div>
             <hr class="w-1/2 my-2">
@@ -113,95 +34,7 @@
                 <div class="flex w-full pt-4 whitespace-pre border-white lg:pl-4 lg:flex-1 lg:border-l lg:pt-0 crawling-data"
                      id="setting_modal_crawling_data">
                     <div class="grid flex-1 grid-cols-2 min-[800px]:grid-cols-3 gap-y-4 text-black setting-modal-crawling-select-wrap"
-                         id="setting_modal_crawling_select_wrap">
-                        <select class="block py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-crawling-filter-site"
-                                title="select Site"
-                                id="setting_modal_crawling_filter_site"
-                                name="setting-modal-crawling-filter-site"
-                                tabindex="1"
-                                placeholder="Site"
-                                autofocus=""
-                                disabled></select>
-                        <select class="block py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-crawling-filter-group"
-                                title="select Group"
-                                id="setting_modal_crawling_filter_group"
-                                name="setting-modal-crawling-filter-group"
-                                tabindex="1"
-                                placeholder="Group"
-                                autofocus=""></select>
-                        <select class="block py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-crawling-filter-category"
-                                title="select Category"
-                                id="setting_modal_crawling_filter_category"
-                                name="setting-modal-crawling-filter-category"
-                                tabindex="2"
-                                placeholder="Category"
-                                autofocus=""></select>
-                        <div class="relative h-[35px] mx-3 text-left text-black bg-white setting-modal-crawling-filter-skill"
-                             title="search Skill"
-                             id="setting_modal_crawling_filter_skill">
-                            <div class="absolute flex justify-between w-full origin-top-left left-1 top-1 setting-modal-crawling-search-skill-wrap"
-                                 id="setting_modal_crawling_search_skill_wrap">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     fill="none"
-                                     viewBox="0 0 24 24"
-                                     stroke-width="2"
-                                     stroke="#000000"
-                                     class="w-6 h-6 p-1 mr-1 cursor-pointer"
-                                     id="setting_modal_crawling_search_skill_remove_btn">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <select class="block py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-crawling-filter-company-tag"
-                                title="select Company Tag"
-                                id="setting_modal_crawling_filter_company_tag"
-                                name="setting-modal-crawling-filter-company-tag"
-                                tabindex="1"
-                                placeholder="Company Tag"
-                                autofocus=""
-                                disabled></select>
-                        <select class="block py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-crawling-filter-min-career"
-                                title="select Minimum Career"
-                                id="setting_modal_crawling_filter_min_career"
-                                name="setting-modal-crawling-filter-min-career"
-                                tabindex="1"
-                                placeholder="Minimum Career"
-                                autofocus="">
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_all"
-                                    value="0">All</option>
-                            <option class="text-[#373737] select-option"
-                                    id="setting_modal_crawling_filter_min_career_0"
-                                    value="-1">newcomer</option>
-                            {% for _ in "x"|rjust:10 %}
-                                <option class="text-[#373737] select-option"
-                                        id="setting_modal_crawling_filter_min_career_{{ forloop.counter }}"
-                                        value="{{ forloop.counter }}">{{ forloop.counter }} year ↑</option>
-                            {% endfor %}
-                        </select>
-                        <select class="block py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-crawling-filter-country"
-                                title="select Country"
-                                id="setting_modal_crawling_filter_country"
-                                name="setting-modal-crawling-filter-country"
-                                tabindex="3"
-                                placeholder="Country"
-                                autofocus=""
-                                disabled></select>
-                        <select class="block py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-crawling-filter-region"
-                                title="select Region"
-                                id="setting_modal_crawling_filter_region"
-                                name="setting-modal-crawling-filter-region"
-                                tabindex="4"
-                                placeholder="Region"
-                                autofocus=""></select>
-                        <select class="block py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-crawling-filter-detail-region"
-                                title="select Detail Region"
-                                id="setting_modal_crawling_filter_detail_region"
-                                name="setting-modal-crawling-filter-detail-region"
-                                tabindex="5"
-                                placeholder="Detail-Region"
-                                autofocus=""></select>
-                    </div>
+                         id="setting_modal_crawling_select_wrap"></div>
                 </div>
             </div>
             <hr class="w-1/2 my-2">
