@@ -95,5 +95,43 @@
         </div>
         <div class="flex items-center font-semibold cursor-pointer hover:text-[#373737] hover:border-none hover:bg-white justify-center border border-white w-10 p-2 text-sm setting-modal-post-save-btn"
              id="setting_modal_post_save_btn">SAVE</div>
-    </body>
+        <svg xmlns="http://www.w3.org/2000/svg"
+             fill="none"
+             viewBox="0 0 24 24"
+             stroke-width="2"
+             stroke="currentColor"
+             class="flex justify-end p-1 cursor-pointer w-7 h-7"
+             id="searched_skill_close_btn">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <div class="flex justify-between w-20 crawling-search-skill-wrap"
+             id="crawling_search_skill_wrap">
+            <input class="flex-1 outline-none crawling-search-skill"
+                   id="crawling_search_skill"
+                   placeholder="Input Skill to search">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke-width="2"
+                 stroke="currentColor"
+                 class="w-6 h-6 p-1 cursor-pointer"
+                 id="search_skill_remove_btn">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </div>
+        <img src=""
+             alt="job-sample-btn"
+             class="top-10 left-1 w-[calc(100%-24px)] block h-6 ml-2 mr-5 cursor-pointer sm:h-8"
+             id="job_sample_btn">
+        <div class="absolute z-10 items-center hidden origin-top-left bg-white rounded-md shadow-lg left-4 w-44 justify-evenly top-10 ring-1 ring-black ring-opacity-5 focus:outline-none crawling-search-skill-list">
+        </div>
+        <img class="fixed left-1/2 top-[50%] translate-x-[-50%] translate-y-[-50%] z-10 w-[100px] h-[100px] lg:w-auto lg:h-auto loading-img"
+             id="loading_img"
+             src=""
+             alt="loading-img">
+        <a class="hover:text-[blue] font-semibold underline fixed left-1/2 top-[calc(50%+50px)] lg:top-[calc(50%+100px)] translate-x-[-50%] z-10 loading-io"
+           id="loding_io"
+           href="https://loading.io/">Loding Icon is provided by loading.io</a>
+    </div>
+</body>
 </html>
