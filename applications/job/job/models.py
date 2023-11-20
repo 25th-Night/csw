@@ -92,7 +92,7 @@ class Recruit(CommonModel):
     description = models.TextField(verbose_name="세부사항")
     task = models.TextField(verbose_name="주요업무")
     requirement = models.TextField(verbose_name="자격요건")
-    preference = models.TextField(verbose_name="우대사항")
+    preference = models.TextField(verbose_name="우대사항", blank=True, null=True)
     benefit = models.TextField(verbose_name="혜택 및 복지")
     workplace = models.CharField(verbose_name="근무지역", max_length=100)
     status = models.BooleanField(verbose_name="공고등록 상태")
