@@ -404,6 +404,7 @@ const makeSelectOptions = async (
                 );
                 new_option.value = option.id;
                 new_option.textContent = option.name;
+                new_option.setAttribute("data-id", option.id);
                 selectBox.appendChild(new_option);
             });
             if (selectedOptionId) {
