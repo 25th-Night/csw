@@ -126,7 +126,7 @@ class RecruitSerializer(serializers.ModelSerializer):
 class JobSettingSerializer(serializers.Serializer):
     type = serializers.IntegerField(required=False)
     user_id = serializers.IntegerField()
-    site_id = serializers.IntegerField(required=False, default=0, write_only=True)
+    site_id = serializers.IntegerField(required=False, default=0)
     skills = serializers.SerializerMethodField()
     min_career = serializers.IntegerField(
         required=False, default=0, min_value=-1, max_value=10
@@ -136,7 +136,7 @@ class JobSettingSerializer(serializers.Serializer):
     region_id = serializers.IntegerField(required=False, default=0)
     detail_region_id = serializers.IntegerField(required=False, default=0)
     category_ids = serializers.CharField(required=False, default="0")
-    skill_ids = serializers.CharField(required=False, default="0")
+    skill_ids = serializers.CharField(required=False, default="0", write_only=True)
 
     def get_skills(self, obj):
         skill_ids = list(map(int, obj.skill_ids.split(",")))
@@ -189,7 +189,7 @@ class JobSettingSerializer(serializers.Serializer):
                     raise serializers.ValidationError("Not valid Region ID")
 
                 if detail_region_id:
-                    detail_region_ids = Region.objects.filter(
+                    detail_region_ids = DetailRegion.objects.filter(
                         region_id=region_id
                     ).values_list("id", flat=True)
                     if detail_region_id not in detail_region_ids:
