@@ -36,7 +36,7 @@ class RecruitView(APIView):
         print(request.data)
 
         min_career = int(request.data.get("min_career"))
-        user_id = int(request.data.get("user_id"))
+        user_id = request.user.get("id")
         site_id = int(request.data.get("site_id"))
         group_id = int(request.data.get("group_id"))  # 그냥 써도 됨
         category_ids = request.data.get("category_ids")
