@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# collectstatic 진행
+echo "collectstatic 진행"
+python manage.py collectstatic --no-input
+
+# migrate 진행
+echo "migrate 진행"
+python manage.py migrate
+
 # static data crawling 진행
 echo "static data crawling 진행"
 python manage.py 01_job_group
@@ -8,13 +16,6 @@ python manage.py 03_country
 python manage.py 04_region
 python manage.py 05_detail_region
 
-# collectstatic 진행
-echo "collectstatic 진행"
-python manage.py collectstatic --no-input
-
-# migrate 진행
-echo "migrate 진행"
-python manage.py migrate
 
 # gunicorn 실행
 echo "gunicorn 실행"
