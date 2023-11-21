@@ -86,10 +86,18 @@ module "server" {
     shortener_postgres_user     = var.shortener_postgres_user
     shortener_postgres_password = var.shortener_postgres_password
     shortener_postgres_port     = var.shortener_postgres_port
+    job_postgres_db             = var.job_postgres_db
+    job_postgres_user           = var.job_postgres_user
+    job_postgres_password       = var.job_postgres_password
+    job_postgres_port           = var.job_postgres_port
     ssh_key                     = var.ssh_key
     jwt_signing_key             = var.jwt_signing_key
     user_service_host           = var.user_service_host
     url_service_host            = var.url_service_host
+    job_service_host            = var.job_service_host
+    wanted_id                   = var.wanted_id
+    wanted_pw                   = var.wanted_pw
+    chrome_driver               = var.chrome_driver
   }
 }
 
