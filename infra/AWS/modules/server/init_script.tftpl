@@ -33,6 +33,7 @@ PROJECT_PATH=$REMOTE_DIRECTORY/csw/
 ENV_REPOSITORY=$PROJECT_PATH.envs/
 USER_ENV_PATH=$ENV_REPOSITORY.env_user
 SHORTENER_ENV_PATH=$ENV_REPOSITORY.env_shortener
+JOB_ENV_PATH=$ENV_REPOSITORY.env_job
 BASH_ALIASES=$REMOTE_DIRECTORY.bash_aliases
 BASHRC=$REMOTE_DIRECTORY.bashrc
 AWS_PATH=$REMOTE_DIRECTORY.aws
@@ -75,6 +76,7 @@ echo "alias dpsls=\"docker ps && docker logs\"" >> $BASH_ALIASES
 echo "alias dexc=\"docker exec\"" >> $BASH_ALIASES
 echo "alias dst=\"docker stop\"" >> $BASH_ALIASES
 echo "alias dstrm=\"docker rm\"" >> $BASH_ALIASES
+echo "alias dcps=\"docker compose -f docker\/docker-compose.yml\"" >> $BASH_ALIASES
 
 
 echo "Set authorized_keys"
