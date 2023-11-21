@@ -32,7 +32,6 @@ import {
     makeQueryParameter,
     capitalize,
     hoverChangeTextColor,
-    hoverChangeBackgroundColor,
 } from "./common.js";
 
 document.addEventListener("DOMContentLoaded", async function () {

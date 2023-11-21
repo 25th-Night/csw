@@ -27,7 +27,6 @@ import {
     popUpConfirm,
     formatDateToCustomFormat,
     hoverChangeTextColor,
-    hoverChangeBackgroundColor,
 } from "./common.js";
 
 document.addEventListener("DOMContentLoaded", function () {
