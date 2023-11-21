@@ -17,6 +17,7 @@ import {
     getCurrentPath,
     changeLogoText,
     getJobURL,
+    setKeyForFunction,
 } from "./common.js";
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -42,45 +43,26 @@ document.addEventListener("DOMContentLoaded", function () {
     imageHover(urlBtn, "/static/img/icon/url06.png", "/static/img/icon/url05.png");
     imageHover(jdBtn, "/static/img/icon/job-post02.png", "/static/img/icon/job-post01.png");
 
-    // admin 버튼 마우스 오버 시 효과 + 클릭 시 Admin Wrap 태그 보이기
+    // admin 버튼 마우스 오버 시 효과 + 클릭 시 Admin 메뉴 보이기
+
     if (adminBtn) {
         imageHover(adminBtn, "/static/img/icon/admin03.png", "/static/img/icon/admin02.png");
-        // admin 메뉴 요소 가져오기
-        const adminMenu = getElFromSel(".admin-menu");
 
         const onClickAdminBtn = () => {
-            const adminMenu = getElFromSel(".admin-menu");
-            if (adminMenu.classList.contains("hidden")) {
-                adminMenu.classList.remove("hidden");
-                adminMenu.classList.add("flex");
+            const headerAdminMenu = getElFromId("header_admin_menu");
+            if (headerAdminMenu.classList.contains("hidden")) {
+                headerAdminMenu.classList.remove("hidden");
+                headerAdminMenu.classList.add("flex");
             } else {
-                adminMenu.classList.add("hidden");
-                adminMenu.classList.remove("flex");
+                headerAdminMenu.classList.add("hidden");
+                headerAdminMenu.classList.remove("flex");
             }
         };
 
         // admin 버튼을 클릭할 때 드롭다운 메뉴의 표시/숨김을 토글
-        adminBtn.addEventListener("click", onClickAdminBtn);
-
-        // // 드롭다운 메뉴 내부 요소 클릭 시 이벤트가 상위로 전파되지 않도록 막음
-        // adminMenu.addEventListener("click", function (event) {
-        //     event.stopPropagation();
-        // });
-
-        // adminBtn.addEventListener("mouseover", function () {
-        //     if (adminMenu.classList.contains("hidden")) {
-        //         adminMenu.classList.remove("hidden");
-        //         adminMenu.classList.add("flex");
-        //     }
-        // });
-
-        // adminMenu.addEventListener("mouseout", function (event) {
-        //     if (![adminUserBtn, adminUrlBtn, adminUserBtn.parentNode].includes(event.target)) {
-        //         adminMenu.classList.add("hidden");
-        //     } else {
-        //         adminMenu.classList.remove("hidden");
-        //     }
-        // });
+        adminBtn.addEventListener("click", () => {
+            onClickAdminBtn();
+        });
     }
 
     // User Admin 버튼 마우스 오버 시 효과 + 클릭 시 User 앱 admin 페이지로 이동
@@ -145,4 +127,23 @@ document.addEventListener("DOMContentLoaded", function () {
         // logout 버튼 마우스 오버 시 효과
         imageHover(myInfoBtn, "/static/img/icon/user02.png", "/static/img/icon/user01.png");
     }
+
+    // esc 버튼 클릭 시 모달창 닫기
+    setKeyForFunction(document, "Escape", () => {
+        const headerAdminMenu = getElFromId("header_admin_menu");
+        if (headerAdminMenu) {
+            headerAdminMenu.classList.add("hidden");
+            return;
+        }
+    });
+
+    // 바깥 영역 클릭 시, 모달창 닫기
+    document.addEventListener("mouseup", function (e) {
+        const headerAdminMenu = getElFromId("header_admin_menu");
+        const adminBtn = getElFromId("header_admin_btn");
+
+        if (!headerAdminMenu.contains(e.target) && !adminBtn.contains(e.target)) {
+            headerAdminMenu.classList.add("hidden");
+        }
+    });
 });
