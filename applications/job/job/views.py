@@ -198,8 +198,5 @@ class JobSettingView(APIView):
             print(serializer.errors)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        response_data = serializer.data
-        response_data.pop("skill_ids")
-        print(f"response_data:{response_data}")
 
-        return Response(response_data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
