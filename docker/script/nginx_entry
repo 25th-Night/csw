@@ -2,4 +2,5 @@
 
 sed -i "s/USER_SERVICE_HOST/$USER_SERVICE_HOST/g" /etc/nginx/sites-available/django
 sed -i "s/URL_SERVICE_HOST/$URL_SERVICE_HOST/g" /etc/nginx/sites-available/django
+sed -i "s/JOB_SERVICE_HOST/$JOB_SERVICE_HOST/g" /etc/nginx/sites-available/django
 service nginx restart
