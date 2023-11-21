@@ -132,36 +132,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         },
     };
 
-    createJobBtn(jobPostBtnImgDict);
-
     // Job Service URL
     const JobURL = getJobURL();
     let getJobListURL = `${JobURL}/recruits`;
 
-    // Post Select Box 렌더링
-    const postFilterElementIdDict = {
-        site: "post_filter_site",
-        group: "post_filter_group",
-        category: "post_filter_category",
-        country: "post_filter_country",
-        region: "post_filter_region",
-        detail_region: "post_filter_detail_region",
-        skill: "post_filter_skill",
-        company_tag: "post_filter_company_tag",
-    };
-
-    // CrawlingSelect Box 렌더링
-    const crawlingFilterElementIdDict = {
-        site: "crawling_filter_site",
-        group: "crawling_filter_group",
-        category: "crawling_filter_category",
-        country: "crawling_filter_country",
-        region: "crawling_filter_region",
-        detail_region: "crawling_filter_detail_region",
-        skill: "crawling_filter_skill",
-        company_tag: "crawling_filter_company_tag",
-    };
-
+    // Setting 정보 조회 함수
     const requestSetting = async (type) => {
         const data = setFetchData("get", {});
         const requestURL = `${JobURL}/settings/${type}`;
@@ -170,44 +145,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         return get_response;
     };
 
-    // 초기 Parameter dict 설정
-    let queryParameterDict;
-    const postSettingResponse = await requestSetting(1);
-    const getPostSettingStatus = postSettingResponse.status;
-    const postSettingData = await postSettingResponse.json();
-    if (getPostSettingStatus == 200) {
-        queryParameterDict = postSettingData;
-    } else {
-        alert("Cannot access Post Setting");
-    }
-
-    // 초기 Parameter dict 설정
-    let crawlingQueryParameterDict;
-    const crawlingSettingResponse = await requestSetting(2);
-    const getCrawlingSettingStatus = crawlingSettingResponse.status;
-    const crawlingSettingData = await crawlingSettingResponse.json();
-    if (getCrawlingSettingStatus == 200) {
-        crawlingQueryParameterDict = crawlingSettingData;
-    } else {
-        alert("Cannot access Crawling Setting");
-    }
-
-    const saveSetting = async (queryParameterDict, type) => {
-        const data = setFetchData("put", queryParameterDict);
-        console.log(`saveSetting - queryParameterDict : type - ${type}`, queryParameterDict);
-        const requestURL = `${JobURL}/settings/${type}`;
-        const get_response = await fetch(requestURL, data);
-        if (get_response.status == 200) {
-            alert("Saved successfully");
-            console.log("Saved Post Setting - queryParameterDict", queryParameterDict);
-            return get_response;
-        } else {
-            alert(await get_response.json());
-        }
-    };
-
     // Setting 모달에서 SAVE 버튼 클릭 시 처리 이벤트
-    const saveSettingInCrawling = async (type_) => {
+    const saveSetting = async (type_) => {
         const saveSiteSetting = getElFromId(`setting_modal_${type_}_filter_site`).value;
         const saveGroupSetting = getElFromId(`setting_modal_${type_}_filter_group`).value;
         const saveCategorySetting = getElFromId(`setting_modal_${type_}_filter_category`).value;
@@ -277,39 +216,41 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Select Box 렌더링
     const handleSelectBox = (type) => {
-        const siteSelectForCrawlingSetting = getElFromId(`${type}_filter_site`);
-        const groupSelectForCrawlingSetting = getElFromId(`${type}_filter_group`);
-        const categorySelectForCrawlingSetting = getElFromId(`${type}_filter_category`);
-        const countrySelectForCrawlingSetting = getElFromId(`${type}_filter_country`);
-        const regionSelectForCrawlingSetting = getElFromId(`${type}_filter_region`);
+        const typeId = type.replace(/-/g, "_");
+        const siteSelectForCrawlingSetting = getElFromId(`${typeId}_filter_site`);
+        const groupSelectForCrawlingSetting = getElFromId(`${typeId}_filter_group`);
+        const categorySelectForCrawlingSetting = getElFromId(`${typeId}_filter_category`);
+        const countrySelectForCrawlingSetting = getElFromId(`${typeId}_filter_country`);
+        const regionSelectForCrawlingSetting = getElFromId(`${typeId}_filter_region`);
 
         siteSelectForCrawlingSetting.addEventListener("change", () => {
-            const settingData = { site_id: getElFromId(`${type}_filter_site`) };
-            renderSelectBoxInCrawling(settingData, `${type}`);
+            const settingData = { site_id: getElFromId(`${typeId}_filter_site`) };
+            renderSelectBox(settingData, `${typeId}`);
         });
         groupSelectForCrawlingSetting.addEventListener("change", () => {
+            console.log("hi");
             let categoryUrl = "categories";
-            const groupId = getElFromId(`${type}_filter_group`).value;
+            const groupId = getElFromId(`${typeId}_filter_group`).value;
             if (groupId > 0) {
                 categoryUrl += `?group_id=${groupId}`;
             }
             makeSelectOptions(
                 JobURL,
                 categoryUrl,
-                `${type}_filter_category`,
+                `${typeId}_filter_category`,
                 true,
                 null,
                 groupId,
                 "Group"
             );
 
-            const skillInputBox = getElFromId(`${type}_search_skill`);
+            const skillInputBox = getElFromId(`${typeId}_search_skill`);
             if (groupId != 1) {
                 skillInputBox.disabled = true;
                 skillInputBox.value = "";
                 skillInputBox.setAttribute("data-id", 0);
                 skillInputBox.placeholder = "Cannot use";
-                const skillRemoveBtn = getElFromId(`${type}_search_skill_remove_btn`);
+                const skillRemoveBtn = getElFromId(`${typeId}_search_skill_remove_btn`);
                 if (skillRemoveBtn) {
                     skillRemoveBtn.remove();
                 }
@@ -317,10 +258,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
 
         categorySelectForCrawlingSetting.addEventListener("change", () => {
-            const groupId = getElFromId(`${type}_filter_group`).value;
-            const categoryId = getElFromId(`${type}_filter_category`).value;
+            const groupId = getElFromId(`${typeId}_filter_group`).value;
+            const categoryId = getElFromId(`${typeId}_filter_category`).value;
 
-            const skillInputBox = getElFromId(`${type}_search_skill`);
+            const skillInputBox = getElFromId(`${typeId}_search_skill`);
             if (groupId == 1 && categoryId != 0) {
                 skillInputBox.disabled = false;
                 skillInputBox.placeholder = "search Skill";
@@ -329,7 +270,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 skillInputBox.value = "";
                 skillInputBox.setAttribute("data-id", 0);
                 skillInputBox.placeholder = "Cannot use";
-                const skillRemoveBtn = getElFromId(`${type}_search_skill_remove_btn`);
+                const skillRemoveBtn = getElFromId(`${typeId}_search_skill_remove_btn`);
                 if (skillRemoveBtn) {
                     skillRemoveBtn.remove();
                 }
@@ -338,20 +279,20 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         countrySelectForCrawlingSetting.addEventListener("change", () => {
             let regionURL = "regions";
-            const countryId = getElFromId(`${type}_filter_country`).value;
+            const countryId = getElFromId(`${typeId}_filter_country`).value;
             if (countryId > 0) {
                 regionURL += `?country_id=${countryId}`;
             }
             makeSelectOptions(
                 JobURL,
                 regionURL,
-                `${type}_filter_region`,
+                `${typeId}_filter_region`,
                 true,
                 null,
                 countryId,
                 "Country"
             );
-            const detailRegionSelect = getElFromId(`${type}_filter_detail_region`);
+            const detailRegionSelect = getElFromId(`${typeId}_filter_detail_region`);
             removeAllNode(detailRegionSelect);
             const defaultOption = createNewElement("option", "default-option", `Country first`);
             defaultOption.value = 0;
@@ -359,14 +300,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
         regionSelectForCrawlingSetting.addEventListener("change", () => {
             let detailRegionURL = "detail_regions";
-            const regionId = getElFromId(`${type}_filter_region`).value;
+            const regionId = getElFromId(`${typeId}_filter_region`).value;
             if (regionId > 0) {
                 detailRegionURL += `?region_id=${regionId}`;
             }
             makeSelectOptions(
                 JobURL,
                 detailRegionURL,
-                `${type}_filter_detail_region`,
+                `${typeId}_filter_detail_region`,
                 true,
                 null,
                 regionId,
@@ -376,9 +317,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     // Wanted API를 통해 skill 존재 여부 확인
-    async function skillSearch(skillName, type, queryParameterDict) {
-        const crawlingSearchSkillList = getElFromId(`${type}_search_skill_list`);
-        const crawlingSkillInput = getElFromId(`${type}_search_skill`);
+    async function skillSearch(skillName, type) {
+        const typeClass = type.replace(/_/g, "-");
+        const typeId = type.replace(/-/g, "_");
+
+        const crawlingSearchSkillList = getElFromId(`${typeId}_search_skill_list`);
+        const crawlingSkillInput = getElFromId(`${typeId}_search_skill`);
         removeAllNode(crawlingSearchSkillList);
         if (skillName) {
             const requestURL = `${JobURL}/crawling/skill/search?keyword=${skillName}`;
@@ -386,7 +330,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             const response = await fetch(requestURL, data);
 
             if (response.status === 200) {
-                queryParameterDict.skill_ids = 0;
+                removeAllNode(crawlingSearchSkillList);
+                crawlingSkillInput.setAttribute("data-id", 0);
                 const searchedSkillList = await response.json();
                 console.log("searchedSkillList", searchedSkillList);
                 if (searchedSkillList) {
@@ -395,7 +340,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                         "div",
                         "flex justify-end items-center",
                         null,
-                        "searched_skill_close_btn_wrap"
+                        `${typeId}_searched_skill_close_btn_wrap`
                     );
                     const searchedSKillCloseSvg = `
                     <svg xmlns="http://www.w3.org/2000/svg"
@@ -404,7 +349,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                             stroke-width="2"
                             stroke="currentColor"
                             class="w-7 h-7 p-1 cursor-pointer"
-                            id="searched_skill_close_btn">
+                            id="${typeId}_searched_skill_close_btn">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                     `;
@@ -431,8 +376,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                         );
                         crawlingSearchSkillList.appendChild(skillDiv);
                         skillDiv.addEventListener("click", () => {
-                            queryParameterDict.skill_ids = skill.id;
-                            console.log("click - queryParameterDict", queryParameterDict);
                             crawlingSkillInput.value = skill.name;
                             crawlingSkillInput.setAttribute("data-id", skill.id);
                             removeAllNode(crawlingSearchSkillList);
@@ -447,27 +390,26 @@ document.addEventListener("DOMContentLoaded", async function () {
             crawlingSearchSkillList.classList.add("hidden");
         }
 
-        const searchSKillInputRemoveSvgBtn = getElFromId("search_skill_remove_btn");
+        const searchSKillInputRemoveSvgBtn = getElFromId(`${type}_search_skill_remove_btn`);
 
-        searchSKillInputRemoveSvgBtn.addEventListener("click", () => {
-            crawlingSkillInput.value = "";
-            removeAllNode(crawlingSearchSkillList);
-            crawlingSearchSkillList.classList.add("hidden");
-            searchSKillInputRemoveSvgBtn.classList.add("hidden");
-        });
-
-        // setKeyForFunction(document, "Escape", () => {
-        //     removeAllNode(crawlingSearchSkillList);
-        //     crawlingSearchSkillList.classList.add("hidden");
-        // });
+        if (searchSKillInputRemoveSvgBtn) {
+            searchSKillInputRemoveSvgBtn.addEventListener("click", () => {
+                clearSkillInputAndList(type);
+            });
+        }
     }
 
     // setting 모달에 추가할 select box
-    const createSelectBoxInSetting = (type, selectType, idx = null, disable = false) => {
-        const className = `py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md setting-modal-${type}-filter-${selectType}`;
-        const id = `setting_modal_${type}_filter_${selectType.replace(/-/g, "_")}`;
+    const createSelectBox = (type, selectType, idx = null, disable = false) => {
+        const typeClass = type.replace(/_/g, "-");
+        const typeId = type.replace(/-/g, "_");
+        const selectTypeClass = selectType.replace(/_/g, "-");
+        const selectTypeId = selectType.replace(/-/g, "_");
+
+        const className = `py-1 mx-3 border-b border-[#d9d9d9] outline-none scrollbar-thin scrollbar-thumb-black scrollbar-thumb-rounded-md ${typeClass}-filter-${selectTypeClass}`;
+        const id = `${typeId}_filter_${selectTypeId}`;
         const createdSelectBox = createNewElement("select", className, null, id);
-        const capitalizedSelectType = capitalize(selectType);
+        const capitalizedSelectType = capitalize(selectTypeClass);
         createdSelectBox.title = `select ${capitalizedSelectType}`;
         createdSelectBox.placeholder = capitalizedSelectType;
         createdSelectBox.tabIndex = idx;
@@ -476,36 +418,42 @@ document.addEventListener("DOMContentLoaded", async function () {
         return createdSelectBox;
     };
 
-    const createInputBoxInSetting = async (type, selectType, idx = null, disabled = false) => {
+    // Search Input Box 생성
+    const createInputBox = async (skills, type, selectType, idx = null, disabled = false) => {
+        const typeClass = type.replace(/_/g, "-");
+        const typeId = type.replace(/-/g, "_");
+        const selectTypeClass = selectType.replace(/_/g, "-");
+        const selectTypeId = selectType.replace(/-/g, "_");
+
         const filterSkill = createNewElement(
             "div",
-            `relative h-[35px] mx-3 text-left text-black bg-white setting-modal-${type}-filter-${selectType}`,
+            `relative h-[35px] mx-3 border-b border-[#d9d9d9] text-left text-black bg-white ${typeClass}-filter-${selectTypeClass}`,
             null,
-            `setting_modal_${type}_filter_${selectType.replace(/-/g, "_")}`
+            `${typeId}_filter_${selectTypeId}`
         );
         const capitalizedSelectType = capitalize(selectType);
         filterSkill.title = `search ${capitalizedSelectType}`;
         const filterSkillWrap = createNewElement(
             "div",
-            `absolute flex justify-between w-full origin-top-left left-1 top-1 setting-modal-${type}-filter-${selectType}-wrap`,
+            `absolute flex justify-between w-full origin-top-left left-1 top-1 ${type}-filter-${selectType}-wrap`,
             null,
-            `setting_modal_${type}_filter_${selectType.replace(/-/g, "_")}-wrap`
+            `${typeId}_filter_${selectTypeId}-wrap`
         );
         const filterSkillInput = createNewElement(
             "input",
-            `w-[calc(100%-24px)] outline-none setting-modal-${type}-search-${selectType}`,
+            `w-[calc(100%-28px)] outline-none ${type}-search-${selectType}`,
             null,
-            `setting_modal_${type}_search_${selectType.replace(/-/g, "_")}`
+            `${typeId}_search_${selectTypeId}`
         );
 
         const filterSearchList = createNewElement(
             "div",
             `absolute left-1 z-10 items-center hidden origin-top-left bg-white rounded-md shadow-lg w-44 justify-evenly top-10 ring-1 ring-black ring-opacity-5 focus:outline-none setting-modal-${type}-search-${selectType}-list`,
             null,
-            `setting_modal_${type}_search_${selectType.replace(/-/g, "_")}_list`
+            `${typeId}_search_${selectTypeId}_list`
         );
 
-        const createSearchRemoveBtn = (type, selectType, filterSearchList) => {
+        const createSearchRemoveBtn = (typeId, selectTypeId, filterSearchList) => {
             const filterRemoveSvg = `
             <svg xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -513,7 +461,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     stroke-width="2"
                     stroke="#000000"
                     class="w-6 h-6 p-1 mr-1 cursor-pointer"
-                    id="setting_modal_${type}_search_${selectType}_remove_btn">
+                    id="${typeId}_search_${selectTypeId}_remove_btn">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>`;
             const filterRemoveParser = new DOMParser();
@@ -525,7 +473,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             filterRemoveSvgElement.addEventListener("click", () => {
                 filterSkillInput.value = "";
                 filterSkillInput.setAttribute("data-id", 0);
-                queryParameterDict.skill_ids = 0;
                 filterRemoveSvgElement.remove();
                 removeAllNode(filterSearchList);
                 filterSearchList.classList.add("hidden");
@@ -533,7 +480,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             return filterRemoveSvgElement;
         };
 
-        const filterRemoveBtn = createSearchRemoveBtn(type, selectType, filterSearchList);
+        const filterRemoveBtn = createSearchRemoveBtn(typeId, selectTypeId, filterSearchList);
 
         filterSkillWrap.appendChild(filterSkillInput);
         filterSkillWrap.appendChild(filterRemoveBtn);
@@ -543,59 +490,264 @@ document.addEventListener("DOMContentLoaded", async function () {
         filterSkillInput.addEventListener(
             "input",
             debounce(() => {
-                skillSearch(
-                    filterSkillInput.value,
-                    `setting_modal_${type}`,
-                    crawlingQueryParameterDict
-                );
+                skillSearch(filterSkillInput.value, `${typeId}`);
             }, 500)
         );
 
         filterSkillInput.addEventListener("input", () => {
-            if (getElFromId(`setting_modal_${type}_search_${selectType}_remove_btn`)) {
+            if (getElFromId(`${typeId}_search_${selectTypeId}_remove_btn`)) {
             } else {
                 const newFilterRemoveSvgElement = createSearchRemoveBtn(
-                    type,
-                    selectType,
+                    typeId,
+                    selectTypeId,
                     filterSearchList
                 );
                 filterSkillWrap.appendChild(newFilterRemoveSvgElement);
             }
-            crawlingQueryParameterDict.skill_ids = 0;
             filterSkillInput.setAttribute("data-id", 0);
-            console.log("change - crawlingQueryParameterDict", crawlingQueryParameterDict);
         });
 
         // Skill Input에 초기 데이터 설정
-        const getSkillResponse = await fetch(
-            `${JobURL}/skills?skill_ids=${crawlingQueryParameterDict.skill_ids}`
-        );
-        const getSkillData = await getSkillResponse.json();
-
-        if (getSkillResponse.status === 200) {
-            if (getSkillData.length) {
-                const skillInitName = getSkillData[0].name;
-                filterSkillInput.value = skillInitName;
-                filterSkillInput.setAttribute("data-id", getSkillData[0].id);
-            } else {
-                filterSkillInput.value = "All";
-                crawlingQueryParameterDict.skill_ids = "0";
-                filterSkillInput.setAttribute("data-id", 0);
-            }
+        if (skills.length) {
+            const skillInitName = skills[0].name;
+            filterSkillInput.value = skillInitName;
+            filterSkillInput.setAttribute("data-id", skills[0].id);
         } else {
-            console.log(getSkillData);
-            // displayErrorMessage("make-url", errorData);
+            filterSkillInput.value = "All";
+            filterSkillInput.setAttribute("data-id", 0);
         }
 
         return filterSkill;
     };
 
+    // Select box에서 post 요청 보낼 데이터 가져오기
+    const getDataFromSelectBox = (type) => {
+        const typeId = type.replace(/-/g, "_");
+
+        const siteSelectBoxValue = getElFromId(`${typeId}_filter_site`).value;
+        const groupSelectBoxValue = getElFromId(`${typeId}_filter_group`).value;
+        const categorySelectBoxValue = getElFromId(`${typeId}_filter_category`).value;
+        const countrySelectBoxValue = getElFromId(`${typeId}_filter_country`).value;
+        const regionSelectBoxValue = getElFromId(`${typeId}_filter_region`).value;
+        const detailRegionSelectBoxValue = getElFromId(`${typeId}_filter_detail_region`).value;
+        const skillSearchBoxValue = getElFromId(`${typeId}_search_skill`).getAttribute("data-id");
+        const companyTagSelectBoxValue = getElFromId(`${typeId}_filter_company_tag`).value;
+        const minCareerSelectBoxValue = getElFromId(`${typeId}_filter_min_career`).value;
+
+        const requestData = {
+            site_id: siteSelectBoxValue,
+            group_id: groupSelectBoxValue,
+            category_ids: categorySelectBoxValue,
+            country_id: countrySelectBoxValue,
+            region_id: regionSelectBoxValue,
+            detail_region_id: detailRegionSelectBoxValue,
+            skill_ids: skillSearchBoxValue,
+            company_tag: companyTagSelectBoxValue,
+            min_career: minCareerSelectBoxValue,
+        };
+        console.log("requestData", requestData);
+        return requestData;
+    };
+
+    // Select 영역 생성하기
+    const createSelectArea = async (postSettingData, type) => {
+        const typeId = type.replace(/-/g, "_");
+        const siteSelectBox = createSelectBox(`${typeId}`, "site", 1, true);
+        const groupSelectBox = createSelectBox(`${typeId}`, "group", 2, false);
+        const categorySelectBox = createSelectBox(`${typeId}`, "category", 3, false);
+        const countrySelectBox = createSelectBox(`${typeId}`, "country", 4, true);
+        const regionSelectBox = createSelectBox(`${typeId}`, "region", 5, false);
+        const detailRegionSelectBox = createSelectBox(`${typeId}`, "detail-region", 6, false);
+        const skillSearchBox = await createInputBox(
+            postSettingData.skills,
+            `${typeId}`,
+            "skill",
+            7,
+            false
+        );
+        const companyTagSelectBox = createSelectBox(`${typeId}`, "company-tag", 8, true);
+        const minCareerSelectBox = createSelectBox(`${typeId}`, "min-career", 9, false);
+
+        const SelectWrap = getElFromId(`${typeId}_select_wrap`);
+        SelectWrap.appendChild(siteSelectBox);
+        SelectWrap.appendChild(groupSelectBox);
+        SelectWrap.appendChild(categorySelectBox);
+        SelectWrap.appendChild(countrySelectBox);
+        SelectWrap.appendChild(regionSelectBox);
+        SelectWrap.appendChild(detailRegionSelectBox);
+        SelectWrap.appendChild(skillSearchBox);
+        SelectWrap.appendChild(companyTagSelectBox);
+        SelectWrap.appendChild(minCareerSelectBox);
+
+        getElFromId(`${typeId}_filter_skill-wrap`).classList.add("mt-1");
+        getElFromId(`${typeId}_search_skill_remove_btn`).classList.add("pr-1");
+
+        renderSelectBox(postSettingData, `${typeId}`);
+
+        handleSelectBox(`${typeId}`);
+    };
+
+    // Select Box 초기화 함수
+    const deleteSelectAreaPlusBtn = (type) => {
+        const typeId = type.replace(/-/g, "_");
+        const selectWrap = getElFromId(`${typeId}_select_wrap`);
+        removeAllNode(selectWrap);
+        const submitBtn = getElFromId(`${typeId}_submit_btn`);
+        submitBtn.remove();
+    };
+
+    // Setting 모달 닫기 함수
+    const closeSettingModal = async () => {
+        // 모달 숨기기
+        const settingModal = getElFromId("setting_modal");
+        settingModal.classList.add("hidden");
+        // close 버튼 제거
+        const closeSettingModalBtn = getElFromId("setting_modal_close_btn");
+        closeSettingModalBtn.remove();
+
+        // 모달 내부 데이터 비우기
+        const postSelectWrap = getElFromId("setting_modal_post_select_wrap");
+        removeAllNode(postSelectWrap);
+        const saveBtnForPostSetting = getElFromId("setting_modal_post_save_btn");
+        saveBtnForPostSetting.remove();
+
+        const crawlingSelectWrap = getElFromId("setting_modal_crawling_select_wrap");
+        removeAllNode(crawlingSelectWrap);
+        const saveBtnForCrawlingSetting = getElFromId("setting_modal_crawling_save_btn");
+        saveBtnForCrawlingSetting.remove();
+
+        // body의 스크롤 원상복구
+        const body = getElFromSel("body");
+        body.style.overflow = "";
+
+        // Post, Crawling 탭의 Select Box 변경
+        if (getElFromId("job_post_btn").getAttribute("src") == "/static/img/icon/job-post04.png") {
+            const postSettingResponse = await requestSetting(1);
+            const postSettingData = await postSettingResponse.json();
+            console.log("postSettingData", postSettingData);
+            renderSelectBox(postSettingData, "post");
+        } else if (
+            getElFromId("job_crawling_btn").getAttribute("src") ==
+            "/static/img/icon/gathering07.png"
+        ) {
+            const crawlingSettingResponse = await requestSetting(2);
+            const crawlingSettingData = await crawlingSettingResponse.json();
+            console.log("crawlingSettingData", crawlingSettingData);
+            renderSelectBox(crawlingSettingData, "crawling");
+        }
+    };
+
+    // Job Card 모달 닫기 함수
+    const closeJobCard = () => {
+        // 모달 숨기기
+        const postModal = getElFromId("post_modal");
+        postModal.classList.add("hidden");
+
+        // 모달 내부 데이터 비우기
+        const positionDataEl = getElFromId("post_modal_position_a");
+        const companyDataEl = getElFromId("post_modal_company_data");
+        const regionDataEl = getElFromId("post_modal_region_data");
+        const categoryDataEl = getElFromId("post_modal_category_data");
+        const taskDataEl = getElFromId("post_modal_task_data");
+        const requirementDataEl = getElFromId("post_modal_requirement_data");
+        const preferenceDataEl = getElFromId("post_modal_preference_data");
+        const descriptionDataEl = getElFromId("post_modal_description_data");
+        const benefitDataEl = getElFromId("post_modal_benefit_data");
+        const workplaceDataEl = getElFromId("post_modal_workplace_a");
+        const skillDataEl = getElFromId("post_modal_skill_data");
+        const companyTagDataEl = getElFromId("post_modal_company_tag_data");
+        const postModalBtnWrap = getElFromId("post_modal_btn_wrap");
+        positionDataEl.textContent = "";
+        companyDataEl.textContent = "";
+        regionDataEl.textContent = "";
+        taskDataEl.textContent = "";
+        requirementDataEl.textContent = "";
+        preferenceDataEl.textContent = "";
+        descriptionDataEl.textContent = "";
+        benefitDataEl.textContent = "";
+        workplaceDataEl.textContent = "";
+        removeAllNode(categoryDataEl);
+        removeAllNode(skillDataEl);
+        removeAllNode(companyTagDataEl);
+        removeAllNode(postModalBtnWrap);
+
+        // body의 스크롤 원상복구
+        const body = getElFromSel("body");
+        body.style.overflow = "";
+    };
+
+    // Skill List 제거
+    const clearSkillInputAndList = (type) => {
+        const typeId = type.replace(/-/g, "_");
+        const crawlingSkillInput = getElFromId(`${typeId}_search_skill`);
+        const crawlingSearchSkillList = getElFromId(`${typeId}_search_skill_list`);
+        const searchSKillInputRemoveSvgBtn = getElFromId(`${type}_search_skill_remove_btn`);
+
+        crawlingSkillInput.value = "";
+        removeAllNode(crawlingSearchSkillList);
+        crawlingSearchSkillList.classList.add("hidden");
+        if (searchSKillInputRemoveSvgBtn) {
+            searchSKillInputRemoveSvgBtn.remove();
+        }
+        crawlingSkillInput.focus();
+    };
+
+    // Skill List 제거
+    const searchedSkillListRemove = (type) => {
+        const typeId = type.replace(/-/g, "_");
+        const crawlingSearchSkillList = getElFromId(`${typeId}_search_skill_list`);
+        removeAllNode(crawlingSearchSkillList);
+        crawlingSearchSkillList.classList.add("hidden");
+    };
+
+    /////////////////////////////////////////////////////// Page Initialization
+
+    // 상단 3버튼 생성
+    createJobBtn(jobPostBtnImgDict);
+
+    const postSettingResponse = await requestSetting(1);
+    const postSettingData = await postSettingResponse.json();
+
+    // Select Area (Box, Button) 생성
+    createSelectArea(postSettingData, "post");
+
+    const postBtn = createNewElement(
+        "div",
+        "flex items-center font-semibold cursor-pointer hover:text-white hover:border-none hover:bg-[#373737] justify-center border border-[#d9d9d9] w-10 p-2 my-1 text-xs post-submit-btn",
+        "SEARCH",
+        "post_submit_btn"
+    );
+    postBtn.style.writingMode = "vertical-rl";
+    postBtn.style.textOrientation = "upright";
+    postBtn.addEventListener("click", async () => {
+        const requestData = getDataFromSelectBox("post");
+        console.log('requestData - getDataFromSelectBox("post")', requestData);
+
+        if (requestData.group_id == 0) {
+            alert("Please select Group");
+        } else if (requestData.category_ids == 0) {
+            alert("Please select Category");
+        } else if (
+            requestData.group_id == 1 &&
+            requestData.category_ids != 0 &&
+            requestData.skill_ids == 0
+        ) {
+            alert("Please search Skill and select one");
+        } else if (requestData.min_career == 0) {
+            alert("Please select Minimum Career");
+        } else {
+            renderPostList(requestData);
+        }
+    });
+    getElFromId("post_form").appendChild(postBtn);
+
     /////////////////////////////////////////////////////// Page Header
 
     //////////////////////////////// Job 관련 3개 버튼에 추가할 이벤트 정의
+
+    // Post Button 클릭 이벤트 정의
     const addClickEventToPostBtn = async () => {
-        console.log("queryParameterDict", queryParameterDict);
-        console.log("crawlingQueryParameterDict", crawlingQueryParameterDict);
+        console.log("addClickEventToPostBtn");
         createJobBtn(jobPostBtnImgDict);
         getElFromId("job_crawling_btn").addEventListener("click", () => {
             addClickEventToCrawlingBtn();
@@ -603,17 +755,48 @@ document.addEventListener("DOMContentLoaded", async function () {
         getElFromId("job_manage_btn").addEventListener("click", () => {
             addClickEventToManageBtn();
         });
-        renderPostList(queryParameterDict);
+        const postSettingResponse = await requestSetting(1);
+        const getPostSettingStatus = postSettingResponse.status;
+        const postSettingData = await postSettingResponse.json();
+        console.log("postSettingData", postSettingData);
 
-        const crawlingSubmitBtn = getElFromId("crawling_submit_btn");
-        const crawlingSearchSKill = getElFromId("crawling_search_skill");
-        if (crawlingSubmitBtn) {
-            crawlingSubmitBtn.remove();
-        }
-        if (crawlingSearchSKill) {
-            crawlingSearchSKill.remove();
-        }
+        createSelectArea(postSettingData, "post");
+
+        const postBtn = createNewElement(
+            "div",
+            "flex items-center font-semibold cursor-pointer hover:text-white hover:border-none hover:bg-[#373737] justify-center border border-[#d9d9d9] w-10 p-2 my-1 text-xs post-submit-btn",
+            "SEARCH",
+            "post_submit_btn"
+        );
+        postBtn.style.writingMode = "vertical-rl";
+        postBtn.style.textOrientation = "upright";
+        postBtn.addEventListener("click", async () => {
+            const requestData = getDataFromSelectBox("post");
+            console.log('requestData - getDataFromSelectBox("post")', requestData);
+
+            if (requestData.group_id == 0) {
+                alert("Please select Group");
+            } else if (requestData.category_ids == 0) {
+                alert("Please select Category");
+            } else if (
+                requestData.group_id == 1 &&
+                requestData.category_ids != 0 &&
+                requestData.skill_ids == 0
+            ) {
+                alert("Please search Skill and select one");
+            } else if (requestData.min_career == 0) {
+                alert("Please select Minimum Career");
+            } else {
+                renderPostList(requestData);
+            }
+        });
+        getElFromId("post_form").appendChild(postBtn);
+
+        deleteSelectAreaPlusBtn("crawling");
         removeAllNode(getElFromId("crawling_job_card_list"));
+
+        // const crawlingSubmitBtn = getElFromId("crawling_submit_btn");
+        // crawlingSubmitBtn.remove();
 
         // 3개 영역 중 클릭한 버튼의 영역만 보이게 하기
         getElFromId("post_wrap").classList.remove("hidden");
@@ -621,9 +804,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         // getElFromId("manage_wrap").classList.add("hidden");
     };
 
+    // Crawling Button 클릭 이벤트 정의
     const addClickEventToCrawlingBtn = async () => {
-        console.log("queryParameterDict", queryParameterDict);
-        console.log("crawlingQueryParameterDict", crawlingQueryParameterDict);
+        console.log("addClickEventToCrawlingBtn");
         createJobBtn(jobCrawlingBtnImgDict);
         getElFromId("job_post_btn").addEventListener("click", () => {
             addClickEventToPostBtn();
@@ -631,6 +814,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         getElFromId("job_manage_btn").addEventListener("click", () => {
             addClickEventToManageBtn();
         });
+
+        const crawlingSettingResponse = await requestSetting(2);
+        const getPostSettingStatus = crawlingSettingResponse.status;
+        const crawlingSettingData = await crawlingSettingResponse.json();
+        console.log("crawlingSettingData", crawlingSettingData);
+
+        createSelectArea(crawlingSettingData, "crawling");
 
         const crawlingBtn = createNewElement(
             "div",
@@ -641,98 +831,29 @@ document.addEventListener("DOMContentLoaded", async function () {
         crawlingBtn.style.writingMode = "vertical-rl";
         crawlingBtn.style.textOrientation = "upright";
         crawlingBtn.addEventListener("click", async () => {
-            if (crawlingQueryParameterDict.category_ids == "0") {
-                alert("Please search Category and select one");
+            const requestData = getDataFromSelectBox("crawling");
+            console.log('requestData - getDataFromSelectBox("crawling")', requestData);
+
+            if (requestData.group_id == 0) {
+                alert("Please select Group");
+            } else if (requestData.category_ids == 0) {
+                alert("Please select Category");
             } else if (
-                crawlingQueryParameterDict.group_id == "1" &&
-                crawlingQueryParameterDict.category_ids != "0" &&
-                crawlingQueryParameterDict.skill_ids == "0"
+                requestData.group_id == 1 &&
+                requestData.category_ids != 0 &&
+                requestData.skill_ids == 0
             ) {
                 alert("Please search Skill and select one");
-            } else if (crawlingQueryParameterDict.min_career == "0") {
-                alert("Please select Minimum Career Year");
+            } else if (requestData.min_career == 0) {
+                alert("Please select Minimum Career");
             } else {
-                // let initJobCrawlingURL = `${JobURL}/crawling/recruits`;
-                // console.log("initJobCrawlingURL", initJobCrawlingURL);
-
-                // const data = setFetchData("post", crawlingQueryParameterDict);
-
-                // const post_response = await fetch(initJobCrawlingURL, data);
-                // console.log(post_response.status);
-
-                // if (post_response.status === 200) {
-                //     let crawling_recruits = await post_response.json();
-                //     console.log(crawling_recruits);
-                // } else {
-                //     const errorData = await post_response.json();
-                //     console.log("errorData", errorData);
-                // }
-                renderCrawlingList(crawlingQueryParameterDict);
+                renderCrawlingList(requestData);
             }
         });
-
         getElFromId("crawling_form").appendChild(crawlingBtn);
+
+        deleteSelectAreaPlusBtn("post");
         removeAllNode(getElFromId("post_job_card_list"));
-
-        // Skill Input 버튼
-        const crawlingSkillInput = createNewElement(
-            "input",
-            "w-[calc(100%-24px)] outline-none crawling-search-skill",
-            null,
-            "crawling_search_skill"
-        );
-        const crawlingSkillInputWrap = getElFromId("crawling_search_skill_wrap");
-        crawlingSkillInputWrap.insertBefore(crawlingSkillInput, crawlingSkillInputWrap.firstChild);
-
-        // Skill Input에 초기 데이터 설정
-        const getSkillResponse = await fetch(
-            `${JobURL}/skills?skill_ids=${crawlingQueryParameterDict.skill_ids}`
-        );
-        const getSkillData = await getSkillResponse.json();
-        console.log("getSkillData", getSkillData);
-
-        if (getSkillResponse.status === 200) {
-            if (getSkillData.length) {
-                const skillInitName = getSkillData[0].name;
-                crawlingSkillInput.value = skillInitName;
-            } else {
-                crawlingSkillInput.value = "All";
-                crawlingQueryParameterDict.skill_ids = "0";
-            }
-            const searchSKillInputRemoveSvgBtn = getElFromId("search_skill_remove_btn");
-            searchSKillInputRemoveSvgBtn.classList.remove("hidden");
-
-            searchSKillInputRemoveSvgBtn.addEventListener("click", () => {
-                crawlingSkillInput.value = "";
-                crawlingQueryParameterDict.skill_ids = 0;
-                removeAllNode(crawlingSearchSkillList);
-                crawlingSearchSkillList.classList.add("hidden");
-                searchSKillInputRemoveSvgBtn.classList.add("hidden");
-            });
-        } else {
-            console.log(getSkillData);
-            // displayErrorMessage("make-url", errorData);
-        }
-        crawlingSkillInput.setAttribute("placeholder", "search Skill");
-
-        crawlingSkillInput.addEventListener(
-            "input",
-            debounce(() => {
-                skillSearch(crawlingSkillInput.value, "crawling", crawlingQueryParameterDict);
-                getElFromId("search_skill_remove_btn").classList.remove("hidden");
-            }, 500)
-        );
-
-        // Skill Search
-        const crawlingSearchSkillList = createNewElement(
-            "div",
-            "absolute left-1 z-10 items-center hidden origin-top-left bg-white rounded-md shadow-lg w-44 justify-evenly top-10 ring-1 ring-black ring-opacity-5 focus:outline-none crawling-search-skill-list",
-            null,
-            "crawling_search_skill_list"
-        );
-
-        const skillBtnWrap = getElFromId("crawling_filter_skill");
-        skillBtnWrap.appendChild(crawlingSearchSkillList);
 
         // 3개 영역 중 클릭한 버튼의 영역만 보이게 하기
         getElFromId("crawling_wrap").classList.remove("hidden");
@@ -740,9 +861,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         // getElFromId("manage_wrap").classList.add("hidden");
     };
 
+    // Manage Button 클릭 이벤트 정의
     const addClickEventToManageBtn = () => {
-        console.log("queryParameterDict", queryParameterDict);
-        console.log("crawlingQueryParameterDict", crawlingQueryParameterDict);
         createJobBtn(jobManageBtnImgDict);
 
         const crawlingSubmitBtn = getElFromId("crawling_submit_btn");
@@ -807,8 +927,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             crawlingSearchSkillList.classList.add("hidden");
         }
 
-        //
-
         // save 버튼 추가
         // - Post Setting Save 버튼
         const saveBtnForPostSetting = createNewElement(
@@ -822,7 +940,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         settingModalPostData.appendChild(saveBtnForPostSetting);
 
         saveBtnForPostSetting.addEventListener("click", () => {
-            saveSettingInCrawling("post");
+            saveSetting("post");
         });
 
         // - Crawling Setting Save 버튼
@@ -837,7 +955,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         settingModalCrawlingData.appendChild(saveBtnForCrawlingSetting);
 
         saveBtnForCrawlingSetting.addEventListener("click", () => {
-            saveSettingInCrawling("crawling");
+            saveSetting("crawling");
         });
 
         ////////////////////////////////// Post Setting
@@ -848,62 +966,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         let queryParameterDict = postSettingData;
 
-        // Post Settings SelectBox 만들기
-        const siteSelectForPostSetting = createSelectBoxInSetting("post", "site", 1, true);
-        const groupSelectForPostSetting = createSelectBoxInSetting("post", "group", 2, false);
-        const categorySelectForPostSetting = createSelectBoxInSetting("post", "category", 3, false);
-        const countrySelectForPostSetting = createSelectBoxInSetting("post", "country", 4, true);
-        const regionSelectForPostSetting = createSelectBoxInSetting("post", "region", 5, false);
-        const detailRegionSelectForPostSetting = createSelectBoxInSetting(
-            "post",
-            "detail-region",
-            6,
-            false
-        );
-        const skillSearchForPostSetting = await createInputBoxInSetting("post", "skill", 7, false);
-        const companyTagSelectForPostSetting = createSelectBoxInSetting(
-            "post",
-            "company-tag",
-            8,
-            true
-        );
-        const minCareerSelectForPostSetting = createSelectBoxInSetting(
-            "post",
-            "min-career",
-            9,
-            false
-        );
-
-        const postSelectWrap = getElFromId("setting_modal_post_select_wrap");
-        postSelectWrap.appendChild(siteSelectForPostSetting);
-        postSelectWrap.appendChild(groupSelectForPostSetting);
-        postSelectWrap.appendChild(categorySelectForPostSetting);
-        postSelectWrap.appendChild(countrySelectForPostSetting);
-        postSelectWrap.appendChild(regionSelectForPostSetting);
-        postSelectWrap.appendChild(detailRegionSelectForPostSetting);
-        postSelectWrap.appendChild(skillSearchForPostSetting);
-        postSelectWrap.appendChild(companyTagSelectForPostSetting);
-        postSelectWrap.appendChild(minCareerSelectForPostSetting);
-
-        renderSelectBoxInCrawling(postSettingData, "setting_modal_post");
-
-        handleSelectBox("setting_modal_post");
-
-        // siteSelectForPostSetting.addEventListener("change", () => {
-        //     renderSelectBox(queryParameterDict, "setting_modal_post");
-        // });
-        // groupSelectForPostSetting.addEventListener("change", () => {
-        //     renderSelectBox(queryParameterDict, "setting_modal_post");
-        // });
-        // categorySelectForPostSetting.addEventListener("change", () => {
-        //     renderSelectBox(queryParameterDict, "setting_modal_post");
-        // });
-        // countrySelectForPostSetting.addEventListener("change", () => {
-        //     renderSelectBox(queryParameterDict, "setting_modal_post");
-        // });
-        // regionSelectForPostSetting.addEventListener("change", () => {
-        //     renderSelectBox(queryParameterDict, "setting_modal_post");
-        // });
+        createSelectArea(postSettingData, "setting_modal_post");
 
         ////////////////////////////////// Crawling Setting
         const crawlingSettingResponse = await requestSetting(2);
@@ -911,160 +974,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const crawlingSettingData = await crawlingSettingResponse.json();
         console.log("crawlingSettingData", crawlingSettingData);
 
-        let crawlingQueryParameterDict = crawlingSettingData;
-
-        // Crawling Settings SelectBox 만들기
-        const siteSelectForCrawlingSetting = createSelectBoxInSetting("crawling", "site", 10, true);
-        const groupSelectForCrawlingSetting = createSelectBoxInSetting(
-            "crawling",
-            "group",
-            11,
-            false
-        );
-        const categorySelectForCrawlingSetting = createSelectBoxInSetting(
-            "crawling",
-            "category",
-            12,
-            false
-        );
-        const countrySelectForCrawlingSetting = createSelectBoxInSetting(
-            "crawling",
-            "country",
-            13,
-            true
-        );
-        const regionSelectForCrawlingSetting = createSelectBoxInSetting(
-            "crawling",
-            "region",
-            14,
-            false
-        );
-        const detailRegionSelectForCrawlingSetting = createSelectBoxInSetting(
-            "crawling",
-            "detail-region",
-            15,
-            false
-        );
-        const skillSearchForCrawlingSetting = await createInputBoxInSetting(
-            "crawling",
-            "skill",
-            16,
-            false
-        );
-        const companyTagSelectForCrawlingSetting = createSelectBoxInSetting(
-            "crawling",
-            "company-tag",
-            17,
-            true
-        );
-        const minCareerSelectForCrawlingSetting = createSelectBoxInSetting(
-            "crawling",
-            "min-career",
-            18,
-            false
-        );
-
-        const crawlingSelectWrap = getElFromId("setting_modal_crawling_select_wrap");
-        crawlingSelectWrap.appendChild(siteSelectForCrawlingSetting);
-        crawlingSelectWrap.appendChild(groupSelectForCrawlingSetting);
-        crawlingSelectWrap.appendChild(categorySelectForCrawlingSetting);
-        crawlingSelectWrap.appendChild(countrySelectForCrawlingSetting);
-        crawlingSelectWrap.appendChild(regionSelectForCrawlingSetting);
-        crawlingSelectWrap.appendChild(detailRegionSelectForCrawlingSetting);
-        crawlingSelectWrap.appendChild(skillSearchForCrawlingSetting);
-        crawlingSelectWrap.appendChild(companyTagSelectForCrawlingSetting);
-        crawlingSelectWrap.appendChild(minCareerSelectForCrawlingSetting);
-
-        renderSelectBoxInCrawling(crawlingSettingData, "setting_modal_crawling");
-
-        handleSelectBox("setting_modal_crawling");
-
-        // siteSelectForCrawlingSetting.addEventListener("change", () => {
-        //     const settingData = { site_id: getElFromId("setting_modal_crawling_filter_site") };
-        //     renderSelectBoxInCrawling(settingData, "setting_modal_crawling");
-        // });
-        // groupSelectForCrawlingSetting.addEventListener("change", () => {
-        //     let categoryUrl = "categories";
-        //     const groupId = getElFromId("setting_modal_crawling_filter_group").value;
-        //     if (groupId > 0) {
-        //         categoryUrl += `?group_id=${groupId}`;
-        //     }
-        //     makeSelectOptions(
-        //         JobURL,
-        //         categoryUrl,
-        //         "setting_modal_crawling_filter_category",
-        //         true,
-        //         null,
-        //         groupId,
-        //         "Group"
-        //     );
-
-        //     const skillInputBox = getElFromId(`setting_modal_crawling_search_skill`);
-        //     if (groupId != 1) {
-        //         skillInputBox.disabled = true;
-        //         skillInputBox.value = "";
-        //         skillInputBox.setAttribute("data-id", 0);
-        //         getElFromId("setting_modal_crawling_search_skill_remove_btn").remove();
-        //     }
-        // });
-
-        // categorySelectForCrawlingSetting.addEventListener("change", () => {
-        //     const groupId = getElFromId("setting_modal_crawling_filter_group").value;
-        //     const categoryId = getElFromId("setting_modal_crawling_filter_category").value;
-
-        //     const skillInputBox = getElFromId(`setting_modal_crawling_search_skill`);
-        //     if (groupId == 1 && categoryId != 0) {
-        //         skillInputBox.disabled = false;
-        //     } else {
-        //         skillInputBox.disabled = true;
-        //         skillInputBox.value = "";
-        //         skillInputBox.setAttribute("data-id", 0);
-        //         getElFromId("setting_modal_crawling_search_skill_remove_btn").remove();
-        //     }
-        // });
-
-        // countrySelectForCrawlingSetting.addEventListener("change", () => {
-        //     let regionURL = "regions";
-        //     const countryId = getElFromId("setting_modal_crawling_filter_country").value;
-        //     if (countryId > 0) {
-        //         regionURL += `?country_id=${countryId}`;
-        //     }
-        //     makeSelectOptions(
-        //         JobURL,
-        //         regionURL,
-        //         "setting_modal_crawling_filter_region",
-        //         true,
-        //         null,
-        //         countryId,
-        //         "Country"
-        //     );
-        //     const detailRegionSelect = getElFromId("setting_modal_crawling_filter_detail_region");
-        //     removeAllNode(detailRegionSelect);
-        //     const defaultOption = createNewElement("option", "default-option", `Country first`);
-        //     defaultOption.value = 0;
-        //     detailRegionSelect.appendChild(defaultOption);
-        // });
-        // regionSelectForCrawlingSetting.addEventListener("change", () => {
-        //     let detailRegionURL = "detail_regions";
-        //     const regionId = getElFromId("setting_modal_crawling_filter_region").value;
-        //     if (regionId > 0) {
-        //         detailRegionURL += `?region_id=${regionId}`;
-        //     }
-        //     makeSelectOptions(
-        //         JobURL,
-        //         detailRegionURL,
-        //         "setting_modal_crawling_filter_detail_region",
-        //         true,
-        //         null,
-        //         regionId,
-        //         "Region"
-        //     );
-        // });
-
-        // 3개 영역 중 클릭한 버튼의 영역만 보이게 하기
-        getElFromId("crawling_wrap").classList.remove("hidden");
-        getElFromId("post_wrap").classList.add("hidden");
-        // getElFromId("manage_wrap").classList.add("hidden");
+        createSelectArea(crawlingSettingData, "setting_modal_crawling");
 
         ////////////////////////////////// Manage Setting
 
@@ -1090,176 +1000,15 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         // close 버튼 클릭 시 모달창 닫기
         settingModalCloseSvgBtn.addEventListener("click", async () => {
-            // 모달 숨기기
-            settingModal.classList.add("hidden");
-            // close 버튼 제거
-            settingModalCloseSvgBtn.remove();
-
-            // 모달 내부 데이터 비우기
-            const postSelectWrap = getElFromId("setting_modal_post_select_wrap");
-            removeAllNode(postSelectWrap);
-            saveBtnForPostSetting.remove();
-
-            const crawlingSelectWrap = getElFromId("setting_modal_crawling_select_wrap");
-            removeAllNode(crawlingSelectWrap);
-            saveBtnForCrawlingSetting.remove();
-
-            // body의 스크롤 원상복구
-            const body = getElFromSel("body");
-            body.style.overflow = "";
-
-            // Post, Crawling 탭의 Select Box 변경
-            if (
-                getElFromId("job_post_btn").getAttribute("src") == "/static/img/icon/job-post04.png"
-            ) {
-                // renderSelectBox(queryParameterDict, "post");
-                console.log('renderSelectBox(queryParameterDict, "post");');
-                this.location.reload();
-            } else if (
-                getElFromId("job_crawling_btn").getAttribute("src") ==
-                "/static/img/icon/gathering07.png"
-            ) {
-                renderSelectBoxInCrawling(crawlingQueryParameterDict, "crawling");
-
-                // Skill Input에 초기 데이터 설정
-                const crawlingSkillInput = getElFromId("crawling_search_skill");
-                const getSkillResponse = await fetch(
-                    `${JobURL}/skills?skill_ids=${crawlingQueryParameterDict.skill_ids}`
-                );
-                const getSkillData = await getSkillResponse.json();
-
-                if (getSkillResponse.status === 200) {
-                    if (getSkillData.length) {
-                        const skillInitName = getSkillData[0].name;
-                        crawlingSkillInput.value = skillInitName;
-                        crawlingQueryParameterDict.skill_ids = getSkillData[0].id;
-                        console.log(
-                            "close setting modal - crawlingQueryParameterDict",
-                            crawlingQueryParameterDict
-                        );
-                    } else {
-                        crawlingSkillInput.value = "All";
-                        crawlingQueryParameterDict.skill_ids = "0";
-                    }
-
-                    const crawlingSearchSkillList = getElFromId("crawling_search_skill_list");
-                    const searchSKillInputRemoveSvgBtn = getElFromId("search_skill_remove_btn");
-                    searchSKillInputRemoveSvgBtn.classList.remove("hidden");
-
-                    searchSKillInputRemoveSvgBtn.addEventListener("click", () => {
-                        crawlingSkillInput.value = "";
-                        removeAllNode(crawlingSearchSkillList);
-                        crawlingSearchSkillList.classList.add("hidden");
-                        searchSKillInputRemoveSvgBtn.classList.add("hidden");
-                    });
-                } else {
-                    console.log(getSkillData);
-                    // displayErrorMessage("make-url", errorData);
-                }
-            }
+            closeSettingModal();
         });
 
         getElFromId("setting_modal_btn_wrap").appendChild(settingModalCloseSvgBtn);
-
-        // esc 버튼 클릭 시 모달창 닫기
-        // setKeyForFunction(document, "Escape", () => {
-        //     // 모달 숨기기
-        //     settingModal.classList.add("hidden");
-
-        //     // 모달 내부 데이터 비우기
-        //     removeAllNode(getElFromId("setting_modal_btn_wrap"));
-        //     removeAllNode(siteSelectForPostSetting);
-        //     removeAllNode(groupSelectForPostSetting);
-        //     removeAllNode(categorySelectForPostSetting);
-        //     removeAllNode(countrySelectForPostSetting);
-        //     removeAllNode(regionSelectForPostSetting);
-        //     removeAllNode(detailRegionSelectForPostSetting);
-        //     removeAllNode(skillSelectForPostSetting);
-        //     removeAllNode(companyTagSelectForPostSetting);
-        //     if (skillSearchForCrawlingSetting) {
-        //         skillSearchForCrawlingSetting.remove();
-        //     }
-        //     minCareerSelectForPostSetting.value = 0;
-        //     saveBtnForPostSetting.remove();
-        //     saveBtnForCrawlingSetting.remove();
-
-        //     // body의 스크롤 원상복구
-        //     const body = getElFromSel("body");
-        //     body.style.overflow = "";
-
-        //     // Post, Crawling 탭의 Select Box 변경
-        //     renderSelectBox(queryParameterDict, "post");
-        //     if (
-        //         getElFromId("job_post_btn").getAttribute("src") == "/static/img/icon/job-post04.png"
-        //     ) {
-        //         renderPostList(queryParameterDict);
-        //     }
-
-        //     renderSelectBoxInCrawling(crawlingQueryParameterDict, "crawling");
-        //     getElFromId("crawling_filter_min_career").value = crawlingQueryParameterDict.min_career;
-        //     if (
-        //         getElFromId("job_crawling_btn").getAttribute("src") ==
-        //         "/static/img/icon/gathering07.png"
-        //     ) {
-        //         // renderCrawlingList(queryParameterDict);
-        //     }
-        // });
     };
 
     /////////////////////////////////////////////////////// POST page
 
-    const siteSelect = getElFromId("post_filter_site");
-    const groupSelect = getElFromId("post_filter_group");
-    const categorySelect = getElFromId("post_filter_category");
-    const countrySelect = getElFromId("post_filter_country");
-    const regionSelect = getElFromId("post_filter_region");
-    const detailRegionSelect = getElFromId("post_filter_detail_region");
-    const skillSelect = getElFromId("post_filter_skill");
-    const companyTagSelect = getElFromId("post_filter_company_tag");
-    const minCareerSelect = getElFromId("post_filter_min_career");
-
-    const searchBtn = getElFromId("post_search_btn");
-    // searchBtn.style.writingMode = "vertical-rl";
-    // searchBtn.style.textOrientation = "upright";
-
-    const changeJobListURL = (
-        selectEl,
-        queryParameterDict,
-        queryParameter,
-        relatedQueryParameters = null
-    ) => {
-        selectEl.addEventListener("change", () => {
-            queryParameterDict[queryParameter] = selectEl.value;
-            if (relatedQueryParameters) {
-                relatedQueryParameters.forEach((relatedQueryParameter) => {
-                    queryParameterDict[relatedQueryParameter] = 0;
-                });
-            }
-            console.log("change queryParameterDict", queryParameterDict);
-            let queryParams = makeQueryParameter(queryParameterDict);
-            console.log("queryParams", queryParams);
-        });
-    };
-
-    const changeJobListURLbyInput = (
-        selectEl,
-        queryParameterDict,
-        queryParameter,
-        relatedQueryParameters = null
-    ) => {
-        selectEl.addEventListener("input", () => {
-            queryParameterDict[queryParameter] = selectEl.value;
-            if (relatedQueryParameters) {
-                relatedQueryParameters.forEach((relatedQueryParameter) => {
-                    queryParameterDict[relatedQueryParameter] = 0;
-                });
-            }
-            console.log("change queryParameterDict", queryParameterDict);
-            let queryParams = makeQueryParameter(queryParameterDict);
-            console.log("queryParams", queryParams);
-        });
-    };
-
+    // Job Card 내의 각 Row 생성
     const makeJobRow = (recruit, type, attribute) => {
         const rowWrap = createNewElement(
             "div",
@@ -1291,6 +1040,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         return rowWrap;
     };
 
+    // Job Card 내의 Title 생성
     const makeJobCompany = (recruit, type) => {
         const jobCompany = createNewElement(
             "div",
@@ -1310,6 +1060,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         return jobCompany;
     };
 
+    // Job Card 내의 Body 생성
     const makeRowBody = (recruit, type) => {
         const jobBodyWrap = createNewElement(
             "div",
@@ -1327,7 +1078,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         return jobBodyWrap;
     };
 
-    const makeRowBottom = (recruit, type, queryParameterDict) => {
+    // Job Card 내의 Bottom 생성
+    const makeRowBottom = (recruit, type, requestData) => {
         const bottomWrap = createNewElement(
             "div",
             `flex flex-col my-1 items-center xl:flex-row ${type}-bottom-wrap-${recruit.id}`,
@@ -1376,7 +1128,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 skill.name,
                 `${type}_skill_${recruit.id}_${skill.id}`
             );
-            if (queryParameterDict.skill_ids == skill.id) {
+            if (requestData.skill_ids == skill.id) {
                 skillElement.classList.add("bg-[#373737]");
             } else {
                 skillElement.classList.add("bg-[#d9d9d9]");
@@ -1388,25 +1140,24 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (type == "post") {
                 skillElement.classList.add("cursor-pointer");
 
+                const skillSearch = getElFromId(`${type}_search_skill`);
+
                 skillElement.addEventListener("click", () => {
-                    if (queryParameterDict.skill_ids == skill.id) {
-                        skillSelect.value = 0;
-                        queryParameterDict.skill_ids = 0;
+                    if (requestData.skill_ids == skill.id) {
+                        skillSearch.value = "All";
+                        skillSearch.setAttribute("data-id", 0);
                         skillElement.classList.add("bg-[#d9d9d9]");
                         skillElement.classList.remove("bg-[#373737]");
                         skillElement.classList.add("hover:bg-[#373737]");
                     } else {
-                        skillSelect.value = skill.id;
-                        queryParameterDict.skill_ids = skill.id;
+                        skillSearch.value = skill.name;
+                        skillSearch.setAttribute("data-id", skill.id);
                         // skillElement.style.backgroundColor = "#373737";
                         skillElement.classList.add("bg-[#373737]");
                         skillElement.classList.remove("bg-[#d9d9d9]");
                     }
-                    if (type == "post") {
-                        renderPostList(queryParameterDict);
-                    } else if (type == "crawling") {
-                        renderCrawlingList(queryParameterDict);
-                    }
+                    const newRequestData = getDataFromSelectBox("post");
+                    renderPostList(newRequestData);
                 });
             }
 
@@ -1422,7 +1173,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         return bottomWrap;
     };
 
-    const makeJobCard = (recruit, queryParameterDict) => {
+    // List 영역에 Job Card 생성
+    const makeJobCard = (recruit, requestData) => {
         const jobCardWrap = createNewElement(
             "div",
             `w-full flex justify-center flex-col border p-2 hover:shadow-lg post-job-card-wrap-${recruit.id}`,
@@ -1445,7 +1197,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const jobCompany = makeJobCompany(recruit, "post");
         const jobBodyWrap = makeRowBody(recruit, "post");
 
-        const jobBottomWrap = makeRowBottom(recruit, "post", queryParameterDict);
+        const jobBottomWrap = makeRowBottom(recruit, "post", requestData);
 
         jobCardWrap.appendChild(jobPosition);
         jobCardWrap.appendChild(jobCompany);
@@ -1457,6 +1209,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         return jobCardWrap;
     };
 
+    // Job Card Modal Open 함수
     const openModalToPositionEl = (recruit) => {
         // 모달 요소에서 display: none 제거
         const postModal = getElFromId("post_modal");
@@ -1564,7 +1317,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 stroke-width="1.5"
                 stroke="#FFFFFF"
                 class="w-6 h-6 p-1 mr-2 cursor-pointer md:w-8 md:h-8"
-                id="post_model_like_btn">
+                id="post_modal_like_btn">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z">
             </path>
         </svg>
@@ -1583,7 +1336,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 stroke-width="1.5"
                 stroke="#FFFFFF"
                 class="w-6 h-6 p-1 mr-2 cursor-pointer md:w-8 md:h-8"
-                id="post_model_scrap_btn">
+                id="post_modal_scrap_btn">
             <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z">
             </path>
         </svg>
@@ -1602,7 +1355,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 stroke-width="2"
                 stroke="#FFFFFF"
                 class="w-6 h-6 p-1 cursor-pointer md:w-8 md:h-8"
-                id="post_model_close_btn">
+                id="post_modal_close_btn">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
         `;
@@ -1615,181 +1368,20 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         // close 버튼 클릭 시 모달창 닫기
         postModalCloseSvgBtn.addEventListener("click", () => {
-            // 모달 숨기기
-            postModal.classList.add("hidden");
-
-            // 모달 내부 데이터 비우기
-            positionDataEl.textContent = "";
-            companyDataEl.textContent = "";
-            regionDataEl.textContent = "";
-            taskDataEl.textContent = "";
-            requirementDataEl.textContent = "";
-            preferenceDataEl.textContent = "";
-            descriptionDataEl.textContent = "";
-            benefitDataEl.textContent = "";
-            workplaceDataEl.textContent = "";
-            removeAllNode(categoryDataEl);
-            removeAllNode(skillDataEl);
-            removeAllNode(companyTagDataEl);
-            removeAllNode(postModalBtnWrap);
-
-            // body의 스크롤 원상복구
-            const body = getElFromSel("body");
-            body.style.overflow = "";
+            closeJobCard();
         });
 
         postModalBtnWrap.appendChild(postModalLikeSvgBtn);
         postModalBtnWrap.appendChild(postModalScrapSvgBtn);
         postModalBtnWrap.appendChild(postModalCloseSvgBtn);
-
-        // esc 버튼 클릭 시 모달창 닫기
-        // setKeyForFunction(document, "Escape", () => {
-        //     // 모달 숨기기
-        //     postModal.classList.add("hidden");
-
-        //     // 모달 내부 데이터 비우기
-        //     positionDataEl.textContent = "";
-        //     companyDataEl.textContent = "";
-        //     regionDataEl.textContent = "";
-        //     taskDataEl.textContent = "";
-        //     requirementDataEl.textContent = "";
-        //     preferenceDataEl.textContent = "";
-        //     descriptionDataEl.textContent = "";
-        //     benefitDataEl.textContent = "";
-        //     workplaceDataEl.textContent = "";
-        //     removeAllNode(categoryDataEl);
-        //     removeAllNode(skillDataEl);
-        //     removeAllNode(companyTagDataEl);
-        //     removeAllNode(postModalBtnWrap);
-
-        //     // body의 스크롤 원상복구
-        //     const body = getElFromSel("body");
-        //     body.style.overflow = "";
-        // });
     };
 
-    const renderSelectBox = (queryParameterDict, type) => {
-        // Select box 만들기
+    // Select Box 내 Option 생성 함수
+    const renderSelectBox = (settingData, type) => {
+        const typeId = type.replace(/-/g, "_");
+        console.log("typeId", typeId);
 
-        console.log("renderSelectBox - queryParameterDict", queryParameterDict);
-        let groupURL;
-        let categoryUrl = "categories";
-        let countryUrl;
-        let regionURL = "regions";
-        let detailRegionURL = "detail_regions";
-
-        if (queryParameterDict.group_id > 0) {
-            categoryUrl += `?group_id=${queryParameterDict.group_id}`;
-        }
-
-        if (queryParameterDict.country_id > 0) {
-            regionURL += `?country_id=${queryParameterDict.country_id}`;
-            detailRegionURL += `?country_id=${queryParameterDict.country_id}`;
-        }
-
-        if (queryParameterDict.region_id > 0) {
-            if (queryParameterDict.country_id > 0) {
-                detailRegionURL += `&region_id=${queryParameterDict.region_id}`;
-            } else {
-                detailRegionURL += `?region_id=${queryParameterDict.region_id}`;
-            }
-        }
-
-        makeSelectOptions(JobURL, "sites", `${type}_filter_site`, true, queryParameterDict.site_id);
-        makeSelectOptions(
-            JobURL,
-            "groups",
-            `${type}_filter_group`,
-            true,
-            queryParameterDict.group_id
-        );
-        makeSelectOptions(
-            JobURL,
-            categoryUrl,
-            `${type}_filter_category`,
-            true,
-            queryParameterDict.category_ids,
-            queryParameterDict.group_id,
-            "Group"
-        );
-        makeSelectOptions(
-            JobURL,
-            "countries",
-            `${type}_filter_country`,
-            true,
-            queryParameterDict.country_id
-        );
-        makeSelectOptions(
-            JobURL,
-            regionURL,
-            `${type}_filter_region`,
-            true,
-            queryParameterDict.region_id,
-            queryParameterDict.country_id,
-            "Country"
-        );
-        makeSelectOptions(
-            JobURL,
-            detailRegionURL,
-            `${type}_filter_detail_region`,
-            true,
-            queryParameterDict.detail_region_id,
-            queryParameterDict.region_id,
-            "Region"
-        );
-        if (queryParameterDict.group_id == 1 && queryParameterDict.category_ids != 0) {
-            getElFromId(`${type}_filter_skill`).disabled = false;
-            makeSelectOptions(
-                JobURL,
-                "skills",
-                `${type}_filter_skill`,
-                true,
-                queryParameterDict.skill_ids
-            );
-        } else {
-            queryParameterDict.skill_ids = 0;
-            removeAllNode(getElFromId(`${type}_filter_skill`));
-            getElFromId(`${type}_filter_skill`).disabled = true;
-        }
-        makeSelectOptions(
-            JobURL,
-            "company_tags",
-            `${type}_filter_company_tag`,
-            true,
-            queryParameterDict.company_tag_ids
-        );
-
-        const minCareerSelectBox = getElFromId(`${type}_filter_min_career`);
-        const minCareerInfo = [
-            [0, "All"],
-            [-1, "newcomer"],
-            [1, "1 year ↑"],
-            [2, "2 year ↑"],
-            [3, "3 year ↑"],
-            [4, "4 year ↑"],
-            [5, "5 year ↑"],
-            [6, "6 year ↑"],
-            [7, "7 year ↑"],
-            [8, "8 year ↑"],
-            [9, "9 year ↑"],
-            [10, "10 year ↑"],
-        ];
-        minCareerInfo.forEach((minCareer) => {
-            const minCareerOption = createNewElement(
-                "option",
-                "text-[#373737] select-option",
-                null,
-                `${type}_filter_min_career_${minCareer[0]}`
-            );
-            minCareerOption.value = minCareer[0];
-            minCareerOption.textContent = minCareer[1];
-            minCareerSelectBox.appendChild(minCareerOption);
-        });
-        minCareerSelectBox.value = queryParameterDict.min_career;
-    };
-
-    const renderSelectBoxInCrawling = async (settingData, type) => {
-        // Select box 만들기
+        // Select box 내에 option 생성
 
         let groupURL;
         let categoryUrl = "categories";
@@ -1813,13 +1405,14 @@ document.addEventListener("DOMContentLoaded", async function () {
                 detailRegionURL += `?region_id=${settingData.region_id}`;
             }
         }
+        console.log("settingData", settingData);
 
-        makeSelectOptions(JobURL, "sites", `${type}_filter_site`, true, settingData.site_id);
-        makeSelectOptions(JobURL, "groups", `${type}_filter_group`, true, settingData.group_id);
+        makeSelectOptions(JobURL, "sites", `${typeId}_filter_site`, true, settingData.site_id);
+        makeSelectOptions(JobURL, "groups", `${typeId}_filter_group`, true, settingData.group_id);
         makeSelectOptions(
             JobURL,
             categoryUrl,
-            `${type}_filter_category`,
+            `${typeId}_filter_category`,
             true,
             settingData.category_ids,
             settingData.group_id,
@@ -1828,14 +1421,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeSelectOptions(
             JobURL,
             "countries",
-            `${type}_filter_country`,
+            `${typeId}_filter_country`,
             true,
             settingData.country_id
         );
         makeSelectOptions(
             JobURL,
             regionURL,
-            `${type}_filter_region`,
+            `${typeId}_filter_region`,
             true,
             settingData.region_id,
             settingData.country_id,
@@ -1844,7 +1437,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeSelectOptions(
             JobURL,
             detailRegionURL,
-            `${type}_filter_detail_region`,
+            `${typeId}_filter_detail_region`,
             true,
             settingData.detail_region_id,
             settingData.region_id,
@@ -1853,12 +1446,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeSelectOptions(
             JobURL,
             "company_tags",
-            `${type}_filter_company_tag`,
+            `${typeId}_filter_company_tag`,
             true,
             settingData.company_tag_ids
         );
 
-        const skillInputBox = getElFromId(`${type}_search_skill`);
+        const skillInputBox = getElFromId(`${typeId}_search_skill`);
+
         if (settingData.skills.length) {
             skillInputBox.value = settingData.skills[0].name;
             skillInputBox.setAttribute("data-id", settingData.skills[0].id);
@@ -1873,7 +1467,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             skillInputBox.disabled = true;
         }
 
-        const minCareerSelectBox = getElFromId(`${type}_filter_min_career`);
+        const minCareerSelectBox = getElFromId(`${typeId}_filter_min_career`);
+        removeAllNode(minCareerSelectBox);
         const minCareerInfo = [
             [0, "All"],
             [-1, "newcomer"],
@@ -1893,7 +1488,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 "option",
                 "text-[#373737] select-option",
                 null,
-                `${type}_filter_min_career_${minCareer[0]}`
+                `${typeId}_filter_min_career_${minCareer[0]}`
             );
             minCareerOption.value = minCareer[0];
             minCareerOption.textContent = minCareer[1];
@@ -1903,9 +1498,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     // 채용공고 리스트 렌더링
-    const renderPostList = async (queryParameterDict) => {
-        renderSelectBox(queryParameterDict, "post");
-        let initJobListURL = `${JobURL}/recruits?${makeQueryParameter(queryParameterDict)}`;
+    const renderPostList = async (requestData) => {
+        let initJobListURL = `${JobURL}/recruits?${makeQueryParameter(requestData)}`;
         console.log("initJobListURL", initJobListURL);
 
         // Job Card List 렌더링
@@ -1920,32 +1514,14 @@ document.addEventListener("DOMContentLoaded", async function () {
             let recruits = await get_recruits_response.json();
             console.log(recruits);
             recruits.forEach((recruit) => {
-                jobCardList.appendChild(makeJobCard(recruit, queryParameterDict));
+                jobCardList.appendChild(makeJobCard(recruit, requestData));
             });
         }
     };
 
-    const fromChangedSelectElementRenderPostList = (SelectElement, queryParameterDict, type) => {
-        SelectElement.addEventListener("change", () => {
-            renderPostList(queryParameterDict);
-        });
-    };
-
-    const fromSearchBtnRenderPostList = (searchBtn, queryParameterDict, type) => {
-        searchBtn.addEventListener("click", () => {
-            renderPostList(queryParameterDict);
-        });
-    };
-
-    const fromChangedSelectElementRenderSelectBox = (SelectElement, queryParameterDict, type) => {
-        SelectElement.addEventListener("change", () => {
-            renderSelectBox(queryParameterDict, type);
-        });
-    };
-
     /////////////////////////////////////////////////////// Crawling page
     // 크롤링한 공고 카드 만들기
-    const makeCrawlingCard = (recruit, queryParameterDict) => {
+    const makeCrawlingCard = (recruit, requestData) => {
         const jobCardWrap = createNewElement(
             "div",
             `w-full flex justify-center flex-col border p-2 hover:shadow-lg crawling-job-card-wrap-${recruit.id}`,
@@ -1968,7 +1544,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const jobCompany = makeJobCompany(recruit, "crawling");
         const jobBodyWrap = makeRowBody(recruit, "crawling");
 
-        const jobBottomWrap = makeRowBottom(recruit, "crawling", queryParameterDict);
+        const jobBottomWrap = makeRowBottom(recruit, "crawling", requestData);
 
         jobCardWrap.appendChild(jobPosition);
         jobCardWrap.appendChild(jobCompany);
@@ -1981,16 +1557,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     // 크롤링한 공고 리스트 렌더링
-    const renderCrawlingList = async (queryParameterDict) => {
+    const renderCrawlingList = async (renderCrawlingList) => {
         const crawlingCardList = getElFromId("crawling_job_card_list");
         removeAllNode(crawlingCardList);
 
         let initJobCrawlingURL = `${JobURL}/crawling/recruits`;
         console.log("initJobCrawlingURL", initJobCrawlingURL);
-        console.log("renderCrawlingList - queryParameterDict", queryParameterDict);
+        console.log("renderCrawlingList - renderCrawlingList", renderCrawlingList);
         // return;
 
-        const data = setFetchData("post", queryParameterDict);
+        const data = setFetchData("post", renderCrawlingList);
 
         const loadingWrap = createNewElement(
             "div",
@@ -2035,7 +1611,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             const crawlingRecruits = crawlingResult.recruits;
             crawlingRecruits.forEach((crawling_recruit) => {
                 crawlingCardList.appendChild(
-                    makeCrawlingCard(crawling_recruit, queryParameterDict)
+                    makeCrawlingCard(crawling_recruit, renderCrawlingList)
                 );
             });
         } else {
@@ -2051,100 +1627,98 @@ document.addEventListener("DOMContentLoaded", async function () {
         openModalToSetting();
     });
 
-    changeJobListURL(siteSelect, queryParameterDict, "site_id", [
-        "group_id",
-        "category_ids",
-        "country_id",
-        "region_id",
-        "detail_region_id",
-    ]);
-    changeJobListURL(groupSelect, queryParameterDict, "group_id", ["category_ids"]);
-    changeJobListURL(categorySelect, queryParameterDict, "category_ids");
-    changeJobListURL(countrySelect, queryParameterDict, "country_id", [
-        "region_id",
-        "detail_region_id",
-    ]);
-    changeJobListURL(regionSelect, queryParameterDict, "region_id", ["detail_region_id"]);
-    changeJobListURL(detailRegionSelect, queryParameterDict, "detail_region_id");
-    changeJobListURL(skillSelect, queryParameterDict, "skill_ids");
-    changeJobListURL(companyTagSelect, queryParameterDict, "company_tag_ids");
-    changeJobListURL(minCareerSelect, queryParameterDict, "min_career");
-
-    renderPostList(queryParameterDict);
-
-    fromChangedSelectElementRenderPostList(siteSelect, queryParameterDict, "post");
-    fromChangedSelectElementRenderPostList(categorySelect, queryParameterDict, "post");
-    fromChangedSelectElementRenderPostList(groupSelect, queryParameterDict, "post");
-    fromChangedSelectElementRenderPostList(skillSelect, queryParameterDict, "post");
-    fromChangedSelectElementRenderPostList(companyTagSelect, queryParameterDict, "post");
-    fromChangedSelectElementRenderPostList(minCareerSelect, queryParameterDict, "post");
-
-    fromChangedSelectElementRenderSelectBox(countrySelect, queryParameterDict, "post");
-    fromChangedSelectElementRenderSelectBox(regionSelect, queryParameterDict, "post");
-
-    fromSearchBtnRenderPostList(searchBtn, queryParameterDict, "post");
+    /////////////////////////////////////////////////////// Crawling page Initialization
 
     /////////////////////////////////////////////////////// Crawling page Initialization
-    const siteSelectInCrawling = getElFromId("crawling_filter_site");
-    const groupSelectInCrawling = getElFromId("crawling_filter_group");
-    const categorySelectInCrawling = getElFromId("crawling_filter_category");
-    const countrySelectInCrawling = getElFromId("crawling_filter_country");
-    const regionSelectInCrawling = getElFromId("crawling_filter_region");
-    const detailRegionSelectInCrawling = getElFromId("crawling_filter_detail_region");
-    const skillSelectInCrawling = getElFromId("crawling_search_skill");
-    const companyTagSelectInCrawling = getElFromId("crawling_filter_company_tag");
-    const minCareerSelectInCrawling = getElFromId("crawling_filter_min_career");
 
-    renderSelectBoxInCrawling(crawlingQueryParameterDict, "crawling");
-    // renderCrawlingList(crawlingQueryParameterDict);
+    // esc 버튼 클릭 시 모달창 닫기
+    setKeyForFunction(document, "Escape", () => {
+        // Job Card 닫기
+        const closeJobCardModalBtn = getElFromId("post_modal_close_btn");
+        if (closeJobCardModalBtn) {
+            closeJobCard();
+            return;
+        }
 
-    changeJobListURL(siteSelectInCrawling, crawlingQueryParameterDict, "site_id", [
-        "group_id",
-        "category_ids",
-        "country_id",
-        "region_id",
-        "detail_region_id",
-    ]);
-    changeJobListURL(groupSelectInCrawling, crawlingQueryParameterDict, "group_id", [
-        "category_ids",
-    ]);
-    changeJobListURL(categorySelectInCrawling, crawlingQueryParameterDict, "category_ids");
-    changeJobListURL(countrySelectInCrawling, crawlingQueryParameterDict, "country_id", [
-        "region_id",
-        "detail_region_id",
-    ]);
-    changeJobListURL(regionSelectInCrawling, crawlingQueryParameterDict, "region_id", [
-        "detail_region_id",
-    ]);
-    changeJobListURL(detailRegionSelectInCrawling, crawlingQueryParameterDict, "detail_region_id");
-    changeJobListURL(companyTagSelectInCrawling, crawlingQueryParameterDict, "company_tag_ids");
-    changeJobListURL(minCareerSelectInCrawling, crawlingQueryParameterDict, "min_career");
+        // Post page에서 검색된 Skill List 닫기
+        const searchedSkillListRemoveBtnInPost = getElFromId("post_searched_skill_close_btn");
+        if (searchedSkillListRemoveBtnInPost) {
+            searchedSkillListRemove("post");
+            return;
+        }
+        // Crawling page에서 검색된 Skill List 닫기
+        const searchedSkillListRemoveBtnInCrawling = getElFromId(
+            "crawling_searched_skill_close_btn"
+        );
+        if (searchedSkillListRemoveBtnInCrawling) {
+            searchedSkillListRemove("crawling");
+            return;
+        }
 
-    siteSelectInCrawling.addEventListener("change", () => {
-        renderSelectBoxInCrawling(crawlingQueryParameterDict, "crawling");
-    });
-    groupSelectInCrawling.addEventListener("change", () => {
-        renderSelectBoxInCrawling(crawlingQueryParameterDict, "crawling");
-    });
-    categorySelectInCrawling.addEventListener("change", () => {
-        const crawlingSkillInput = getElFromId("crawling_search_skill");
+        // Setting page에서 검색된 Skill List 닫기
+        const searchedSkillListRemoveBtnInPostSetting = getElFromId(
+            "setting_modal_post_searched_skill_close_btn"
+        );
+        const searchedSkillListRemoveBtnInCrawlingSetting = getElFromId(
+            "setting_modal_crawling_searched_skill_close_btn"
+        );
         if (
-            crawlingQueryParameterDict.group_id == 1 &&
-            crawlingQueryParameterDict.category_ids != 0
+            searchedSkillListRemoveBtnInPostSetting ||
+            searchedSkillListRemoveBtnInCrawlingSetting
         ) {
-            if (crawlingSkillInput) {
-                crawlingSkillInput.disabled = false;
+            if (searchedSkillListRemoveBtnInPostSetting) {
+                searchedSkillListRemove("setting_modal_post");
             }
-        } else {
-            crawlingSkillInput.value = "";
-            crawlingQueryParameterDict.skill_ids = 0;
-            crawlingSkillInput.disabled = true;
+            if (searchedSkillListRemoveBtnInCrawlingSetting) {
+                searchedSkillListRemove("setting_modal_crawling");
+            }
+            return;
+        }
+
+        // Setting page 닫기
+        const closeSettingModalBtn = getElFromId("setting_modal_close_btn");
+        if (closeSettingModalBtn) {
+            closeSettingModal();
+            return;
         }
     });
-    countrySelectInCrawling.addEventListener("change", () => {
-        renderSelectBoxInCrawling(crawlingQueryParameterDict, "crawling");
-    });
-    regionSelectInCrawling.addEventListener("change", () => {
-        renderSelectBoxInCrawling(crawlingQueryParameterDict, "crawling");
+
+    // 바깥 영역 클릭 시, 모달창 닫기
+    document.addEventListener("mouseup", function (e) {
+        const searchedSkillListRemoveBtnInPost = getElFromId("post_search_skill_list");
+        const searchedSkillListRemoveBtnInCrawling = getElFromId("crawling_search_skill_list");
+        if (
+            searchedSkillListRemoveBtnInPost &&
+            !searchedSkillListRemoveBtnInPost.contains(e.target)
+        ) {
+            searchedSkillListRemove("post");
+        }
+
+        if (
+            searchedSkillListRemoveBtnInCrawling &&
+            !searchedSkillListRemoveBtnInCrawling.contains(e.target)
+        ) {
+            searchedSkillListRemove("crawling");
+        }
+
+        const searchedSkillListRemoveBtnInPostSetting = getElFromId(
+            "setting_modal_post_search_skill_list"
+        );
+        if (
+            searchedSkillListRemoveBtnInPostSetting &&
+            !searchedSkillListRemoveBtnInPostSetting.contains(e.target)
+        ) {
+            searchedSkillListRemove("setting_modal_post");
+        }
+
+        const searchedSkillListRemoveBtnInCrawlingSetting = getElFromId(
+            "setting_modal_crawling_search_skill_list"
+        );
+        if (
+            searchedSkillListRemoveBtnInCrawlingSetting &&
+            !searchedSkillListRemoveBtnInCrawlingSetting.contains(e.target)
+        ) {
+            searchedSkillListRemove("setting_modal_crawling");
+        }
     });
 });
