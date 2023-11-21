@@ -61,6 +61,26 @@ variable "shortener_postgres_port" {
   default = 5432
 }
 
+variable "job_postgres_db" {
+  type      = string
+  sensitive = true
+}
+
+variable "job_postgres_user" {
+  type      = string
+  sensitive = true
+}
+
+variable "job_postgres_password" {
+  type      = string
+  sensitive = true
+}
+
+variable "job_postgres_port" {
+  type    = number
+  default = 5432
+}
+
 variable "jwt_signing_key" {
   type = string
 }
@@ -86,5 +106,22 @@ variable "user_service_host" {
 }
 
 variable "url_service_host" {
+  type = string
+}
+
+
+variable "job_service_host" {
+  type = string
+}
+
+variable "wanted_id" {
+  type = string
+}
+
+variable "wanted_pw" {
+  type = string
+}
+
+variable "chrome_driver" {
   type = string
 }
