@@ -273,10 +273,8 @@ document.addEventListener("DOMContentLoaded", async function () {
                 }
             }
             if (type.includes("post")) {
-                if (groupId == 1) {
-                    skillInputBox.disabled = false;
-                    skillInputBox.placeholder = "search Skill";
-                }
+                skillInputBox.disabled = false;
+                skillInputBox.placeholder = "search Skill";
             }
         });
 
@@ -1082,6 +1080,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             null,
             "loading_img"
         );
+        copyRight.target = "_blank";
         loadingImg.src = "/static/img/icon/loading01.svg";
         loadingBackground.alt = "loading Img";
 
