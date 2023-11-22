@@ -1092,6 +1092,131 @@ document.addEventListener("DOMContentLoaded", async function () {
         return loadingWrap;
     };
 
+    // Post Page로 이동 시, SEARCH 버튼 생성
+    const createSearchBtn = () => {
+        const postBtn = createNewElement(
+            "div",
+            "flex items-center font-semibold cursor-pointer hover:text-white hover:border-none hover:bg-[#373737] justify-center border border-[#d9d9d9] w-10 p-2 my-1 text-xs post-submit-btn",
+            "SEARCH",
+            "post_submit_btn"
+        );
+        postBtn.style.writingMode = "vertical-rl";
+        postBtn.style.textOrientation = "upright";
+        postBtn.addEventListener("click", async () => {
+            const requestData = getDataFromSelectBox("post");
+
+            if (requestData.group_id == 0) {
+                alert("Please select Group2");
+                // } else if (requestData.category_ids == 0) {
+                //     alert("Please select Category2");
+                // } else if (
+                //     requestData.group_id == 1 &&
+                //     requestData.category_ids != 0 &&
+                //     requestData.skill_ids == 0
+                // ) {
+                //     alert("Please search Skill and select one");
+                // } else if (requestData.min_career == 0) {
+                //     alert("Please select Minimum Career");
+            } else {
+                renderPostList(requestData);
+            }
+        });
+        getElFromId("post_form").appendChild(postBtn);
+    };
+
+    // Crawling Page로 이동 시, START 버튼 생성
+    const createStartBtn = () => {
+        const crawlingBtn = createNewElement(
+            "div",
+            "flex items-center font-semibold cursor-pointer hover:text-white hover:border-none hover:bg-[#373737] justify-center border border-[#d9d9d9] w-10 p-2 my-1 text-xs crawling-submit-btn",
+            "START",
+            "crawling_submit_btn"
+        );
+        crawlingBtn.style.writingMode = "vertical-rl";
+        crawlingBtn.style.textOrientation = "upright";
+        crawlingBtn.addEventListener("click", async () => {
+            const requestData = getDataFromSelectBox("crawling");
+
+            if (requestData.group_id == 0) {
+                alert("Please select Group3");
+            } else if (requestData.category_ids == 0) {
+                alert("Please select Category3");
+            } else if (
+                requestData.group_id == 1 &&
+                requestData.category_ids != 0 &&
+                requestData.skill_ids == 0
+            ) {
+                alert("Please search Skill and select one");
+            } else if (requestData.min_career == 0) {
+                alert("Please select Minimum Career");
+            } else {
+                renderCrawlingList(requestData);
+            }
+        });
+        getElFromId("crawling_form").appendChild(crawlingBtn);
+    };
+
+    // Setting 페이지에서 Save 버튼 생성
+    const addSaveBtnInSetting = () => {
+        // - Post Setting Save 버튼
+        const saveBtnForPostSetting = createNewElement(
+            "div",
+            "flex items-center font-semibold cursor-pointer hover:text-[#373737] hover:border-none hover:bg-white justify-center border border-white w-10 p-2 text-sm setting-modal-post-save-btn",
+            "SAVE",
+            "setting_modal_post_save_btn"
+        );
+
+        const settingModalPostData = getElFromId("setting_modal_post_data");
+        settingModalPostData.appendChild(saveBtnForPostSetting);
+
+        saveBtnForPostSetting.addEventListener("click", () => {
+            saveSetting("post");
+        });
+
+        // - Crawling Setting Save 버튼
+        const saveBtnForCrawlingSetting = createNewElement(
+            "div",
+            "flex items-center font-semibold cursor-pointer hover:text-[#373737] hover:border-none hover:bg-white justify-center border border-white w-10 p-2 text-sm setting-modal-crawling-save-btn",
+            "SAVE",
+            "setting_modal_crawling_save_btn"
+        );
+
+        const settingModalCrawlingData = getElFromId("setting_modal_crawling_data");
+        settingModalCrawlingData.appendChild(saveBtnForCrawlingSetting);
+
+        saveBtnForCrawlingSetting.addEventListener("click", () => {
+            saveSetting("crawling");
+        });
+    };
+
+    // Setting 페이지에 Close 버튼 생성
+    const addCloseBtnInSetting = () => {
+        const settingModalCloseSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="#FFFFFF"
+                class="w-6 h-6 p-1 cursor-pointer md:w-8 md:h-8"
+                id="setting_modal_close_btn">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        `;
+        const settingModalCloseParser = new DOMParser();
+        const settingModalCloseSvgDOM = settingModalCloseParser.parseFromString(
+            settingModalCloseSvg,
+            "image/svg+xml"
+        );
+        const settingModalCloseSvgBtn = settingModalCloseSvgDOM.documentElement;
+
+        // close 버튼 클릭 시 모달창 닫기
+        settingModalCloseSvgBtn.addEventListener("click", async () => {
+            closeSettingModal();
+        });
+
+        getElFromId("setting_modal_btn_wrap").appendChild(settingModalCloseSvgBtn);
+    };
+
     /////////////////////////////////////////////////////// Page Initialization
     // Post page를 벗어날 시 무한스크롤 이벤트 제거
     removeInfiniteScroll();
@@ -1144,13 +1269,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Post Button 클릭 이벤트 정의
     const addClickEventToPostBtn = async () => {
         console.log("addClickEventToPostBtn");
-        createJobBtn(jobPostBtnImgDict);
-        getElFromId("job_crawling_btn").addEventListener("click", () => {
-            addClickEventToCrawlingBtn();
-        });
-        getElFromId("job_manage_btn").addEventListener("click", () => {
-            addClickEventToManageBtn();
-        });
+
         const postSettingResponse = await requestSetting(1);
         const getPostSettingStatus = postSettingResponse.status;
         const postSettingData = await postSettingResponse.json();
@@ -1158,43 +1277,24 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         createSelectArea(postSettingData, "post");
 
-        const postBtn = createNewElement(
-            "div",
-            "flex items-center font-semibold cursor-pointer hover:text-white hover:border-none hover:bg-[#373737] justify-center border border-[#d9d9d9] w-10 p-2 my-1 text-xs post-submit-btn",
-            "SEARCH",
-            "post_submit_btn"
-        );
-        postBtn.style.writingMode = "vertical-rl";
-        postBtn.style.textOrientation = "upright";
-        postBtn.addEventListener("click", async () => {
-            const requestData = getDataFromSelectBox("post");
-            console.log('requestData - getDataFromSelectBox("post")', requestData);
-
-            if (requestData.group_id == 0) {
-                alert("Please select Group2");
-                // } else if (requestData.category_ids == 0) {
-                //     alert("Please select Category2");
-                // } else if (
-                //     requestData.group_id == 1 &&
-                //     requestData.category_ids != 0 &&
-                //     requestData.skill_ids == 0
-                // ) {
-                //     alert("Please search Skill and select one");
-                // } else if (requestData.min_career == 0) {
-                //     alert("Please select Minimum Career");
-            } else {
-                renderPostList(requestData);
-            }
-        });
-        getElFromId("post_form").appendChild(postBtn);
-
-        deleteSelectAreaPlusBtn("crawling");
-        removeAllNode(getElFromId("crawling_job_card_list"));
+        createSearchBtn();
 
         page = 1;
         emptyPage = false;
         blockRequest = false;
         lastScrollY = 0;
+
+        createJobBtn(jobPostBtnImgDict);
+
+        deleteSelectAreaPlusBtn("crawling");
+        removeAllNode(getElFromId("crawling_job_card_list"));
+
+        getElFromId("job_crawling_btn").addEventListener("click", () => {
+            addClickEventToCrawlingBtn();
+        });
+        getElFromId("job_manage_btn").addEventListener("click", () => {
+            addClickEventToManageBtn();
+        });
 
         // 3개 영역 중 클릭한 버튼의 영역만 보이게 하기
         getElFromId("post_wrap").classList.remove("hidden");
@@ -1205,13 +1305,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Crawling Button 클릭 이벤트 정의
     const addClickEventToCrawlingBtn = async () => {
         console.log("addClickEventToCrawlingBtn");
-        createJobBtn(jobCrawlingBtnImgDict);
-        getElFromId("job_post_btn").addEventListener("click", () => {
-            addClickEventToPostBtn();
-        });
-        getElFromId("job_manage_btn").addEventListener("click", () => {
-            addClickEventToManageBtn();
-        });
 
         const crawlingSettingResponse = await requestSetting(2);
         const getPostSettingStatus = crawlingSettingResponse.status;
@@ -1220,40 +1313,21 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         createSelectArea(crawlingSettingData, "crawling");
 
-        const crawlingBtn = createNewElement(
-            "div",
-            "flex items-center font-semibold cursor-pointer hover:text-white hover:border-none hover:bg-[#373737] justify-center border border-[#d9d9d9] w-10 p-2 my-1 text-xs crawling-submit-btn",
-            "START",
-            "crawling_submit_btn"
-        );
-        crawlingBtn.style.writingMode = "vertical-rl";
-        crawlingBtn.style.textOrientation = "upright";
-        crawlingBtn.addEventListener("click", async () => {
-            const requestData = getDataFromSelectBox("crawling");
-            console.log('requestData - getDataFromSelectBox("crawling")', requestData);
+        createStartBtn();
 
-            if (requestData.group_id == 0) {
-                alert("Please select Group3");
-            } else if (requestData.category_ids == 0) {
-                alert("Please select Category3");
-            } else if (
-                requestData.group_id == 1 &&
-                requestData.category_ids != 0 &&
-                requestData.skill_ids == 0
-            ) {
-                alert("Please search Skill and select one");
-            } else if (requestData.min_career == 0) {
-                alert("Please select Minimum Career");
-            } else {
-                renderCrawlingList(requestData);
-            }
-        });
-        getElFromId("crawling_form").appendChild(crawlingBtn);
+        removeInfiniteScroll();
+
+        createJobBtn(jobCrawlingBtnImgDict);
 
         deleteSelectAreaPlusBtn("post");
         removeAllNode(getElFromId("post_job_card_list"));
 
-        removeInfiniteScroll();
+        getElFromId("job_post_btn").addEventListener("click", () => {
+            addClickEventToPostBtn();
+        });
+        getElFromId("job_manage_btn").addEventListener("click", () => {
+            addClickEventToManageBtn();
+        });
 
         // 3개 영역 중 클릭한 버튼의 영역만 보이게 하기
         getElFromId("crawling_wrap").classList.remove("hidden");
@@ -1313,53 +1387,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         const settingModal = getElFromId("setting_modal");
         settingModal.classList.remove("hidden");
 
-        // body의 스크롤 방지
-        const body = getElFromSel("body");
-        body.style.overflow = "hidden";
-
-        // Post, Crawling 탭의 Select Box 변경
-        if (getElFromId("job_post_btn").getAttribute("src") == "/static/img/icon/job-post04.png") {
-            //
-        }
-        if (
-            getElFromId("job_crawling_btn").getAttribute("src") ==
-            "/static/img/icon/gathering07.png"
-        ) {
-            const crawlingSearchSkillList = getElFromId("crawling_search_skill_list");
-            removeAllNode(crawlingSearchSkillList);
-            crawlingSearchSkillList.classList.add("hidden");
-        }
-
         // save 버튼 추가
-        // - Post Setting Save 버튼
-        const saveBtnForPostSetting = createNewElement(
-            "div",
-            "flex items-center font-semibold cursor-pointer hover:text-[#373737] hover:border-none hover:bg-white justify-center border border-white w-10 p-2 text-sm setting-modal-post-save-btn",
-            "SAVE",
-            "setting_modal_post_save_btn"
-        );
-
-        const settingModalPostData = getElFromId("setting_modal_post_data");
-        settingModalPostData.appendChild(saveBtnForPostSetting);
-
-        saveBtnForPostSetting.addEventListener("click", () => {
-            saveSetting("post");
-        });
-
-        // - Crawling Setting Save 버튼
-        const saveBtnForCrawlingSetting = createNewElement(
-            "div",
-            "flex items-center font-semibold cursor-pointer hover:text-[#373737] hover:border-none hover:bg-white justify-center border border-white w-10 p-2 text-sm setting-modal-crawling-save-btn",
-            "SAVE",
-            "setting_modal_crawling_save_btn"
-        );
-
-        const settingModalCrawlingData = getElFromId("setting_modal_crawling_data");
-        settingModalCrawlingData.appendChild(saveBtnForCrawlingSetting);
-
-        saveBtnForCrawlingSetting.addEventListener("click", () => {
-            saveSetting("crawling");
-        });
+        addSaveBtnInSetting();
 
         ////////////////////////////////// Post Setting
         const postSettingResponse = await requestSetting(1);
@@ -1383,51 +1412,27 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         ////////////////////////////////// Close Setting
         // 모달 close 버튼
-        const settingModalCloseSvg = `
-        <svg xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="#FFFFFF"
-                class="w-6 h-6 p-1 cursor-pointer md:w-8 md:h-8"
-                id="setting_modal_close_btn">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-        `;
-        const settingModalCloseParser = new DOMParser();
-        const settingModalCloseSvgDOM = settingModalCloseParser.parseFromString(
-            settingModalCloseSvg,
-            "image/svg+xml"
-        );
-        const settingModalCloseSvgBtn = settingModalCloseSvgDOM.documentElement;
+        addCloseBtnInSetting();
 
-        // close 버튼 클릭 시 모달창 닫기
-        settingModalCloseSvgBtn.addEventListener("click", async () => {
-            closeSettingModal();
-        });
+        // body의 스크롤 방지
+        const body = getElFromSel("body");
+        body.style.overflow = "hidden";
 
-        getElFromId("setting_modal_btn_wrap").appendChild(settingModalCloseSvgBtn);
+        // Post, Crawling 탭의 Select Box 변경
+        if (getElFromId("job_post_btn").getAttribute("src") == "/static/img/icon/job-post04.png") {
+            //
+        }
+        if (
+            getElFromId("job_crawling_btn").getAttribute("src") ==
+            "/static/img/icon/gathering07.png"
+        ) {
+            const crawlingSearchSkillList = getElFromId("crawling_search_skill_list");
+            removeAllNode(crawlingSearchSkillList);
+            crawlingSearchSkillList.classList.add("hidden");
+        }
     };
 
     /////////////////////////////////////////////////////// POST page
-
-    // List 영역에 Job Card 생성
-    // const makeJobCard = (recruit, requestData) => {
-    //     const jobCardWrap = makeJobCardWrap(recruit, "post");
-    //     const jobPosition = makeJobPosition(recruit, "post");
-
-    //     const jobCompany = makeJobCompany(recruit, "post");
-    //     const jobBodyWrap = makeRowBody(recruit, "post");
-
-    //     const jobBottomWrap = makeRowBottom(recruit, "post", requestData);
-
-    //     jobCardWrap.appendChild(jobPosition);
-    //     jobCardWrap.appendChild(jobCompany);
-    //     jobCardWrap.appendChild(jobBodyWrap);
-    //     jobCardWrap.appendChild(jobBottomWrap);
-
-    //     return jobCardWrap;
-    // };
 
     // Job Card Modal Open 함수
     const openModalToPositionEl = (recruit) => {
@@ -1781,23 +1786,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     /////////////////////////////////////////////////////// Crawling page
-    // // 크롤링한 공고 카드 만들기
-    // const makeCrawlingCard = (recruit, requestData) => {
-    //     const jobCardWrap = makeJobCardWrap(recruit, "crawling");
-    //     const jobPosition = makeJobPosition(recruit, "crawling");
-
-    //     const jobCompany = makeJobCompany(recruit, "crawling");
-    //     const jobBodyWrap = makeRowBody(recruit, "crawling");
-
-    //     const jobBottomWrap = makeRowBottom(recruit, "crawling", requestData);
-
-    //     jobCardWrap.appendChild(jobPosition);
-    //     jobCardWrap.appendChild(jobCompany);
-    //     jobCardWrap.appendChild(jobBodyWrap);
-    //     jobCardWrap.appendChild(jobBottomWrap);
-
-    //     return jobCardWrap;
-    // };
 
     // 크롤링한 공고 리스트 렌더링
     const renderCrawlingList = async (requestData) => {
