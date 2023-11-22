@@ -88,6 +88,17 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function setCookie(key, value, days) {
+    const expires = days
+        ? `expires=${new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString()}`
+        : "";
+    document.cookie = `${key}=${JSON.stringify(value)}; ${expires}; path=/`;
+}
+
+function deleteCookie(name) {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+}
+
 function setFetchData(method, body) {
     /* Fetch data 셋팅 함수 */
 
@@ -514,6 +525,8 @@ export {
     insertAfter,
     removeAllNode,
     getCookie,
+    setCookie,
+    deleteCookie,
     setFetchData,
     redirectLogin,
     imageHover,
