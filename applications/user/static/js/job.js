@@ -619,9 +619,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     const deleteSelectAreaPlusBtn = (type) => {
         const typeId = type.replace(/-/g, "_");
         const selectWrap = getElFromId(`${typeId}_select_wrap`);
-        removeAllNode(selectWrap);
+        if (selectWrap) {
+            removeAllNode(selectWrap);
+        }
         const submitBtn = getElFromId(`${typeId}_submit_btn`);
-        submitBtn.remove();
+        if (submitBtn) {
+            submitBtn.remove();
+        }
     };
 
     // Setting 모달 닫기 함수
@@ -1424,6 +1428,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         deleteSelectAreaPlusBtn("post");
         removeAllNode(getElFromId("post_job_card_list"));
 
+        deleteSelectAreaPlusBtn("crawling");
+        removeAllNode(getElFromId("crawling_job_card_list"));
+
         getElFromId("job_post_btn").addEventListener("click", () => {
             addClickEventToPostBtn();
         });
@@ -1451,6 +1458,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
         removeInfiniteScroll();
+
+        deleteSelectAreaPlusBtn("post");
+        removeAllNode(getElFromId("post_job_card_list"));
 
         getElFromId("job_crawling_btn").addEventListener("click", () => {
             addClickEventToCrawlingBtn();
