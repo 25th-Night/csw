@@ -89,11 +89,13 @@ class RecruitView(GenericAPIView):
                     else "전체"
                 )
 
-        if skill_ids in ["0", 0]:
+        if group_id == 1 and skill_ids in ["0", 0]:
             # skill_id_list, skill_name_list = None, None
             response_data = {"detail": "Please select Skill"}
             print(response_data)
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        elif group_id != 1:
+            skill_id_list, skill_name_list = None, None
         elif type(skill_ids) == int and skill_ids:
             skill_id_list = [skill_ids]
             skill_name_list = [Skill.objects.get(id=skill_ids).name]
@@ -155,7 +157,7 @@ class RecruitView(GenericAPIView):
 
                     skill_found = True
                     recruit_skill_list = recruit["job"]["skill_tags"]
-                    if recruit_skill_list:
+                    if recruit_skill_list and skill_name_list:
                         recruit_skill_name_list = [
                             recruit_skill["title"]
                             for recruit_skill in recruit_skill_list
