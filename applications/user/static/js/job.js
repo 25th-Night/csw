@@ -819,6 +819,10 @@ document.addEventListener("DOMContentLoaded", async function () {
                     minCareerSelectBox.value = minCareer[0];
                     newRequestData.min_career = minCareer[0];
                 }
+                page = 1;
+                emptyPage = false;
+                blockRequest = false;
+                lastScrollY = 0;
                 setCookie("requestData", newRequestData, 1);
                 renderPostList(newRequestData);
             });
@@ -994,7 +998,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (type == "post") {
                 skillElement.classList.add("cursor-pointer");
 
-                const skillSearch = getElFromId(`${type}_search_skill`);
+                const skillSearchInput = getElFromId(`${type}_search_skill`);
 
                 skillElement.addEventListener("click", async () => {
                     const SettingResponse = await requestSetting(1);
@@ -1003,19 +1007,24 @@ document.addEventListener("DOMContentLoaded", async function () {
 
                     const newRequestData = JSON.parse(getCookie("requestData"));
                     if (newRequestData.skill_ids == skill.id) {
-                        skillSearch.value = "All";
-                        skillSearch.setAttribute("data-id", 0);
+                        skillSearchInput.value = "All";
+                        skillSearchInput.setAttribute("data-id", 0);
                         newRequestData.skill_ids = 0;
                         skillElement.classList.add("bg-[#d9d9d9]");
                         skillElement.classList.remove("bg-[#373737]");
                         skillElement.classList.add("hover:bg-[#373737]");
                     } else {
-                        skillSearch.value = skill.name;
-                        skillSearch.setAttribute("data-id", skill.id);
+                        skillSearchInput.value = skill.name;
+                        skillSearchInput.setAttribute("data-id", skill.id);
                         newRequestData.skill_ids = skill.id;
                         skillElement.classList.add("bg-[#373737]");
                         skillElement.classList.remove("bg-[#d9d9d9]");
                     }
+
+                    page = 1;
+                    emptyPage = false;
+                    blockRequest = false;
+                    lastScrollY = 0;
                     console.log("newRequestData", newRequestData);
                     setCookie("requestData", newRequestData, 1);
                     renderPostList(newRequestData);
@@ -1118,6 +1127,10 @@ document.addEventListener("DOMContentLoaded", async function () {
                 // } else if (requestData.min_career == 0) {
                 //     alert("Please select Minimum Career");
             } else {
+                page = 1;
+                emptyPage = false;
+                blockRequest = false;
+                lastScrollY = 0;
                 renderPostList(requestData);
             }
         });
@@ -1706,6 +1719,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         if (get_recruits_response.status === 200) {
             const responseData = await get_recruits_response.json();
+            console.log("renderPostList - responseData", responseData);
             const recruits = responseData.results;
             recruits.forEach((recruit) => {
                 jobCardList.appendChild(makeJobCard(recruit, requestData, "post"));
@@ -1742,6 +1756,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             if (get_recruits_response.status === 200) {
                 const responseData = await get_recruits_response.json();
+                console.log("renderPostListByScroll - responseData", responseData);
                 const recruits = responseData.results;
                 if (!recruits) {
                     emptyPage = true;
