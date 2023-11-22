@@ -10,6 +10,8 @@ import {
     insertAfter,
     removeAllNode,
     getCookie,
+    setCookie,
+    deleteCookie,
     setFetchData,
     redirectLogin,
     imageHover,
@@ -131,6 +133,21 @@ document.addEventListener("DOMContentLoaded", async function () {
         },
     };
 
+    const minCareerInfo = [
+        [0, "All"],
+        [-1, "newcomer"],
+        [1, "1 year ↑"],
+        [2, "2 year ↑"],
+        [3, "3 year ↑"],
+        [4, "4 year ↑"],
+        [5, "5 year ↑"],
+        [6, "6 year ↑"],
+        [7, "7 year ↑"],
+        [8, "8 year ↑"],
+        [9, "9 year ↑"],
+        [10, "10 year ↑"],
+    ];
+
     // Job Service URL
     const JobURL = getJobURL();
     let getJobListURL = `${JobURL}/recruits`;
@@ -187,16 +204,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.log("saveSettingData", saveSettingData);
 
         if (saveGroupSetting == "0") {
-            alert("Please select Group");
-        } else if (saveCategorySetting == "0") {
-            alert("Please select Category");
+            alert("Please select Group4");
+        } else if (type_.includes("crawling") && saveCategorySetting == "0") {
+            alert("Please select Category4");
         } else if (
+            type_.includes("crawling") &&
             saveGroupSetting == "1" &&
             saveCategorySetting != "0" &&
             saveSkillSetting == "0"
         ) {
             alert("Please search Skill and select one");
-        } else if (saveMinCareerTagSetting == "0") {
+        } else if (type_.includes("crawling") && saveMinCareerTagSetting == "0") {
             alert("Please select Minimum Career Year");
         } else {
             const data = setFetchData("put", saveSettingData);
@@ -254,27 +272,35 @@ document.addEventListener("DOMContentLoaded", async function () {
                     skillRemoveBtn.remove();
                 }
             }
-        });
-
-        categorySelectForCrawlingSetting.addEventListener("change", () => {
-            const groupId = getElFromId(`${typeId}_filter_group`).value;
-            const categoryId = getElFromId(`${typeId}_filter_category`).value;
-
-            const skillInputBox = getElFromId(`${typeId}_search_skill`);
-            if (groupId == 1 && categoryId != 0) {
-                skillInputBox.disabled = false;
-                skillInputBox.placeholder = "search Skill";
-            } else {
-                skillInputBox.disabled = true;
-                skillInputBox.value = "";
-                skillInputBox.setAttribute("data-id", 0);
-                skillInputBox.placeholder = "Cannot use";
-                const skillRemoveBtn = getElFromId(`${typeId}_search_skill_remove_btn`);
-                if (skillRemoveBtn) {
-                    skillRemoveBtn.remove();
+            if (type.includes("post")) {
+                if (groupId == 1) {
+                    skillInputBox.disabled = false;
+                    skillInputBox.placeholder = "search Skill";
                 }
             }
         });
+
+        if (type.includes("crawling")) {
+            categorySelectForCrawlingSetting.addEventListener("change", () => {
+                const groupId = getElFromId(`${typeId}_filter_group`).value;
+                const categoryId = getElFromId(`${typeId}_filter_category`).value;
+
+                const skillInputBox = getElFromId(`${typeId}_search_skill`);
+                if (groupId == 1 && categoryId != 0) {
+                    skillInputBox.disabled = false;
+                    skillInputBox.placeholder = "search Skill";
+                } else {
+                    skillInputBox.disabled = true;
+                    skillInputBox.value = "";
+                    skillInputBox.setAttribute("data-id", 0);
+                    skillInputBox.placeholder = "Cannot use";
+                    const skillRemoveBtn = getElFromId(`${typeId}_search_skill_remove_btn`);
+                    if (skillRemoveBtn) {
+                        skillRemoveBtn.remove();
+                    }
+                }
+            });
+        }
 
         countrySelectForCrawlingSetting.addEventListener("change", () => {
             let regionURL = "regions";
@@ -475,6 +501,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 filterRemoveSvgElement.remove();
                 removeAllNode(filterSearchList);
                 filterSearchList.classList.add("hidden");
+                filterSkillInput.focus();
             });
             return filterRemoveSvgElement;
         };
@@ -699,7 +726,378 @@ document.addEventListener("DOMContentLoaded", async function () {
         crawlingSearchSkillList.classList.add("hidden");
     };
 
+    // 무한스크롤 구현 관련
+    let page = 1; // 현재 페이지 정의
+    let emptyPage = false;
+    let blockRequest = false;
+    let lastScrollY = 0;
+    const handleScroll = () => {
+        const requestData = JSON.parse(getCookie("requestData"));
+
+        renderPostListByScroll(requestData);
+    };
+
+    // 페이지 전환 시 이벤트 활성화/비활성화
+    const removeInfiniteScroll = () => {
+        window.removeEventListener("scroll", handleScroll);
+        deleteCookie("requestData");
+        page = 1;
+    };
+
+    // Job Card 내의 Wrap 생성
+    const makeJobCardWrap = (recruit, type) => {
+        const jobCardWrap = createNewElement(
+            "div",
+            `w-full flex justify-center flex-col border p-2 hover:shadow-lg post-job-card-wrap-${recruit.id}`,
+            null,
+            `${type}_job_card_wrap_${recruit.id}`
+        );
+
+        jobCardWrap.style.border = "1px solid #373737";
+
+        return jobCardWrap;
+    };
+
+    // Job Card 내의 Position 생성
+    const makeJobPosition = (recruit, type) => {
+        const jobPosition = createNewElement(
+            "div",
+            `p-2 h-10 md:w-[calc(100%-75px)] truncate hover:underline cursor-pointer hover:text-[#66FF99] font-semibold text-white ${type}-job-position-${recruit.id}`,
+            recruit.position,
+            `${type}_job_position_${recruit.id}`
+        );
+        jobPosition.addEventListener("click", () => {
+            openModalToPositionEl(recruit);
+        });
+        jobPosition.setAttribute("title", "Click for detail Information");
+
+        return jobPosition;
+    };
+
+    // Job Card 내의 Min Career 생성
+    const makeJobMinCareer = (recruit, type) => {
+        const setMinCareer = (min_career) => {
+            let minCareer = min_career || min_career - 1;
+            let returnMinCareer;
+            for (let i = 0; i < minCareerInfo.length; i++) {
+                const minCareerArray = minCareerInfo[i];
+                if (minCareer == minCareerArray[0]) {
+                    returnMinCareer = minCareerArray;
+                    break;
+                }
+            }
+
+            return returnMinCareer;
+        };
+
+        let minCareer = setMinCareer(recruit.min_career);
+
+        const jobMinCareer = createNewElement(
+            "div",
+            `px-2 py-1 hidden md:flex w-[75px] justify-center items-center mr-2 text-xs rounded bg-white text-[#373737] ${type}-job-min-career-${recruit.id}`,
+            minCareer[1],
+            `${type}_job_min_career_${recruit.id}`
+        );
+        jobMinCareer.setAttribute("data-id", minCareer[0]);
+
+        if (type.includes("post")) {
+            jobMinCareer.setAttribute("title", "Click for filter Year");
+            jobMinCareer.classList.add("cursor-pointer");
+            jobMinCareer.classList.add("hover:underline");
+            jobMinCareer.classList.add("hover:bg-[#d9d9d9]");
+
+            const minCareerSelectBox = getElFromId(`${type}_filter_min_career`);
+
+            jobMinCareer.addEventListener("click", async () => {
+                const SettingResponse = await requestSetting(1);
+                const SettingData = await SettingResponse.json();
+                renderSelectBox(SettingData, type);
+
+                const newRequestData = JSON.parse(getCookie("requestData"));
+                if (newRequestData.min_career == minCareer[0]) {
+                    minCareerSelectBox.value = 0;
+                    newRequestData.min_career = 0;
+                } else {
+                    minCareerSelectBox.value = minCareer[0];
+                    newRequestData.min_career = minCareer[0];
+                }
+                setCookie("requestData", newRequestData, 1);
+                renderPostList(newRequestData);
+            });
+        }
+
+        return jobMinCareer;
+    };
+
+    // Job Card 내의 Title 생성
+    const makeJobTitle = (recruit, type) => {
+        const jobTitle = createNewElement(
+            "div",
+            `flex justify-between items-center w-full bg-[#373737] ${type}_job_title_${recruit.id}`,
+            null,
+            `${type}_job_title_${recruit.id}`
+        );
+
+        const jobPosition = makeJobPosition(recruit, type);
+        const jobMinCareer = makeJobMinCareer(recruit, type);
+
+        jobTitle.appendChild(jobPosition);
+        jobTitle.appendChild(jobMinCareer);
+
+        return jobTitle;
+    };
+
+    // Job Card 내의 Company 생성
+    const makeJobCompany = (recruit, type) => {
+        const jobCompanyWrap = createNewElement(
+            "div",
+            `w-full flex justify-between ${type}-job-company-wrap-${recruit.id}`,
+            null,
+            `${type}_job_company_wrap_${recruit.id}`
+        );
+        const jobCompany = createNewElement(
+            "div",
+            `flex truncate justify-center my-2 w-1/2 cursor-pointer border-b border-[#373737] hover:underline font-semibold ${type}-job-company-${recruit.id}`,
+            recruit.company.name,
+            `${type}_job_company_${recruit.id}`
+        );
+        jobCompany.style.paddingBottom = "8px";
+        jobCompany.addEventListener("click", () => {
+            window.open(
+                `https://www.jobplanet.co.kr/search?query=${recruit.company.name}`,
+                "_blank"
+            );
+        });
+        jobCompany.setAttribute("title", "Search for the company on JobPlanet");
+
+        jobCompanyWrap.appendChild(jobCompany);
+
+        return jobCompanyWrap;
+    };
+
+    // Job Card 내의 각 Row 생성
+    const makeJobRow = (recruit, type, attribute) => {
+        const rowWrap = createNewElement(
+            "div",
+            `flex my-2 text-sm h-20 ${type}-job-${attribute}-wrap-${recruit.id}`,
+            null,
+            `${type}_job_${attribute}_wrap_${recruit.id}`
+        );
+        const rowLabel = createNewElement(
+            "div",
+            `h-full pr-2 border-r border-[#373737] font-bold ${type}-job-${attribute}-label-${recruit.id}`,
+            capitalize(attribute),
+            `${type}_job-${attribute}-label-${recruit.id}`
+        );
+        rowLabel.style.width = "100px";
+        const rowData = createNewElement(
+            "div",
+            `h-full overflow-hidden ${type}-job-${attribute}-${recruit.id}`,
+            recruit[attribute],
+            `${type}_job_${attribute}_${recruit.id}`
+        );
+        rowData.style.whiteSpace = "pre";
+        rowData.style.textOverflow = "ellipsis";
+        rowData.style.flex = "1";
+        rowData.style.paddingLeft = "8px";
+
+        rowWrap.appendChild(rowLabel);
+        rowWrap.appendChild(rowData);
+
+        return rowWrap;
+    };
+
+    // Job Card 내의 Body 생성
+    const makeRowBody = (recruit, type) => {
+        const jobBodyWrap = createNewElement(
+            "div",
+            `grid grid-cols-1 grid-rows-3 ${type}-job-body-wrap-${recruit.id}`,
+            null,
+            `${type}_job_body_wrap_${recruit.id}`
+        );
+        const jobTask = makeJobRow(recruit, type, "task");
+        const jobRequirement = makeJobRow(recruit, type, "requirement");
+        const jobPreference = makeJobRow(recruit, type, "preference");
+
+        jobBodyWrap.appendChild(jobTask);
+        jobBodyWrap.appendChild(jobRequirement);
+        jobBodyWrap.appendChild(jobPreference);
+        return jobBodyWrap;
+    };
+
+    // Job Card 내의 Bottom 생성
+    const makeRowBottom = (recruit, type, requestData) => {
+        const bottomWrap = createNewElement(
+            "div",
+            `flex flex-col my-1 items-center md:flex-row ${type}-bottom-wrap-${recruit.id}`,
+            null,
+            `${type}_bottom_wrap_${recruit.id}`
+        );
+        const regionWrap = createNewElement(
+            "div",
+            `flex items-center w-full md:w-auto ${type}-region-wrap-${recruit.id}`,
+            null,
+            `${type}_region_wrap_${recruit.id}`
+        );
+        const jobRegion = createNewElement(
+            "div",
+            `mr-2 w-8 font-semibold ${type}-job-region-${recruit.id}`,
+            recruit.detail_region.region.name,
+            `${type}_job_region_${recruit.id}`
+        );
+        const likeSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mr-2 w-5 h-5 cursor-pointer">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+        </svg>
+        `;
+        const likeParser = new DOMParser();
+        const likeSvgDOM = likeParser.parseFromString(likeSvg, "image/svg+xml");
+        const likeSvgBtn = likeSvgDOM.documentElement;
+        const scrapSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mr-2 w-5 h-5 cursor-pointer">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+        </svg>
+        `;
+        const scrapParser = new DOMParser();
+        const scrapSvgDOM = scrapParser.parseFromString(scrapSvg, "image/svg+xml");
+        const scrapSvgBtn = scrapSvgDOM.documentElement;
+
+        const jobMinCareer = makeJobMinCareer(recruit, type);
+        jobMinCareer.classList.remove("md:flex");
+        jobMinCareer.classList.remove("hidden");
+        jobMinCareer.classList.add("md:hidden");
+        jobMinCareer.classList.add("flex");
+        jobMinCareer.classList.add("flex");
+        jobMinCareer.classList.add("border");
+        jobMinCareer.classList.add("border-[#d9d9d9]");
+
+        const skillWrap = createNewElement(
+            "div",
+            `flex items-center w-full mt-2 overflow-x-scroll scrollbar-hide md:mt-0 md:w-auto ${type}-skill-wrap-${recruit.id}`,
+            null,
+            `${type}_skill_wrap_${recruit.id}`
+        );
+        recruit.skills.forEach((skill) => {
+            const skillElement = createNewElement(
+                "div",
+                `whitespace-nowrap p-1 mx-1 text-xs text-white rounded ${type}-skill-${recruit.id}-${skill.id}`,
+                skill.name,
+                `${type}_skill_${recruit.id}_${skill.id}`
+            );
+            if (requestData.skill_ids == skill.id) {
+                skillElement.classList.add("bg-[#373737]");
+            } else {
+                skillElement.classList.add("bg-[#d9d9d9]");
+                if (type == "post") {
+                    skillElement.classList.add("hover:bg-[#373737]");
+                }
+            }
+
+            if (type == "post") {
+                skillElement.classList.add("cursor-pointer");
+
+                const skillSearch = getElFromId(`${type}_search_skill`);
+
+                skillElement.addEventListener("click", async () => {
+                    const SettingResponse = await requestSetting(1);
+                    const SettingData = await SettingResponse.json();
+                    renderSelectBox(SettingData, type);
+
+                    const newRequestData = JSON.parse(getCookie("requestData"));
+                    if (newRequestData.skill_ids == skill.id) {
+                        skillSearch.value = "All";
+                        skillSearch.setAttribute("data-id", 0);
+                        newRequestData.skill_ids = 0;
+                        skillElement.classList.add("bg-[#d9d9d9]");
+                        skillElement.classList.remove("bg-[#373737]");
+                        skillElement.classList.add("hover:bg-[#373737]");
+                    } else {
+                        skillSearch.value = skill.name;
+                        skillSearch.setAttribute("data-id", skill.id);
+                        newRequestData.skill_ids = skill.id;
+                        skillElement.classList.add("bg-[#373737]");
+                        skillElement.classList.remove("bg-[#d9d9d9]");
+                    }
+                    console.log("newRequestData", newRequestData);
+                    setCookie("requestData", newRequestData, 1);
+                    renderPostList(newRequestData);
+                });
+            }
+
+            skillWrap.appendChild(skillElement);
+        });
+
+        regionWrap.appendChild(jobRegion);
+        regionWrap.appendChild(likeSvgBtn);
+        regionWrap.appendChild(scrapSvgBtn);
+        regionWrap.appendChild(jobMinCareer);
+
+        bottomWrap.appendChild(regionWrap);
+        bottomWrap.appendChild(skillWrap);
+        return bottomWrap;
+    };
+
+    // Job Card 생성
+    const makeJobCard = (recruit, requestData, type) => {
+        const jobCardWrap = makeJobCardWrap(recruit, type);
+        const jobTitle = makeJobTitle(recruit, type);
+
+        const jobCompany = makeJobCompany(recruit, type);
+        const jobBodyWrap = makeRowBody(recruit, type);
+
+        const jobBottomWrap = makeRowBottom(recruit, type, requestData);
+
+        jobCardWrap.appendChild(jobTitle);
+        jobCardWrap.appendChild(jobCompany);
+        jobCardWrap.appendChild(jobBodyWrap);
+        jobCardWrap.appendChild(jobBottomWrap);
+
+        return jobCardWrap;
+    };
+
+    // loading 화면 생성
+    const makeLoading = () => {
+        const loadingWrap = createNewElement(
+            "div",
+            "relative z-10 w-full loading-wrap",
+            null,
+            "loading_wrap"
+        );
+        const loadingBackground = createNewElement(
+            "div",
+            "fixed inset-0 transition-opacity bg-white bg-opacity-75",
+            null,
+            "loading_background"
+        );
+        const copyRight = createNewElement(
+            "a",
+            "hover:text-[blue] font-semibold underline fixed left-1/2 top-[calc(50%+50px)] lg:top-[calc(50%+100px)] translate-x-[-50%] z-10 loading-io",
+            "Loading Icon is provided by loading.io",
+            "loading_io"
+        );
+        copyRight.href = "https://loading.io/";
+        const loadingImg = createNewElement(
+            "img",
+            "fixed left-1/2 top-[50%] translate-x-[-50%] translate-y-[-50%] z-10 w-[100px] h-[100px] lg:w-auto lg:h-auto loading-img",
+            null,
+            "loading_img"
+        );
+        loadingImg.src = "/static/img/icon/loading01.svg";
+        loadingBackground.alt = "loading Img";
+
+        loadingWrap.appendChild(loadingBackground);
+        loadingWrap.appendChild(loadingImg);
+        loadingWrap.appendChild(copyRight);
+        getElFromSel("main").appendChild(loadingWrap);
+
+        return loadingWrap;
+    };
+
     /////////////////////////////////////////////////////// Page Initialization
+    // Post page를 벗어날 시 무한스크롤 이벤트 제거
+    removeInfiniteScroll();
+
+    // 크롤링 시 띄울 loading 영역 생성
 
     // 상단 3버튼 생성
     createJobBtn(jobPostBtnImgDict);
@@ -723,17 +1121,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.log('requestData - getDataFromSelectBox("post")', requestData);
 
         if (requestData.group_id == 0) {
-            alert("Please select Group");
-        } else if (requestData.category_ids == 0) {
-            alert("Please select Category");
-        } else if (
-            requestData.group_id == 1 &&
-            requestData.category_ids != 0 &&
-            requestData.skill_ids == 0
-        ) {
-            alert("Please search Skill and select one");
-        } else if (requestData.min_career == 0) {
-            alert("Please select Minimum Career");
+            alert("Please select Group1");
+            // } else if (requestData.category_ids == 0) {
+            //     alert("Please select Category1");
+            // } else if (
+            //     requestData.group_id == 1 &&
+            //     requestData.category_ids != 0 &&
+            //     requestData.skill_ids == 0
+            // ) {
+            //     alert("Please search Skill and select one");
+            // } else if (requestData.min_career == 0) {
+            //     alert("Please select Minimum Career");
         } else {
             renderPostList(requestData);
         }
@@ -774,17 +1172,17 @@ document.addEventListener("DOMContentLoaded", async function () {
             console.log('requestData - getDataFromSelectBox("post")', requestData);
 
             if (requestData.group_id == 0) {
-                alert("Please select Group");
-            } else if (requestData.category_ids == 0) {
-                alert("Please select Category");
-            } else if (
-                requestData.group_id == 1 &&
-                requestData.category_ids != 0 &&
-                requestData.skill_ids == 0
-            ) {
-                alert("Please search Skill and select one");
-            } else if (requestData.min_career == 0) {
-                alert("Please select Minimum Career");
+                alert("Please select Group2");
+                // } else if (requestData.category_ids == 0) {
+                //     alert("Please select Category2");
+                // } else if (
+                //     requestData.group_id == 1 &&
+                //     requestData.category_ids != 0 &&
+                //     requestData.skill_ids == 0
+                // ) {
+                //     alert("Please search Skill and select one");
+                // } else if (requestData.min_career == 0) {
+                //     alert("Please select Minimum Career");
             } else {
                 renderPostList(requestData);
             }
@@ -794,8 +1192,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         deleteSelectAreaPlusBtn("crawling");
         removeAllNode(getElFromId("crawling_job_card_list"));
 
-        // const crawlingSubmitBtn = getElFromId("crawling_submit_btn");
-        // crawlingSubmitBtn.remove();
+        page = 1;
+        emptyPage = false;
+        blockRequest = false;
+        lastScrollY = 0;
 
         // 3개 영역 중 클릭한 버튼의 영역만 보이게 하기
         getElFromId("post_wrap").classList.remove("hidden");
@@ -834,9 +1234,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             console.log('requestData - getDataFromSelectBox("crawling")', requestData);
 
             if (requestData.group_id == 0) {
-                alert("Please select Group");
+                alert("Please select Group3");
             } else if (requestData.category_ids == 0) {
-                alert("Please select Category");
+                alert("Please select Category3");
             } else if (
                 requestData.group_id == 1 &&
                 requestData.category_ids != 0 &&
@@ -853,6 +1253,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         deleteSelectAreaPlusBtn("post");
         removeAllNode(getElFromId("post_job_card_list"));
+
+        removeInfiniteScroll();
 
         // 3개 영역 중 클릭한 버튼의 영역만 보이게 하기
         getElFromId("crawling_wrap").classList.remove("hidden");
@@ -872,6 +1274,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (crawlingSearchSKill) {
             crawlingSearchSKill.remove();
         }
+
+        removeInfiniteScroll();
+
         getElFromId("job_crawling_btn").addEventListener("click", () => {
             addClickEventToCrawlingBtn();
         });
@@ -1007,212 +1412,32 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     /////////////////////////////////////////////////////// POST page
 
-    // Job Card 내의 각 Row 생성
-    const makeJobRow = (recruit, type, attribute) => {
-        const rowWrap = createNewElement(
-            "div",
-            `flex my-2 text-sm h-20 ${type}-job-${attribute}-wrap-${recruit.id}`,
-            null,
-            `${type}_job_${attribute}_wrap_${recruit.id}`
-        );
-        const rowLabel = createNewElement(
-            "div",
-            `h-full pr-2 border-r border-[#373737] font-bold ${type}-job-${attribute}-label-${recruit.id}`,
-            capitalize(attribute),
-            `${type}_job-${attribute}-label-${recruit.id}`
-        );
-        rowLabel.style.width = "100px";
-        const rowData = createNewElement(
-            "div",
-            `h-full overflow-hidden ${type}-job-${attribute}-${recruit.id}`,
-            recruit[attribute],
-            `${type}_job_${attribute}_${recruit.id}`
-        );
-        rowData.style.whiteSpace = "pre";
-        rowData.style.textOverflow = "ellipsis";
-        rowData.style.flex = "1";
-        rowData.style.paddingLeft = "8px";
-
-        rowWrap.appendChild(rowLabel);
-        rowWrap.appendChild(rowData);
-
-        return rowWrap;
-    };
-
-    // Job Card 내의 Title 생성
-    const makeJobCompany = (recruit, type) => {
-        const jobCompany = createNewElement(
-            "div",
-            `flex truncate justify-center my-2 w-1/2 cursor-pointer border-b border-[#373737] hover:underline font-semibold ${type}-job-company-${recruit.id}`,
-            recruit.company.name,
-            `${type}_job_company_${recruit.id}`
-        );
-        jobCompany.style.paddingBottom = "8px";
-        jobCompany.addEventListener("click", () => {
-            window.open(
-                `https://www.jobplanet.co.kr/search?query=${recruit.company.name}`,
-                "_blank"
-            );
-        });
-        jobCompany.setAttribute("title", "Search for the company on JobPlanet");
-
-        return jobCompany;
-    };
-
-    // Job Card 내의 Body 생성
-    const makeRowBody = (recruit, type) => {
-        const jobBodyWrap = createNewElement(
-            "div",
-            `grid grid-cols-1 grid-rows-3 ${type}-job-body-wrap-${recruit.id}`,
-            null,
-            `${type}_job_body_wrap_${recruit.id}`
-        );
-        const jobTask = makeJobRow(recruit, "post", "task");
-        const jobRequirement = makeJobRow(recruit, "post", "requirement");
-        const jobPreference = makeJobRow(recruit, "post", "preference");
-
-        jobBodyWrap.appendChild(jobTask);
-        jobBodyWrap.appendChild(jobRequirement);
-        jobBodyWrap.appendChild(jobPreference);
-        return jobBodyWrap;
-    };
-
-    // Job Card 내의 Bottom 생성
-    const makeRowBottom = (recruit, type, requestData) => {
-        const bottomWrap = createNewElement(
-            "div",
-            `flex flex-col my-1 items-center xl:flex-row ${type}-bottom-wrap-${recruit.id}`,
-            null,
-            `${type}_bottom_wrap_${recruit.id}`
-        );
-        const regionWrap = createNewElement(
-            "div",
-            `flex items-center w-full xl:w-auto ${type}-region-wrap-${recruit.id}`,
-            null,
-            `${type}_region_wrap_${recruit.id}`
-        );
-        const jobRegion = createNewElement(
-            "div",
-            `mr-2 w-8 font-semibold ${type}-job-region-${recruit.id}`,
-            recruit.detail_region.region.name,
-            `${type}_job_region_${recruit.id}`
-        );
-        const likeSvg = `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mr-2 w-5 h-5 cursor-pointer">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-        </svg>
-        `;
-        const likeParser = new DOMParser();
-        const likeSvgDOM = likeParser.parseFromString(likeSvg, "image/svg+xml");
-        const likeSvgBtn = likeSvgDOM.documentElement;
-        const scrapSvg = `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mr-2 w-5 h-5 cursor-pointer">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-        </svg>
-        `;
-        const scrapParser = new DOMParser();
-        const scrapSvgDOM = scrapParser.parseFromString(scrapSvg, "image/svg+xml");
-        const scrapSvgBtn = scrapSvgDOM.documentElement;
-
-        const skillWrap = createNewElement(
-            "div",
-            `flex items-center w-full mt-2 overflow-x-scroll scrollbar-hide xl:mt-0 xl:w-auto ${type}-skill-wrap-${recruit.id}`,
-            null,
-            `${type}_skill_wrap_${recruit.id}`
-        );
-        recruit.skills.forEach((skill) => {
-            const skillElement = createNewElement(
-                "div",
-                `whitespace-nowrap p-1 mx-1 text-xs text-white rounded ${type}-skill-${recruit.id}-${skill.id}`,
-                skill.name,
-                `${type}_skill_${recruit.id}_${skill.id}`
-            );
-            if (requestData.skill_ids == skill.id) {
-                skillElement.classList.add("bg-[#373737]");
-            } else {
-                skillElement.classList.add("bg-[#d9d9d9]");
-                if (type == "post") {
-                    skillElement.classList.add("hover:bg-[#373737]");
-                }
-            }
-
-            if (type == "post") {
-                skillElement.classList.add("cursor-pointer");
-
-                const skillSearch = getElFromId(`${type}_search_skill`);
-
-                skillElement.addEventListener("click", () => {
-                    if (requestData.skill_ids == skill.id) {
-                        skillSearch.value = "All";
-                        skillSearch.setAttribute("data-id", 0);
-                        skillElement.classList.add("bg-[#d9d9d9]");
-                        skillElement.classList.remove("bg-[#373737]");
-                        skillElement.classList.add("hover:bg-[#373737]");
-                    } else {
-                        skillSearch.value = skill.name;
-                        skillSearch.setAttribute("data-id", skill.id);
-                        // skillElement.style.backgroundColor = "#373737";
-                        skillElement.classList.add("bg-[#373737]");
-                        skillElement.classList.remove("bg-[#d9d9d9]");
-                    }
-                    const newRequestData = getDataFromSelectBox("post");
-                    renderPostList(newRequestData);
-                });
-            }
-
-            skillWrap.appendChild(skillElement);
-        });
-
-        regionWrap.appendChild(jobRegion);
-        regionWrap.appendChild(likeSvgBtn);
-        regionWrap.appendChild(scrapSvgBtn);
-
-        bottomWrap.appendChild(regionWrap);
-        bottomWrap.appendChild(skillWrap);
-        return bottomWrap;
-    };
-
     // List 영역에 Job Card 생성
-    const makeJobCard = (recruit, requestData) => {
-        const jobCardWrap = createNewElement(
-            "div",
-            `w-full flex justify-center flex-col border p-2 hover:shadow-lg post-job-card-wrap-${recruit.id}`,
-            null,
-            `post_job_card_wrap_${recruit.id}`
-        );
-        const jobPosition = createNewElement(
-            "div",
-            `p-2 h-10 overflow-hidden hover:underline cursor-pointer hover:text-[#66FF99] font-semibold bg-[#373737] text-white post-job-position-${recruit.id}`,
-            recruit.position,
-            `post_job_position_${recruit.id}`
-        );
-        jobPosition.style.textOverflow = "ellipsis";
-        jobPosition.style.whiteSpace = "nowrap";
-        jobPosition.addEventListener("click", () => {
-            openModalToPositionEl(recruit);
-        });
-        jobPosition.setAttribute("title", "Open Modal for Detail Information");
+    // const makeJobCard = (recruit, requestData) => {
+    //     const jobCardWrap = makeJobCardWrap(recruit, "post");
+    //     const jobPosition = makeJobPosition(recruit, "post");
 
-        const jobCompany = makeJobCompany(recruit, "post");
-        const jobBodyWrap = makeRowBody(recruit, "post");
+    //     const jobCompany = makeJobCompany(recruit, "post");
+    //     const jobBodyWrap = makeRowBody(recruit, "post");
 
-        const jobBottomWrap = makeRowBottom(recruit, "post", requestData);
+    //     const jobBottomWrap = makeRowBottom(recruit, "post", requestData);
 
-        jobCardWrap.appendChild(jobPosition);
-        jobCardWrap.appendChild(jobCompany);
-        jobCardWrap.appendChild(jobBodyWrap);
-        jobCardWrap.appendChild(jobBottomWrap);
+    //     jobCardWrap.appendChild(jobPosition);
+    //     jobCardWrap.appendChild(jobCompany);
+    //     jobCardWrap.appendChild(jobBodyWrap);
+    //     jobCardWrap.appendChild(jobBottomWrap);
 
-        jobCardWrap.style.border = "1px solid #373737";
-
-        return jobCardWrap;
-    };
+    //     return jobCardWrap;
+    // };
 
     // Job Card Modal Open 함수
     const openModalToPositionEl = (recruit) => {
         // 모달 요소에서 display: none 제거
         const postModal = getElFromId("post_modal");
         postModal.classList.remove("hidden");
+
+        // 스크롤을 최상단으로 이동
+        getElFromId("post_modal_body_wrap").scrollTop = 0;
 
         // body의 스크롤 방지
         const body = getElFromSel("body");
@@ -1268,12 +1493,15 @@ document.addEventListener("DOMContentLoaded", async function () {
         removeAllNode(categoryDataEl);
         categoryDataEl.appendChild(categoryDivWrap);
 
-        const skillDivWrap = createNewElement("div", "flex items-start w-full post-skill-wrap");
+        const skillDivWrap = createNewElement(
+            "div",
+            "flex flex-wrap items-start w-full post-skill-wrap"
+        );
         let skillData = recruit.skills;
         skillData.forEach((skill) => {
             const skillDiv = createNewElement(
                 "div",
-                `whitespace-nowrap rounded mr-2 post-modal-skill-${recruit.id}-${skill.id}`,
+                `whitespace-nowrap rounded mb-3 mr-2 post-modal-skill-${recruit.id}-${skill.id}`,
                 `${skill.name}`,
                 `post_modal_skill_${recruit.id}_${skill.id}`
             );
@@ -1287,13 +1515,13 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         const companyTagDivWrap = createNewElement(
             "div",
-            "flex items-start w-full post-company-tag-wrap"
+            "flex flex-wrap items-start w-full post-company-tag-wrap"
         );
         let companyTagData = recruit.company.tags;
         companyTagData.forEach((companyTag) => {
             const companyTagDiv = createNewElement(
                 "div",
-                `whitespace-nowrap rounded mr-2 post-modal-company-tag-${recruit.id}-${companyTag.id}`,
+                `whitespace-nowrap rounded mb-3 mr-2 post-modal-company-tag-${recruit.id}-${companyTag.id}`,
                 `${companyTag.name}`,
                 `post_modal_company-tag_${recruit.id}_${companyTag.id}`
             );
@@ -1459,29 +1687,17 @@ document.addEventListener("DOMContentLoaded", async function () {
             skillInputBox.value = "All";
             skillInputBox.setAttribute("data-id", 0);
         }
-
-        if (settingData.group_id == 1 && settingData.category_ids != 0) {
-            skillInputBox.disabled = false;
-        } else {
-            skillInputBox.disabled = true;
+        if (type.includes("crawling")) {
+            if (settingData.group_id == 1 && settingData.category_ids != 0) {
+                skillInputBox.disabled = false;
+            } else {
+                skillInputBox.disabled = true;
+            }
         }
 
         const minCareerSelectBox = getElFromId(`${typeId}_filter_min_career`);
         removeAllNode(minCareerSelectBox);
-        const minCareerInfo = [
-            [0, "All"],
-            [-1, "newcomer"],
-            [1, "1 year ↑"],
-            [2, "2 year ↑"],
-            [3, "3 year ↑"],
-            [4, "4 year ↑"],
-            [5, "5 year ↑"],
-            [6, "6 year ↑"],
-            [7, "7 year ↑"],
-            [8, "8 year ↑"],
-            [9, "9 year ↑"],
-            [10, "10 year ↑"],
-        ];
+
         minCareerInfo.forEach((minCareer) => {
             const minCareerOption = createNewElement(
                 "option",
@@ -1490,7 +1706,11 @@ document.addEventListener("DOMContentLoaded", async function () {
                 `${typeId}_filter_min_career_${minCareer[0]}`
             );
             minCareerOption.value = minCareer[0];
-            minCareerOption.textContent = minCareer[1];
+            if (type.includes("post")) {
+                minCareerOption.textContent = minCareer[1];
+            } else if (type.includes("crawling")) {
+                minCareerOption.textContent = minCareer[1].replace(/ ↑/g, "");
+            }
             minCareerSelectBox.appendChild(minCareerOption);
         });
         minCareerSelectBox.value = settingData.min_career;
@@ -1498,109 +1718,103 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // 채용공고 리스트 렌더링
     const renderPostList = async (requestData) => {
-        let initJobListURL = `${JobURL}/recruits?${makeQueryParameter(requestData)}`;
-        console.log("initJobListURL", initJobListURL);
+        let initJobListURL = `${JobURL}/recruits?${makeQueryParameter(requestData)}&page=1`;
+        setCookie("requestData", requestData, 1);
 
         // Job Card List 렌더링
-        const data = setFetchData("get", {});
-
         const jobCardList = getElFromId("post_job_card_list");
         removeAllNode(jobCardList);
+
+        const data = setFetchData("get", {});
 
         const get_recruits_response = await fetch(initJobListURL, data);
 
         if (get_recruits_response.status === 200) {
-            let recruits = await get_recruits_response.json();
-            console.log(recruits);
+            const responseData = await get_recruits_response.json();
+            const recruits = responseData.results;
             recruits.forEach((recruit) => {
-                jobCardList.appendChild(makeJobCard(recruit, requestData));
+                jobCardList.appendChild(makeJobCard(recruit, requestData, "post"));
             });
         }
+
+        window.removeEventListener("scroll", handleScroll);
+        page = 2;
+        window.addEventListener("scroll", handleScroll);
+    };
+
+    // 채용공고 리스트 렌더링
+    const renderPostListByScroll = async (requestData) => {
+        console.log("page", page);
+        let initJobListURL = `${JobURL}/recruits?${makeQueryParameter(requestData)}&page=${page}`;
+
+        // scroll 변화에 따른 페이지 추가
+        let currentScrollY = window.scrollY;
+        let margin = document.body.clientHeight - window.innerHeight - 200;
+
+        if (
+            currentScrollY > lastScrollY &&
+            currentScrollY > margin &&
+            !emptyPage &&
+            !blockRequest
+        ) {
+            blockRequest = true;
+            page += 1;
+
+            const data = setFetchData("get", {});
+            const jobCardList = getElFromId("post_job_card_list");
+
+            const get_recruits_response = await fetch(initJobListURL, data);
+
+            if (get_recruits_response.status === 200) {
+                const responseData = await get_recruits_response.json();
+                const recruits = responseData.results;
+                if (!recruits) {
+                    emptyPage = true;
+                } else {
+                    recruits.forEach((recruit) => {
+                        jobCardList.appendChild(makeJobCard(recruit, requestData, "post"));
+                        blockRequest = false;
+                    });
+                }
+            }
+        }
+        lastScrollY = currentScrollY;
     };
 
     /////////////////////////////////////////////////////// Crawling page
-    // 크롤링한 공고 카드 만들기
-    const makeCrawlingCard = (recruit, requestData) => {
-        const jobCardWrap = createNewElement(
-            "div",
-            `w-full flex justify-center flex-col border p-2 hover:shadow-lg crawling-job-card-wrap-${recruit.id}`,
-            null,
-            `crawling_job_card_wrap_${recruit.id}`
-        );
-        const jobPosition = createNewElement(
-            "div",
-            `p-2 h-10 overflow-hidden hover:underline cursor-pointer hover:text-[#66FF99] font-semibold bg-[#373737] text-white crawling-job-position-${recruit.id}`,
-            recruit.position,
-            `crawling_job_position_${recruit.id}`
-        );
-        jobPosition.style.textOverflow = "ellipsis";
-        jobPosition.style.whiteSpace = "nowrap";
-        jobPosition.addEventListener("click", () => {
-            openModalToPositionEl(recruit);
-        });
-        jobPosition.setAttribute("title", "Open Modal for Detail Information");
+    // // 크롤링한 공고 카드 만들기
+    // const makeCrawlingCard = (recruit, requestData) => {
+    //     const jobCardWrap = makeJobCardWrap(recruit, "crawling");
+    //     const jobPosition = makeJobPosition(recruit, "crawling");
 
-        const jobCompany = makeJobCompany(recruit, "crawling");
-        const jobBodyWrap = makeRowBody(recruit, "crawling");
+    //     const jobCompany = makeJobCompany(recruit, "crawling");
+    //     const jobBodyWrap = makeRowBody(recruit, "crawling");
 
-        const jobBottomWrap = makeRowBottom(recruit, "crawling", requestData);
+    //     const jobBottomWrap = makeRowBottom(recruit, "crawling", requestData);
 
-        jobCardWrap.appendChild(jobPosition);
-        jobCardWrap.appendChild(jobCompany);
-        jobCardWrap.appendChild(jobBodyWrap);
-        jobCardWrap.appendChild(jobBottomWrap);
+    //     jobCardWrap.appendChild(jobPosition);
+    //     jobCardWrap.appendChild(jobCompany);
+    //     jobCardWrap.appendChild(jobBodyWrap);
+    //     jobCardWrap.appendChild(jobBottomWrap);
 
-        jobCardWrap.style.border = "1px solid #373737";
-
-        return jobCardWrap;
-    };
+    //     return jobCardWrap;
+    // };
 
     // 크롤링한 공고 리스트 렌더링
-    const renderCrawlingList = async (renderCrawlingList) => {
+    const renderCrawlingList = async (requestData) => {
+        let initJobCrawlingURL = `${JobURL}/crawling/recruits`;
+        // return;
+
+        // Job Card List 렌더링
         const crawlingCardList = getElFromId("crawling_job_card_list");
         removeAllNode(crawlingCardList);
 
-        let initJobCrawlingURL = `${JobURL}/crawling/recruits`;
-        console.log("initJobCrawlingURL", initJobCrawlingURL);
-        console.log("renderCrawlingList - renderCrawlingList", renderCrawlingList);
-        // return;
+        const data = setFetchData("post", requestData);
 
-        const data = setFetchData("post", renderCrawlingList);
-
-        const loadingWrap = createNewElement(
-            "div",
-            "relative z-10 w-full loading-wrap",
-            null,
-            "loading_wrap"
-        );
-        const loadingBackground = createNewElement(
-            "div",
-            "fixed inset-0 transition-opacity bg-white bg-opacity-75",
-            null,
-            "loading_background"
-        );
-        const copyRight = createNewElement(
-            "a",
-            "hover:text-[blue] font-semibold underline fixed left-1/2 top-[calc(50%+50px)] lg:top-[calc(50%+100px)] translate-x-[-50%] z-10 loading-io",
-            "Loading Icon is provided by loading.io",
-            "loading_io"
-        );
-        copyRight.href = "https://loading.io/";
-        const loadingImg = createNewElement(
-            "img",
-            "fixed left-1/2 top-[50%] translate-x-[-50%] translate-y-[-50%] z-10 w-[100px] h-[100px] lg:w-auto lg:h-auto loading-img",
-            null,
-            "loading_img"
-        );
-        loadingImg.src = "/static/img/icon/loading01.svg";
-        loadingBackground.alt = "loading Img";
-
-        loadingWrap.appendChild(loadingBackground);
-        loadingWrap.appendChild(loadingImg);
-        loadingWrap.appendChild(copyRight);
-        getElFromSel("main").appendChild(loadingWrap);
+        const loadingWrap = makeLoading();
 
         const post_response = await fetch(initJobCrawlingURL, data);
+
         loadingWrap.remove();
         console.log(post_response.status);
 
@@ -1608,10 +1822,27 @@ document.addEventListener("DOMContentLoaded", async function () {
             const crawlingResult = await post_response.json();
             console.log("crawlingResult", crawlingResult);
             const crawlingRecruits = crawlingResult.recruits;
-            crawlingRecruits.forEach((crawling_recruit) => {
+            const createdRecruitsIdxList = crawlingResult.created_recruit_idx_list;
+            console.log("crawlingRecruits", crawlingRecruits);
+            console.log("createdRecruitsIdxList", createdRecruitsIdxList);
+            crawlingRecruits.forEach((crawling_recruit, idx) => {
                 crawlingCardList.appendChild(
-                    makeCrawlingCard(crawling_recruit, renderCrawlingList)
+                    makeJobCard(crawling_recruit, requestData, "crawling")
                 );
+                if (idx in createdRecruitsIdxList) {
+                    console.log("idx", idx);
+                    console.log("crawling_recruit.id", crawling_recruit.id);
+                    const jobCompanyWrap = getElFromId(
+                        `crawling_job_company_wrap_${crawling_recruit.id}`
+                    );
+                    const createdMark = createNewElement(
+                        "div",
+                        `my-2 bg-[#5a5a5a] text-white text-xs p-2 rounded self-center crawling-job-new-mark-${crawling_recruit.id}`,
+                        "New",
+                        `crawling_job_new_mark_${crawling_recruit.id}`
+                    );
+                    jobCompanyWrap.appendChild(createdMark);
+                }
             });
         } else {
             const errorData = await post_response.json();
@@ -1625,8 +1856,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     settingBtn.addEventListener("click", () => {
         openModalToSetting();
     });
-
-    /////////////////////////////////////////////////////// Crawling page Initialization
 
     /////////////////////////////////////////////////////// Crawling page Initialization
 
@@ -1720,4 +1949,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             searchedSkillListRemove("setting_modal_crawling");
         }
     });
+
+    const SettingResponse = await requestSetting(1);
+    const SettingData = await SettingResponse.json();
+    console.log("SettingData", SettingData);
 });
