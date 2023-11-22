@@ -104,7 +104,9 @@ class RecruitFilter(filters.FilterSet):
         result = queryset
 
         for company_tag_id in company_tag_ids:
-            result: QuerySet = result.filter(company__tags__id__iexact=company_tag_id)
+            result: QuerySet = result.filter(
+                company__tags__id__iexact=company_tag_id
+            ).distinct()
 
         return result
 
@@ -117,7 +119,7 @@ class RecruitFilter(filters.FilterSet):
         return queryset.filter(categories__id__in=category_ids)
 
     def filter_by_group_id(self, queryset, name, value):
-        return queryset.filter(categories__group__id=value)
+        return queryset.filter(categories__group__id=value).distinct()
 
     def filter_by_min_career(self, queryset, name, value):
         if value == -1:
