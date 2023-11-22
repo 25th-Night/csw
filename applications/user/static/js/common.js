@@ -513,6 +513,18 @@ const hoverChangeBackgroundColor = (targetElement, overColor, outColor) => {
     });
 };
 
+const useScrollTopBtn = () => {
+    // scroll top
+    const scrollTopBtn = getElFromId("scroll_top_btn");
+    scrollTopBtn.classList.remove("hidden");
+    const screenHeight = window.innerHeight || document.documentElement.clientHeight;
+    const scrollBtnHeight = screenHeight * 0.1;
+    scrollTopBtn.style.bottom = scrollBtnHeight;
+    scrollTopBtn.addEventListener("click", () => {
+        document.documentElement.scrollTop = 0;
+    });
+};
+
 export {
     getElFromSel,
     getElsFromSel,
@@ -552,4 +564,5 @@ export {
     capitalize,
     hoverChangeTextColor,
     hoverChangeBackgroundColor,
+    useScrollTopBtn,
 };
