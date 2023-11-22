@@ -419,7 +419,6 @@ const makeSelectOptions = async (
             });
             if (selectedOptionId) {
                 const selectedOption = getElFromId(`${selectElId}_${selectedOptionId}`);
-                selectedOption.selected = true;
                 selectBox.value = selectedOptionId;
             }
         } else {
