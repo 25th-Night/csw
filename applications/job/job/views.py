@@ -139,17 +139,37 @@ class CompanyTagView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class RecruitView(APIView):
+class RecruitView(GenericAPIView):
     serializer_class = RecruitSerializer
-    filter_backends = DjangoFilterBackend
+    filter_backends = [DjangoFilterBackend]
     filterset_class = RecruitFilter
 
-    def get(self, request: Request):
-        recruits: Recruit = Recruit.objects.all()
-        queryset = self.filter_backends().filter_queryset(request, recruits, self)
-        serializer: RecruitSerializer = self.serializer_class(queryset, many=True)
+    def get_queryset(self):
+        recruits = Recruit.objects.all()
+        return recruits
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def filter_queryset(self, queryset):
+        queryset = self.filter_backends[0]().filter_queryset(
+            self.request, queryset, self
+        )
+        return queryset
+
+    def get(self, request: Request):
+        queryset = self.get_queryset()
+        queryset = self.filter_queryset(queryset)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer: RecruitSerializer = self.get_serializer(page, many=True)
+            data_list = self.get_paginated_response(serializer.data).data.get("results")
+            url_list = [data.get("url_id") for data in data_list]
+            print(f"url_list:{url_list}")
+            response_data = self.get_paginated_response(serializer.data)
+            response_data.data["page_size"] = self.pagination_class.page_size
+            return response_data
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class RecruitDetailView(APIView):
