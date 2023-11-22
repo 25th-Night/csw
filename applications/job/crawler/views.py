@@ -29,7 +29,7 @@ from job.models import (
 from crawler.utils import crawling_recruits, make_crawling_data
 
 
-class RecruitView(APIView):
+class RecruitView(GenericAPIView):
     serializer_class = CrawlingRecruitSerializer
 
     def post(self, request: Request):
