@@ -742,4 +742,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 화면 로드 시 실행될 함수 목록
     getUrlList(currentPageNumber);
+
+    // 바깥 영역 클릭 시, 모달창 닫기
+    document.addEventListener("mouseup", function (e) {
+        const modifyModalWrap = getElFromId("modify_modal_wrap");
+        if (modifyModalWrap) {
+            closeModal();
+        }
+    });
 });
