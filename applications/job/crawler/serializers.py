@@ -77,6 +77,7 @@ class CrawlingRecruitSerializer(serializers.Serializer):
                 "company": company,
             },
         )
+
         recruit.categories.add(*categories)
         recruit.skills.add(*skills)
         status = "existed"
@@ -85,7 +86,15 @@ class CrawlingRecruitSerializer(serializers.Serializer):
         else:
             if recruit.min_career != min(recruit.min_career, min_career):
                 recruit.min_career = min(recruit.min_career, min_career)
-                recruit.save()
-                status = "modified"
+            recruit.description = validated_data.get("description")
+            recruit.task = validated_data.get("task")
+            recruit.requirement = validated_data.get("requirement")
+            recruit.benefit = validated_data.get("benefit")
+            recruit.workplace = validated_data.get("workplace")
+            recruit.status = validated_data.get("status")
+            if validated_data.get("preference", None) is not None:
+                recruit.preference = validated_data.get("preference", None)
+            recruit.save()
+            status = "modified"
 
         return recruit, status
