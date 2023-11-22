@@ -34,16 +34,20 @@ import {
     makeQueryParameter,
     capitalize,
     hoverChangeTextColor,
+    useScrollTopBtn,
 } from "./common.js";
 
 document.addEventListener("DOMContentLoaded", async function () {
+    // Scroll Top Button 사용
+    useScrollTopBtn();
+
     // 상단 3버튼 - 생성
     const createJobBtn = (imgListDict) => {
         const titleBtnWrap = getElFromId("title_btn_wrap");
 
         const jobPostBtn = createNewElement(
             "img",
-            "block h-6 ml-2 mr-5 cursor-pointer sm:h-8 job-post-btn",
+            "block h-6 mx-3 cursor-pointer sm:h-8 job-post-btn",
             null,
             "job_post_btn"
         );
@@ -52,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         const jobCrawlingBtn = createNewElement(
             "img",
-            "block h-6 ml-2 mr-5 cursor-pointer sm:h-8 job-crawling-btn",
+            "block h-6 mx-3 cursor-pointer sm:h-8 job-crawling-btn",
             null,
             "job_crawling_btn"
         );
@@ -61,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         const jobManageBtn = createNewElement(
             "img",
-            "block h-6 ml-2 mr-5 cursor-pointer sm:h-8 job-manage-btn",
+            "block h-6 mx-3 cursor-pointer sm:h-8 job-manage-btn",
             null,
             "job_manage_btn"
         );
@@ -1920,6 +1924,18 @@ document.addEventListener("DOMContentLoaded", async function () {
             !searchedSkillListRemoveBtnInCrawlingSetting.contains(e.target)
         ) {
             searchedSkillListRemove("setting_modal_crawling");
+        }
+
+        const settingModalWrap = getElFromId("setting_modal_wrap");
+        const settingModal = getElFromId("setting_modal");
+        if (!settingModal.classList.contains("hidden") && !settingModalWrap.contains(e.target)) {
+            closeSettingModal();
+        }
+
+        const postModalWrap = getElFromId("post_modal_wrap");
+        const postModal = getElFromId("post_modal");
+        if (!postModal.classList.contains("hidden") && !postModalWrap.contains(e.target)) {
+            closeJobCard();
         }
     });
 
