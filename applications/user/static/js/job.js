@@ -1719,7 +1719,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         if (get_recruits_response.status === 200) {
             const responseData = await get_recruits_response.json();
-            console.log("renderPostList - responseData", responseData);
+            // console.log("renderPostList - responseData", responseData);
             const recruits = responseData.results;
             recruits.forEach((recruit) => {
                 jobCardList.appendChild(makeJobCard(recruit, requestData, "post"));
@@ -1756,7 +1756,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             if (get_recruits_response.status === 200) {
                 const responseData = await get_recruits_response.json();
-                console.log("renderPostListByScroll - responseData", responseData);
+                // console.log("renderPostListByScroll - responseData", responseData);
                 const recruits = responseData.results;
                 if (!recruits) {
                     emptyPage = true;
