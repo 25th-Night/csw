@@ -6,6 +6,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework import serializers
 
 from common.utils import (
+    make_prefix,
+    make_shortened_url,
     make_shortened_url_and_prefix,
 )
 
@@ -18,7 +20,7 @@ class ShortenedUrlSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
         allow_blank=True,
-        default="Unknown",
+        default="Undefined",
     )
     expired_at = serializers.CharField(
         required=False,
@@ -30,6 +32,20 @@ class ShortenedUrlSerializer(serializers.ModelSerializer):
         validators=[MinValueValidator(1), MaxValueValidator(3)]
     )
 
+    prefix = serializers.CharField(
+        max_length=30,
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+    )
+
+    shortened_url = serializers.CharField(
+        max_length=30,
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+    )
+
     class Meta:
         model = ShortenedUrl
         exclude = (
@@ -37,20 +53,20 @@ class ShortenedUrlSerializer(serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = (
-            "prefix",
             "click",
-            "shortened_url",
             "last_clicked",
             "created_at",
         )
 
     def create(self, validated_data):
-        prefix, shortened_url = make_shortened_url_and_prefix()
+        nick_name = validated_data.get("nick_name", "Undefined")
+        prefix = validated_data.get("prefix", make_prefix())
+        shortened_url = validated_data.get("suffix", make_shortened_url())
+
+        validated_data["nick_name"] = nick_name
         validated_data["prefix"] = prefix
         validated_data["shortened_url"] = shortened_url
-        nick_name = validated_data.get("nick_name")
-        if not nick_name:
-            validated_data.pop("nick_name")
+
         instance = super().create(validated_data)
         return instance
 
