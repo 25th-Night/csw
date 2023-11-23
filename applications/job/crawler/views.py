@@ -26,7 +26,11 @@ from job.models import (
     Skill,
 )
 
-from crawler.utils import crawling_recruits, make_crawling_data
+from crawler.utils import (
+    check_availability_to_crawling,
+    crawling_recruits,
+    make_crawling_data,
+)
 
 
 class RecruitView(GenericAPIView):
@@ -34,6 +38,11 @@ class RecruitView(GenericAPIView):
 
     def post(self, request: Request):
         print(request.data)
+
+        availability_to_crawling = check_availability_to_crawling(request)
+        if not availability_to_crawling:
+            response_msg = {"detail": "Exceeded daily crawling limit"}
+            return Response(response_msg, status=status.HTTP_403_FORBIDDEN)
 
         min_career = int(request.data.get("min_career"))
         user_id = request.user.get("id")
