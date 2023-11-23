@@ -68,12 +68,7 @@ def check_access_token_valid(request):
 
 def get_token_from_request(request: Request):
     access_token = None
-    print(f"request.__dict__:{request.__dict__}")
-    print(request.headers)
-    print(request.COOKIES)
-    print(request.COOKIES.get("access"))
     cookie = request.headers.get("Cookie", None)
-    print(cookie)
     if cookie:
         for content in cookie.split("; "):
             if content.startswith("access"):

@@ -61,12 +61,7 @@ def check_access_token_valid(request):
 
 def get_token_from_request(request: Request):
     access_token = None
-    print(f"request.__dict__:{request.__dict__}")
-    print(request.headers)
-    print(request.COOKIES)
-    print(request.COOKIES.get("access"))
     cookie = request.headers.get("Cookie", None)
-    print(cookie)
     if cookie:
         for content in cookie.split("; "):
             if content.startswith("access"):
@@ -141,7 +136,7 @@ def refresh_access_token(request: Request):
 
 
 def make_prefix():
-    str_pool = string.ascii_letters
+    str_pool = string.digits + string.ascii_letters
     return random.choice(str_pool)
 
 
