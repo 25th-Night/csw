@@ -27,6 +27,7 @@ import {
     popUpConfirm,
     formatDateToCustomFormat,
     hoverChangeTextColor,
+    isAlphaNumeric,
 } from "./common.js";
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -57,17 +58,59 @@ document.addEventListener("DOMContentLoaded", function () {
     setKeyForFunction(makeSubmitBtn, "Enter", makeUrl);
 
     async function makeUrl() {
-        const url = makeUrlInput.value;
-        let nickname = null;
-        if (makeNicknameInput) {
-            nickname = makeNicknameInput.value;
-        }
-        const expire = makeExpireInput.value;
-        const access = makeAccessInput.value;
+        const makeUrlInput = getElFromId("url_target");
+        const makeNicknameInput = getElFromId("url_nickname");
+        const makeExpireInput = getElFromId("url_expire");
+        const makeAccessInput = getElFromId("url_access");
+        const makeUrlPrefix = getElFromId("url_prefix");
+        const makeUrlSuffix = getElFromId("url_suffix");
 
-        if (!url) {
+        let requestData = {};
+
+        if (!makeUrlInput.value) {
             displayErrorMessage("make-url", "Please enter target url.");
             return;
+        }
+
+        requestData["target_url"] = makeUrlInput.value;
+        if (makeNicknameInput && makeNicknameInput.value) {
+            requestData["nick_name"] = makeNicknameInput.value;
+        }
+        requestData["expired_at"] = makeExpireInput.value;
+        requestData["access"] = makeAccessInput.value;
+        if (url_license == 4) {
+            if (makeUrlPrefix) {
+                if (makeUrlPrefix.value) {
+                    console.log("makeUrlPrefix.value", makeUrlPrefix.value);
+                    if (!isAlphaNumeric(makeUrlPrefix.value)) {
+                        displayErrorMessage(
+                            "make-url",
+                            "Prefix : alpha-numeric characters are allowed"
+                        );
+                        return;
+                    } else if (makeUrlPrefix.value.length != 1) {
+                        displayErrorMessage("make-url", "Prefix : Please enter 1 character");
+                        return;
+                    }
+                    requestData["prefix"] = makeUrlPrefix.value;
+                }
+            }
+            if (makeUrlSuffix) {
+                if (makeUrlSuffix.value) {
+                    console.log("makeUrlSuffix.value", makeUrlSuffix.value);
+                    if (!isAlphaNumeric(makeUrlSuffix.value)) {
+                        displayErrorMessage(
+                            "make-url",
+                            "Suffix : alpha-numeric characters are allowed"
+                        );
+                        return;
+                    } else if (makeUrlSuffix.value.length != 6) {
+                        displayErrorMessage("make-url", "Suffix : Please enter 6 characters");
+                        return;
+                    }
+                    requestData["shortened_url"] = makeUrlSuffix.value;
+                }
+            }
         }
 
         const currentTotal = parseInt(getElFromSel(".url-list-title").getAttribute("data-total"));
@@ -76,13 +119,8 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Cannot create more URLs.");
             return;
         }
-
-        const data = setFetchData("post", {
-            target_url: url,
-            nick_name: nickname,
-            expired_at: expire,
-            access: access,
-        });
+        console.log("requestData", requestData);
+        const data = setFetchData("post", requestData);
 
         // shortened_url api 호출
         const make_url_response = await fetch(`${ShortenerUrl}/shortener/`, data);
@@ -94,6 +132,12 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             makeAccessInput.value = "1";
             fp.clear();
+            if (makeUrlPrefix) {
+                makeUrlPrefix.value = "";
+            }
+            if (makeUrlSuffix) {
+                makeUrlSuffix.value = "";
+            }
             makeUrlInput.focus();
             updateTotalCount("created");
             getUrlList();
@@ -163,13 +207,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Target URL 클릭 시 모달창 오픈
     async function openModal(urlId) {
-        const data = setFetchData("get", {});
+        // expire Input 생성
+        createExpireModifyInput();
 
         // shortened_url api 호출
+        const data = setFetchData("get", {});
+
         const get_url_response = await fetch(`${ShortenerUrl}/shortener/${urlId}`, data);
 
         if (get_url_response.status === 200) {
             const url = await get_url_response.json();
+            console.log("url", url);
             const modifyModal = getElFromId("modify_modal");
             modifyModal.classList.remove("hidden");
 
@@ -177,6 +225,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const modalNickname = getElFromId("url_nickname_modify");
             const modalExpire = getElFromId("url_expire_modify");
             const modalAccess = getElFromId("url_access_modify");
+            const modalPrefix = getElFromId("url_prefix_modify");
+            const modalSuffix = getElFromId("url_suffix_modify");
             const modalShortenedUrl = getElFromId("url_shortened_info");
             const modalClick = getElFromId("url_click_info");
             const modalLastClicked = getElFromId("url_last_clicked_info");
@@ -187,17 +237,24 @@ document.addEventListener("DOMContentLoaded", function () {
             modalNickname.value = url.nick_name;
             modalExpire.value = url.expired_at;
             modalAccess.value = url.access;
-            modalShortenedUrl.textContent = `/${url.prefix}/${url.shortened_url}`;
+            if (modalPrefix) {
+                modalPrefix.value = url.prefix;
+            }
+            if (modalSuffix) {
+                modalSuffix.value = url.shortened_url;
+            }
+            if (modalShortenedUrl) {
+                modalShortenedUrl.textContent = `/${url.prefix}/${url.shortened_url}`;
+                modalShortenedUrl.style.backgroundColor = "#bfbfbf";
+            }
             modalClick.textContent = url.click.toString();
             modalLastClicked.textContent = formatDateToCustomFormat(url.last_clicked);
             modalCreated.textContent = formatDateToCustomFormat(url.created_at);
             modalAccessCode.textContent = url.access_code;
 
-            modalShortenedUrl.style.backgroundColor = "#bfbfbf";
             modalClick.style.backgroundColor = "#bfbfbf";
             modalLastClicked.style.backgroundColor = "#bfbfbf";
             modalCreated.style.backgroundColor = "#bfbfbf";
-            modalAccessCode.style.backgroundColor = "#bfbfbf";
 
             modalTargetUrl.focus();
 
@@ -213,7 +270,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 const modifyModalWrap = getElFromSel(".modify-modal-wrap");
                 modifyModalWrap.insertAdjacentElement("afterend", calendar);
             }
-            const fp = flatpickr("#url_expire_modify", {
+
+            const fp_modify = flatpickr("#url_expire_modify_wrap", {
                 minDate: "today",
                 dateFormat: "Y-m-d",
                 static: true,
@@ -221,31 +279,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 wrap: true,
             });
 
-            calendar.appendChild(fp.calendarContainer);
+            calendar.appendChild(fp_modify.calendarContainer);
             setAttributeToElement(modifyModal, "data-id", url.id);
-
-            // Date Input 선택 시 x 버튼 활성화
-            const clearDateBtn = getElFromId("clear_modify_date");
-
-            if (url.expired_at) {
-                clearDateBtn.classList.remove("hidden");
-            }
-
-            if (clearDateBtn) {
-                clearDateBtn.addEventListener("click", function () {
-                    const expireInput = getElFromId("url_expire_modify");
-                    expireInput.value = null;
-                    clearDateBtn.classList.add("hidden");
-                });
-            }
-
-            modalExpire.addEventListener("input", function () {
-                if (modalExpire.value) {
-                    clearDateBtn.classList.remove("hidden");
-                } else {
-                    clearDateBtn.classList.add("hidden");
-                }
-            });
 
             // submit 버튼 생성
             const modifySubmitBtn = createNewElement(
@@ -303,7 +338,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Access Code Refresh 버튼 생성
             const refreshCodeSvg = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#FFFFFF" class="w-6 h-6 hover:stroke-[#d9d9d9] cursor-pointer refresh-access-code-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000000" class="w-6 h-6 mr-3 hover:stroke-white cursor-pointer refresh-access-code-btn">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
             </svg>
             `;
@@ -472,6 +507,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 // access 요소 내에 access select box 복사
                 const originalSelectAccess = getElFromId("url_access");
                 const clonedSelectAccess = originalSelectAccess.cloneNode(true);
+                clonedSelectAccess.classList.add("text-center");
+                clonedSelectAccess.classList.remove("border-b");
+                clonedSelectAccess.classList.remove("border-[#d9d9d9]");
                 clonedSelectAccess.id = `url_access_${urlId}`;
                 clonedSelectAccess.name = `url-access-${urlId}`;
                 clonedSelectAccess.value = url.access;
@@ -592,8 +630,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const modalTargetUrl = getElFromId("url_target_modify");
         const modalNickname = getElFromId("url_nickname_modify");
-        const modalExpire = getElFromId("url_expire_modify");
         const modalAccess = getElFromId("url_access_modify");
+        const modalPrefix = getElFromId("url_prefix_modify");
+        const modalSuffix = getElFromId("url_suffix_modify");
         const modalShortenedUrl = getElFromId("url_shortened_info");
         const modalClick = getElFromId("url_click_info");
         const modalLastClicked = getElFromId("url_last_clicked_info");
@@ -602,13 +641,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
         modalTargetUrl.value = "";
         modalNickname.value = "";
-        modalExpire.value = "";
         modalAccess.value = "";
-        modalShortenedUrl.textContent = "";
+        if (modalPrefix) {
+            modalPrefix.value = "";
+        }
+        if (modalSuffix) {
+            modalSuffix.value = "";
+        }
+        if (modalShortenedUrl) {
+            modalShortenedUrl.textContent = "";
+        }
         modalClick.textContent = "";
         modalLastClicked.textContent = "";
         modalCreated.textContent = "";
         modalAccessCode.textContent = "";
+
+        const expireModifyWrap = getElsFromSel(".flatpickr-wrapper")[1];
+        if (expireModifyWrap) {
+            expireModifyWrap.remove();
+        }
 
         const flatpickr = getElsFromSel(".flatpickr-calendar")[1];
         if (flatpickr) {
@@ -642,6 +693,17 @@ document.addEventListener("DOMContentLoaded", function () {
         setKeyForFunction(makeNicknameInput, "Enter", makeUrl);
     }
 
+    // suffix, prefix 입력 칸에서 Enter 키 입력 시 폼 제출
+    const makePreInput = getElFromId("url_prefix");
+    const makeSuffixInput = getElFromId("url_suffix");
+
+    if (makePreInput) {
+        setKeyForFunction(makePreInput, "Enter", makeUrl);
+    }
+    if (makeSuffixInput) {
+        setKeyForFunction(makeSuffixInput, "Enter", makeUrl);
+    }
+
     // make submit 버튼 마우스 오버 시 효과
     imageHover(makeSubmitBtn, "/static/img/icon/submit02.png", "/static/img/icon/submit01.png");
 
@@ -658,13 +720,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const expireInput = getElFromId("url_expire");
     const svg = getElFromId("clearDate");
 
-    // if (svg) {
-    //     svg.addEventListener("click", function () {
-    //         expireInput.value = "";
-    //         svg.classList.add("hidden");
-    //     });
-    // }
-
     expireInput.addEventListener("input", function () {
         if (expireInput.text) {
             svg.classList.add("hidden");
@@ -678,29 +733,73 @@ document.addEventListener("DOMContentLoaded", function () {
         const modalNickname = getElFromId("url_nickname_modify");
         const modalExpire = getElFromId("url_expire_modify");
         const modalAccess = getElFromId("url_access_modify");
+        const makeUrlPrefix = getElFromId("url_prefix_modify");
+        const makeUrlSuffix = getElFromId("url_suffix_modify");
 
-        const targetUrl = modalTargetUrl.value;
-        const nickname = modalNickname.value;
-        const expire = modalExpire.value;
-        const access = modalAccess.value;
+        let requestData = {};
 
-        if (!targetUrl) {
+        if (!getElFromId("url_target_modify").value) {
             displayErrorMessage("modify-url", "Please enter target url.");
             return;
         }
+        requestData["target_url"] = modalTargetUrl.value;
 
-        const data = setFetchData("put", {
-            target_url: targetUrl,
-            nick_name: nickname,
-            expired_at: expire,
-            access: access,
-        });
+        if (modalNickname && !modalNickname.value) {
+            displayErrorMessage("modify-url", "Please enter nickname.");
+            return;
+        }
+        requestData["nick_name"] = modalNickname.value;
+
+        if (modalExpire.value) {
+            requestData["expired_at"] = modalExpire.value;
+        }
+
+        requestData["access"] = modalAccess.value;
+
+        if (url_license == 4) {
+            if (makeUrlPrefix) {
+                if (makeUrlPrefix.value) {
+                    if (!isAlphaNumeric(makeUrlPrefix.value)) {
+                        displayErrorMessage(
+                            "modify-url",
+                            "Prefix : alpha-numeric characters are allowed"
+                        );
+                        return;
+                    } else if (makeUrlPrefix.value.length != 1) {
+                        displayErrorMessage("modify-url", "Prefix : Please enter 1 character");
+                        return;
+                    }
+                    requestData["prefix"] = makeUrlPrefix.value;
+                }
+            }
+            if (makeUrlSuffix) {
+                if (makeUrlSuffix.value) {
+                    if (!isAlphaNumeric(makeUrlSuffix.value)) {
+                        displayErrorMessage(
+                            "modify-url",
+                            "Suffix : alpha-numeric characters are allowed"
+                        );
+                        return;
+                    } else if (makeUrlSuffix.value.length != 6) {
+                        displayErrorMessage("modify-url", "Suffix : Please enter 6 characters");
+                        return;
+                    }
+                    requestData["shortened_url"] = makeUrlSuffix.value;
+                }
+            }
+        }
+
+        console.log("modify- requestData", requestData);
+
+        const data = setFetchData("put", requestData);
 
         // shortened_url api 호출
         console.log("modify url: ", `${ShortenerUrl}/shortener/${urlId}`);
         const modify_url_response = await fetch(`${ShortenerUrl}/shortener/${urlId}`, data);
 
         if (modify_url_response.status === 200) {
+            const response_data = await modify_url_response.json();
+            console.log("modify - response_data", response_data);
             closeModal();
             getUrlList();
         } else {
@@ -719,35 +818,70 @@ document.addEventListener("DOMContentLoaded", function () {
         getUrlList(currentPageNumber);
     });
 
-    // // 생성 영역에서 flatpickr가 열린 경우, 외부 영역 클릭 시 flatpickr 닫기
-    // const makeFlatpickrCalendar = document.querySelector(".make-form .flatpickr-calendar");
-
-    // makeExpireInput.addEventListener("click", function () {
-    //     if (makeFlatpickrCalendar) {
-    //         makeFlatpickrCalendar.classList.add("open");
-    //     }
-    // });
-
-    // document.addEventListener("click", function (event) {
-    //     if (
-    //         makeFlatpickrCalendar &&
-    //         // ![makeExpireInput, makeFlatpickrCalendar].includes(event.target)
-    //         ![makeExpireInput, makeFlatpickrCalendar].includes(event.target) &&
-    //         !makeFlatpickrCalendar.contains(event.target)
-    //     ) {
-    //         makeFlatpickrCalendar.classList.remove("open");
-    //         console.log("makeFlatpickrCalendar", makeFlatpickrCalendar);
-    //     }
-    // });
-
     // 화면 로드 시 실행될 함수 목록
     getUrlList(currentPageNumber);
 
     // 바깥 영역 클릭 시, 모달창 닫기
     document.addEventListener("mouseup", function (e) {
         const modifyModalWrap = getElFromId("modify_modal_wrap");
-        if (modifyModalWrap) {
+        const flatpickr = getElsFromSel(".flatpickr-calendar")[1];
+
+        if (
+            flatpickr &&
+            !flatpickr.contains(e.target) &&
+            modifyModalWrap &&
+            !modifyModalWrap.contains(e.target)
+        ) {
             closeModal();
         }
     });
+
+    // Modal 창 내의 Expire Input 생성 함수
+    const createExpireModifyInput = () => {
+        const expireModifyWrap = createNewElement(
+            "div",
+            "relative flex items-center bg-white flatpickr",
+            null,
+            "url_expire_modify_wrap"
+        );
+        const expireModifyInput = createNewElement(
+            "input",
+            "w-full p-1 text-black outline-none md:w-[126px]",
+            null,
+            "url_expire_modify"
+        );
+        expireModifyInput.name = "url-expire";
+        expireModifyInput.autocomplete = "off";
+        expireModifyInput.autofocus = true;
+        expireModifyInput.tabIndex = "8";
+        expireModifyInput.placeholder = "Expire";
+        expireModifyInput.dataset.input = "";
+        const expireModifyClear = createNewElement("a", "", null, "clear_data_modify");
+        expireModifyClear.title = "clear";
+        expireModifyClear.dataset.clear = "";
+        const expireClearSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="black"
+            class="w-6 h-6 p-1 mr-1 cursor-pointer"
+            id="clearDate_modify">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        `;
+        const expireClearParser = new DOMParser();
+        const expireClearSvgDOM = expireClearParser.parseFromString(
+            expireClearSvg,
+            "image/svg+xml"
+        );
+        const expireClearSvgBtn = expireClearSvgDOM.documentElement;
+
+        expireModifyClear.appendChild(expireClearSvgBtn);
+        expireModifyWrap.appendChild(expireModifyInput);
+        expireModifyWrap.appendChild(expireModifyClear);
+
+        const expireFormField = getElFromId("form_field_expire_modify");
+        expireFormField.appendChild(expireModifyWrap);
+    };
 });
