@@ -446,7 +446,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     // Search Input Box 내의 삭제 버튼 생성
-    const createSearchRemoveBtn = (typeId, selectTypeId, filterSearchList) => {
+    const createSearchRemoveBtn = (typeId, selectTypeId) => {
         const filterRemoveSvg = `
         <svg xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -463,14 +463,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             "image/svg+xml"
         );
         const filterRemoveSvgElement = filterRemoveSvgDOM.documentElement;
-        filterRemoveSvgElement.addEventListener("click", () => {
-            filterSkillInput.value = "";
-            filterSkillInput.setAttribute("data-id", 0);
-            filterRemoveSvgElement.remove();
-            removeAllNode(filterSearchList);
-            filterSearchList.classList.add("hidden");
-            filterSkillInput.focus();
-        });
+
         return filterRemoveSvgElement;
     };
 
@@ -493,7 +486,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             "div",
             `absolute flex justify-between w-full origin-top-left left-1 top-1 ${type}-filter-${selectType}-wrap`,
             null,
-            `${typeId}_filter_${selectTypeId}-wrap`
+            `${typeId}_filter_${selectTypeId}_wrap`
         );
         const filterSkillInput = createNewElement(
             "input",
@@ -509,7 +502,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             `${typeId}_search_${selectTypeId}_list`
         );
 
-        const filterRemoveBtn = createSearchRemoveBtn(typeId, selectTypeId, filterSearchList);
+        const filterRemoveBtn = createSearchRemoveBtn(typeId, selectTypeId);
 
         filterSkillWrap.appendChild(filterSkillInput);
         filterSkillWrap.appendChild(filterRemoveBtn);
@@ -572,7 +565,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         SelectWrap.appendChild(companyTagSelectBox);
         SelectWrap.appendChild(minCareerSelectBox);
 
-        getElFromId(`${typeId}_filter_skill-wrap`).classList.add("mt-1");
+        getElFromId(`${typeId}_filter_skill_wrap`).classList.add("mt-1");
         getElFromId(`${typeId}_search_skill_remove_btn`).classList.add("pr-1");
     };
 
@@ -617,7 +610,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (getElFromId("job_post_btn").getAttribute("src") == "/static/img/icon/job-post04.png") {
             const postSettingResponse = await requestSetting(1);
             const postSettingData = await postSettingResponse.json();
-            console.log("postSettingData", postSettingData);
+            if (!getElFromId("post_search_skill").value) {
+                const skillSearchRemoveBtn = createSearchRemoveBtn("post", "skill");
+                const skillFilterSkillWrap = getElFromId("post_filter_skill_wrap");
+                skillFilterSkillWrap.appendChild(skillSearchRemoveBtn);
+            }
             renderSelectBox(postSettingData, "post");
         } else if (
             getElFromId("job_crawling_btn").getAttribute("src") ==
@@ -625,7 +622,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         ) {
             const crawlingSettingResponse = await requestSetting(2);
             const crawlingSettingData = await crawlingSettingResponse.json();
-            console.log("crawlingSettingData", crawlingSettingData);
+            if (!getElFromId("crawling_search_skill").value) {
+                const skillSearchRemoveBtn = createSearchRemoveBtn("crawling", "skill");
+                const skillFilterSkillWrap = getElFromId("crawling_filter_skill_wrap");
+                skillFilterSkillWrap.appendChild(skillSearchRemoveBtn);
+            }
             renderSelectBox(crawlingSettingData, "crawling");
         }
     };
@@ -672,17 +673,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Skill Input & List 제거
     const clearSkillInputAndList = (type) => {
         const typeId = type.replace(/-/g, "_");
-        const crawlingSkillInput = getElFromId(`${typeId}_search_skill`);
-        const crawlingSearchSkillList = getElFromId(`${typeId}_search_skill_list`);
+        const skillInput = getElFromId(`${typeId}_search_skill`);
+        const searchSkillList = getElFromId(`${typeId}_search_skill_list`);
         const searchSKillInputRemoveSvgBtn = getElFromId(`${type}_search_skill_remove_btn`);
 
-        crawlingSkillInput.value = "";
-        removeAllNode(crawlingSearchSkillList);
-        crawlingSearchSkillList.classList.add("hidden");
+        skillInput.value = "";
+        skillInput.setAttribute("data-id", 0);
+        removeAllNode(searchSkillList);
+        searchSkillList.classList.add("hidden");
         if (searchSKillInputRemoveSvgBtn) {
             searchSKillInputRemoveSvgBtn.remove();
         }
-        crawlingSkillInput.focus();
+        skillInput.focus();
     };
 
     // Skill List 제거
@@ -1301,15 +1303,27 @@ document.addEventListener("DOMContentLoaded", async function () {
         skillInputBox.addEventListener("input", () => {
             if (getElFromId(`${typeId}_search_skill_remove_btn`)) {
             } else {
-                const newFilterRemoveSvgElement = createSearchRemoveBtn(
-                    typeId,
-                    "skill",
-                    filterSearchList
-                );
+                const filterSkillWrap = getElFromId(`${typeId}_filter_skill_wrap`);
+                const newFilterRemoveSvgElement = createSearchRemoveBtn(typeId, "skill");
                 filterSkillWrap.appendChild(newFilterRemoveSvgElement);
             }
             skillInputBox.setAttribute("data-id", 0);
         });
+
+        const skillFilterRemoveBtn = getElFromId(`${typeId}_search_skill_remove_btn`);
+        const skillFilterSearchList = getElFromId(`${typeId}_search_skill_list`);
+        if (skillFilterRemoveBtn) {
+            skillFilterRemoveBtn.addEventListener("click", () => {
+                const skillInputBox = getElFromId(`${typeId}_search_skill`);
+                console.log("skillInputBox", skillInputBox);
+                skillInputBox.value = "";
+                skillInputBox.setAttribute("data-id", 0);
+                skillFilterRemoveBtn.remove();
+                removeAllNode(skillFilterSearchList);
+                skillFilterSearchList.classList.add("hidden");
+                skillInputBox.focus();
+            });
+        }
 
         const minCareerSelectBox = getElFromId(`${typeId}_filter_min_career`);
         removeAllNode(minCareerSelectBox);
