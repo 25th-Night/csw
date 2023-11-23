@@ -7,6 +7,7 @@ from rest_framework.request import Request
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
 
 from common.utils import (
     Chrome,
@@ -82,114 +83,114 @@ def crawling_recruits(
 
     driver.get(url)
 
-    try:
-        # login
-        find_visible(short_wait, "button[data-gnb-kind=signupLogin]").click()
-        find_visible(wait, "input[type=email]").send_keys(os.getenv("WANTED_ID") + "\n")
-        find_visible(wait, "input[type=password]").send_keys(
-            os.getenv("WANTED_PW") + "\n"
-        )
+    # login
+    find_visible(short_wait, "button[data-gnb-kind=signupLogin]").click()
+    find_visible(short_wait, "button[data-method=email]").click()
+    find_visible(wait, "input[type=email]").send_keys(os.getenv("WANTED_ID") + "\n")
+    find_visible(wait, "input[type=password]").send_keys(os.getenv("WANTED_PW") + "\n")
 
-        # job_group
-        find_visible(wait, "button[class*=JobGroup_]").click()
-        job_groups = finds_present(
-            driver, wait, "section[class*=JobGroupOverlay_] li a"
-        )
-        for i, job_group in enumerate(job_groups):
-            if group_idx == i:
-                job_group.click()
+    # job_group
+    find_visible(wait, "button[class*=JobGroup_]").click()
+    job_groups = finds_present(driver, wait, "section[class*=JobGroupOverlay_] li a")
+    for i, job_group in enumerate(job_groups):
+        if group_idx == i:
+            job_group.click()
+            break
+
+    # job_category
+    if category_name_list is not None:
+        find_visible(wait, "button[class*=JobCategory_]").click()
+        job_categories = finds_present(driver, wait, "button[class*=JobCategoryItem_]")
+        for i, job_category in enumerate(job_categories):
+            if job_category.text in category_name_list:
+                job_category.click()
+
+        # job_category confirm btn
+        finds_visible(driver, wait, "button[class*=Button_Button]")[0].click()
+
+        # stack
+        if skill_name_list is not None:
+            find_visible(wait, "button[data-filter-name=skill]").click()
+            input_skill_tag = find_visible(
+                wait, "div[class*=SkillsSearch_SkillsSearch__] input"
+            )
+            for skill in skill_name_list:
+                skill = click_skill_btn(wait, input_skill_tag, skill)
+                if not skill:
+                    driver.quit()
+                    return False
+            finds_present(driver, wait, "span[class*=Button_Button__interaction]")[
+                2
+            ].click()
+
+    # country
+    find_visible(wait, "button[data-filter-name=region]").click()
+
+    country_select = find_visible(
+        wait, "div[id=MODAL_BODY] div[class*=Selector_select] select"
+    )
+    country_options = finds_visible(
+        driver,
+        wait,
+        "div[id=MODAL_BODY] div[class*=Selector_select] select option",
+    )
+    for i, country_option in enumerate(country_options):
+        if country_idx == i:
+            select = Select(country_select)
+            select.select_by_index(country_idx)
+
+            # region
+            if country_idx in [1, 3, 4] and region_name:
+                regions_section = finds_present(
+                    driver, wait, "div[class*=Locations_column__]"
+                )[0]
+                regions = finds_present(regions_section, wait, "button")
+                for i, region in enumerate(regions):
+                    if region_name == region.text:
+                        if i >= 8:
+                            region.send_keys(Keys.ARROW_DOWN)
+                        region.click()
+                        # detail_region
+                        if country_idx == 4 and region_name not in ["전국"]:
+                            detail_regions_section = finds_present(
+                                driver, wait, "div[class*=Locations_column__]"
+                            )[1]
+                            detail_regions = finds_present(
+                                detail_regions_section, wait, "button"
+                            )
+                            for j, detail_region in enumerate(detail_regions):
+                                if (
+                                    detail_region_name != "전체"
+                                    and detail_region_name == detail_region.text
+                                ):
+                                    if j >= 8:
+                                        detail_region.send_keys(Keys.ARROW_DOWN)
+                                    detail_region.click()
+                                    break
+
+                            break
+                        break
                 break
 
-        # job_category
-        if category_name_list is not None:
-            find_visible(wait, "button[class*=JobCategory_]").click()
-            job_categories = finds_present(
-                driver, wait, "button[class*=JobCategoryItem_]"
-            )
-            for i, job_category in enumerate(job_categories):
-                if job_category.text in category_name_list:
-                    job_category.click()
+    # _region confirm btn
+    find_visible(wait, "button[class*=CommonFooter_button__]").click()
 
-            # job_category confirm btn
-            finds_visible(driver, wait, "button[class*=Button_Button]")[0].click()
+    print("complete push button")
 
-            # stack
-            if skill_name_list is not None:
-                find_visible(wait, "button[data-filter-name=skill]").click()
-                input_skill_tag = find_visible(
-                    wait, "div[class*=SkillsSearch_SkillsSearch__] input"
-                )
-                for skill in skill_name_list:
-                    skill = click_skill_btn(wait, input_skill_tag, skill)
-                    if not skill:
-                        driver.quit()
-                        return False
-                finds_present(driver, wait, "span[class*=Button_Button__interaction]")[
-                    2
-                ].click()
-
-        # country
-        find_visible(wait, "button[data-filter-name=region]").click()
-
-        country_select = find_visible(
-            wait, "div[id=MODAL_BODY] div[class*=Selector_select] select"
-        )
-        country_options = finds_visible(
-            driver,
-            wait,
-            "div[id=MODAL_BODY] div[class*=Selector_select] select option",
-        )
-        for i, country_option in enumerate(country_options):
-            if country_idx == i:
-                select = Select(country_select)
-                select.select_by_index(country_idx)
-
-                # region
-                if country_idx in [1, 3, 4] and region_name:
-                    regions_section = finds_present(
-                        driver, wait, "div[class*=Locations_column__]"
-                    )[0]
-                    regions = finds_present(regions_section, wait, "button")
-                    for i, region in enumerate(regions):
-                        if region_name == region.text:
-                            if i >= 8:
-                                region.send_keys(Keys.ARROW_DOWN)
-                            region.click()
-                            # detail_region
-                            if country_idx == 4 and region_name not in ["전국"]:
-                                detail_regions_section = finds_present(
-                                    driver, wait, "div[class*=Locations_column__]"
-                                )[1]
-                                detail_regions = finds_present(
-                                    detail_regions_section, wait, "button"
-                                )
-                                for j, detail_region in enumerate(detail_regions):
-                                    if (
-                                        detail_region_name != "전체"
-                                        and detail_region_name == detail_region.text
-                                    ):
-                                        if j >= 8:
-                                            detail_region.send_keys(Keys.ARROW_DOWN)
-                                        detail_region.click()
-                                        break
-
-                                break
-                            break
-                    break
-
-        # _region confirm btn
-        find_visible(wait, "button[class*=CommonFooter_button__]").click()
-
-        print("complete push button")
-
-        # check data
-        if find_visible(wait, "div[class*=EmptyList_Container__]"):
+    # check data
+    try:
+        if find_visible(wait, "div[class*=EmptyList_Title__]").is_displayed():
             return ["empty"]
+    except:
+        pass
 
-        # scroll down
-        prev_height = driver.execute_script("return document.body.scrollHeight")
-        print(f"prev_height:{prev_height}")
+    print("check data complete")
 
+    # scroll down
+    prev_height = driver.execute_script("return document.body.scrollHeight")
+    print(f"prev_height:{prev_height}")
+
+    try:
         while True:
             driver.execute_script("window.scrollBy(0, 5000)")
             time.sleep(0.5)
@@ -205,26 +206,30 @@ def crawling_recruits(
             prev_height = new_height
             print(f"prev_height:{prev_height}, new_height:{new_height}")
             time.sleep(0.5)
-
-        # add crawling data
-        crawling_url_id_list = []
-        time.sleep(0.3)
-        companies = finds_visible(driver, wait, "div[class*=List_List_container__] li")
-        for i, company in enumerate(companies):
-            link = company.find_element(By.TAG_NAME, "a").get_attribute("href")
-            url_id = link.split("/")[-1]
-            location = company.find_element(
-                By.CSS_SELECTOR, "div.job-card-company-location"
-            ).text
-            region, country = location.split(".")
-            if region_name == "전국" or region_name == region:
-                crawling_url_id_list.append(url_id)
-
-        driver.quit()
-        return crawling_url_id_list
     except Exception as e:
         print(f"Raised exception: {e}")
         return False
+
+    # add crawling data
+    crawling_url_id_list = []
+    time.sleep(0.3)
+    try:
+        companies = finds_visible(driver, wait, "div[class*=List_List_container__] li")
+    except Exception as e:
+        print(f"Raised exception: {e}")
+        return False
+    for i, company in enumerate(companies):
+        link = company.find_element(By.TAG_NAME, "a").get_attribute("href")
+        url_id = link.split("/")[-1]
+        location = company.find_element(
+            By.CSS_SELECTOR, "div.job-card-company-location"
+        ).text
+        region, country = location.split(".")
+        if region_name == "전국" or region_name == region:
+            crawling_url_id_list.append(url_id)
+
+    driver.quit()
+    return crawling_url_id_list
 
 
 def crawling_recruit_detail(url):
