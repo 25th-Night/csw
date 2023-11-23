@@ -13,166 +13,172 @@
             <img src="{% static 'img/icon/submit01.png' %}"
                  alt="submit"
                  class="block h-10 cursor-pointer sm:h-12"
-                 tabindex="5"
+                 tabindex="7"
                  id="make_btn_url">
         </div>
-        <form class="grid w-full grid-cols-12 mt-4 gap-y-3 gap-x-5 url-form make-form">
-            {% if user.url.license == 1 %}
-                <div class="col-span-12 form-field-target" id="form_field_target">
-                {% else %}
-                    <div class="col-span-7 lg:col-span-9 form-field-target"
-                         id="form_field_target">
-                    {% endif %}
-                    <div class="flex label-wrap">
-                        <label for="url-target" class="block mr-2 font-semibold sm:mb-3">Target Url</label>
-                        <div class="self-center hidden text-sm text-[red] make-url-error"></div>
-                    </div>
-                    <input type="text"
-                           id="url_target"
-                           name="url-target"
-                           autocomplete="off"
-                           autofocus
-                           tabindex="1"
-                           class="block w-full p-1 border-b border-[#d9d9d9] outline-none"
-                           placeholder="Target Url">
-                </div>
-                {% if user.url.license > 1 %}
-                    <div class="col-span-5 lg:col-span-3 form-field-nickname"
-                         id="form_field_nickname">
-                        <label for="url-nickname" class="block font-semibold sm:mb-3">Nickname</label>
-                        <input type="text"
-                               id="url_nickname"
-                               name="url-nickname"
-                               autocomplete="off"
-                               autofocus
-                               tabindex="2"
-                               class="block w-full p-1 border-b border-[#d9d9d9] outline-none"
-                               placeholder="Nickname">
-                    </div>
+        {% if user.url.license == 1 %}
+            <form class="grid w-full grid-cols-12 mt-4 sm:grid-cols-8 lg:grid-cols-12 gap-y-3 gap-x-5 url-form make-form">
+            {% else %}
+                <form class="grid w-full grid-cols-12 mt-4 gap-y-3 gap-x-5 url-form make-form">
                 {% endif %}
-                <div class="col-span-6 sm:col-span-4 lg:col-span-3 form-field-expire"
-                     id="form_field_expire">
-                    <label for="url-expire"
-                           class="block font-semibold sm:mb-3 make-expire-label">Expire</label>
-                    <div class="flex border-b border-[#d9d9d9] items-center flatpickr"
-                         id="url_expire_wrap">
+                {% if user.url.license == 1 %}
+                    <div class="col-span-12 sm:col-span-8 lg:col-span-6 form-field-target"
+                         id="form_field_target">
+                    {% else %}
+                        <div class="col-span-7 lg:col-span-9 form-field-target"
+                             id="form_field_target">
+                        {% endif %}
+                        <div class="flex label-wrap">
+                            <label for="url-target" class="block mr-2 font-semibold sm:mb-3">Target Url</label>
+                            <div class="self-center hidden text-sm text-[red] make-url-error"></div>
+                        </div>
                         <input type="text"
-                               id="url_expire"
-                               name="url-expire"
+                               id="url_target"
+                               name="url-target"
                                autocomplete="off"
                                autofocus
-                               tabindex="3"
-                               class="w-[calc(100%-24px)] p-1 outline-none"
-                               placeholder="Expire"
-                               data-input>
-                        <a class="input-button" title="clear" data-clear>
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 fill="none"
-                                 viewBox="0 0 24 24"
-                                 stroke-width="1.5"
-                                 stroke="currentColor"
-                                 class="w-6 h-6 p-1 cursor-pointer"
-                                 id="clearDate">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </a>
+                               tabindex="1"
+                               class="block w-full p-1 border-b border-[#d9d9d9] outline-none"
+                               placeholder="Target Url">
                     </div>
-                </div>
-                <div class="col-span-6 sm:col-span-4 lg:col-span-3 form-field-access"
-                     id="form_field_access">
-                    <label for="url-access" class="block font-semibold sm:mb-3">Access</label>
-                    <select id="url_access"
-                            name="url-access"
-                            class="w-full p-1 outline-none border-b border-[#d9d9d9] appearance-none cursor-pointer"
-                            autofocus
-                            tabindex="4"
-                            placeholder="Access">
-                        <option value="1" class="select-option">Public</option>
-                        <option value="2" class="select-option">Private</option>
-                        <option value="3" class="select-option">Secret</option>
-                    </select>
-                </div>
-                {% if user.url.license == 4 %}
-                    <div class="col-span-6 sm:col-span-4 lg:col-span-3 form-field-shortened"
-                         id="form_field_shortened">
-                        <label for="url-shortened" class="block font-semibold sm:mb-3">Shortened Url</label>
-                        <div class="flex p-1 items-center border-b border-[#d9d9d9] shortened-url-wrap"
-                             id="shortened_url_wrap">
+                    {% if user.url.license > 1 %}
+                        <div class="col-span-5 lg:col-span-3 form-field-nickname"
+                             id="form_field_nickname">
+                            <label for="url-nickname" class="block font-semibold sm:mb-3">Nickname</label>
                             <input type="text"
-                                   id="url_prefix"
-                                   name="url-prefix"
+                                   id="url_nickname"
+                                   name="url-nickname"
                                    autocomplete="off"
                                    autofocus
-                                   tabindex="5"
-                                   class="block w-3 text-right outline-none"
-                                   title="prefix"
-                                   maxlength="1">
-                            <div class="mx-1">/</div>
+                                   tabindex="2"
+                                   class="block w-full p-1 border-b border-[#d9d9d9] outline-none"
+                                   placeholder="Nickname">
+                        </div>
+                    {% endif %}
+                    <div class="col-span-6 sm:col-span-4 lg:col-span-3 form-field-access"
+                         id="form_field_access">
+                        <label for="url-access" class="block font-semibold sm:mb-3">Access</label>
+                        <select id="url_access"
+                                name="url-access"
+                                class="w-full p-1 outline-none border-b border-[#d9d9d9] appearance-none cursor-pointer"
+                                autofocus
+                                tabindex="3"
+                                placeholder="Access">
+                            <option value="1" class="select-option">Public</option>
+                            <option value="2" class="select-option">Private</option>
+                            <option value="3" class="select-option">Secret</option>
+                        </select>
+                    </div>
+                    <div class="col-span-6 sm:col-span-4 lg:col-span-3 form-field-expire"
+                         id="form_field_expire">
+                        <label for="url-expire"
+                               class="block font-semibold sm:mb-3 make-expire-label">Expire</label>
+                        <div class="flex border-b border-[#d9d9d9] items-center flatpickr"
+                             id="url_expire_wrap">
                             <input type="text"
-                                   id="url_shortened"
-                                   name="url-shortened"
+                                   id="url_expire"
+                                   name="url-expire"
                                    autocomplete="off"
                                    autofocus
-                                   tabindex="6"
-                                   class="block w-full outline-none"
-                                   title="suffix"
-                                   maxlength="6">
+                                   tabindex="4"
+                                   class="w-[calc(100%-24px)] p-1 outline-none"
+                                   placeholder="Expire"
+                                   data-input>
+                            <a class="input-button" title="clear" data-clear>
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor"
+                                     class="w-6 h-6 p-1 cursor-pointer"
+                                     id="clearDate">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </a>
                         </div>
                     </div>
-                {% endif %}
-            </form>
-        </div>
-        <hr class="mt-5 mb-7 hr border-[#373737]">
-        <div class="mb-10 list-wrap">
-            <div class="grid items-center justify-between grid-cols-1 min-[500px]:grid-cols-2 mb-[10px] min-[800px]:mb-5 min-[800px]:grid-cols-3 title-wrap">
-                <div class="flex items-center list-title-wrap">
-                    <div class="mr-4 title url-list-title">URL List</div>
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         fill="none"
-                         viewBox="0 0 24 24"
-                         stroke-width="1.5"
-                         stroke="#373737"
-                         class="w-5 h-5 hover:stroke-[#d9d9d9] cursor-pointer refresh-list-btn">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                    </svg>
-                </div>
-                <div class="flex justify-center items-end mt-[10px] min-[800px]:h-[48px] min-[800px]:mt-0 min-[500px]:col-span-2 row-start-3 min-[500px]:row-start-2 min-[800px]:col-span-1 min-[800px]:row-start-auto page-btn-wrap"
-                     id="page_btn_wrap"></div>
-                <div class="count-wrap">
-                    <div class="flex items-center justify-end available-total-count">
-                        <div class="font-semibold">{{ available_url_cnt }} URLs</div>
-                        <div class="ml-2 text-sm">Available</div>
+                    {% if user.url.license == 4 %}
+                        <div class="col-span-6 sm:col-span-4 lg:col-span-3 form-field-shortened"
+                             id="form_field_shortened">
+                            <label for="url-shortened" class="block font-semibold sm:mb-3">Shortened Url</label>
+                            <div class="flex p-1 items-center border-b border-[#d9d9d9] shortened-url-wrap"
+                                 id="shortened_url_wrap">
+                                <div class="text-[#a6a6a6] slash">/</div>
+                                <input type="text"
+                                       id="url_prefix"
+                                       name="url-prefix"
+                                       autocomplete="off"
+                                       autofocus
+                                       tabindex="5"
+                                       class="block w-3 text-right outline-none"
+                                       title="prefix"
+                                       maxlength="1">
+                                <div class="text-[#a6a6a6] mx-1 slash">/</div>
+                                <input type="text"
+                                       id="url_suffix"
+                                       name="url-suffix"
+                                       autocomplete="off"
+                                       autofocus
+                                       tabindex="6"
+                                       class="block w-full outline-none"
+                                       title="suffix"
+                                       maxlength="6">
+                            </div>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+            <hr class="mt-5 mb-7 hr border-[#373737]">
+            <div class="mb-10 list-wrap">
+                <div class="grid items-center justify-between grid-cols-1 min-[500px]:grid-cols-2 mb-[10px] min-[800px]:mb-5 min-[800px]:grid-cols-3 title-wrap">
+                    <div class="flex items-center list-title-wrap">
+                        <div class="mr-4 title url-list-title">URL List</div>
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="#373737"
+                             class="w-5 h-5 hover:stroke-[#d9d9d9] cursor-pointer refresh-list-btn">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
                     </div>
-                    <div class="flex items-center justify-end current-total-count">
-                        <div class="font-semibold total-count"></div>
-                        <div class="ml-2 text-sm">Created</div>
+                    <div class="flex justify-center items-end mt-[10px] min-[800px]:h-[48px] min-[800px]:mt-0 min-[500px]:col-span-2 row-start-3 min-[500px]:row-start-2 min-[800px]:col-span-1 min-[800px]:row-start-auto page-btn-wrap"
+                         id="page_btn_wrap"></div>
+                    <div class="count-wrap">
+                        <div class="flex items-center justify-end available-total-count">
+                            <div class="font-semibold">{{ available_url_cnt }} URLs</div>
+                            <div class="ml-2 text-sm">Available</div>
+                        </div>
+                        <div class="flex items-center justify-end current-total-count">
+                            <div class="font-semibold total-count"></div>
+                            <div class="ml-2 text-sm">Created</div>
+                        </div>
                     </div>
                 </div>
+                <div class="flex items-center w-full h-10 font-semibold text-white bg-[#373737] content md:flex-row my-2 px-2">
+                    <div class="px-1 url-list-1 target-url">Target Url</div>
+                    <div class="px-1 url-list-2 shortened-url">Shortened Url</div>
+                    <div class="px-1 url-list-3 nickname">Nickname</div>
+                    <div class="px-1 truncate url-list-4 access">Access</div>
+                    <div class="px-1 truncate url-list-4 clicked">Click</div>
+                    <div class="px-1 truncate url-list-5 open">Open</div>
+                    <div class="px-1 truncate url-list-5 copy">Copy</div>
+                    <div class="px-1 truncate url-list-6 remove"></div>
+                </div>
+                <div class="self-center hidden text-sm text-[red] list-url-error"></div>
+                <div class="mb-2 text-sm md:text-base" id="url_list">
+                    <div class="url-link"></div>
+                </div>
             </div>
-            <div class="flex items-center w-full h-10 font-semibold text-white bg-[#373737] content md:flex-row my-2 px-2">
-                <div class="px-1 url-list-1 target-url">Target Url</div>
-                <div class="px-1 url-list-2 shortened-url">Shortened Url</div>
-                <div class="px-1 url-list-3 nickname">Nickname</div>
-                <div class="px-1 truncate url-list-4 access">Access</div>
-                <div class="px-1 truncate url-list-4 clicked">Click</div>
-                <div class="px-1 truncate url-list-5 open">Open</div>
-                <div class="px-1 truncate url-list-5 copy">Copy</div>
-                <div class="px-1 truncate url-list-6 remove"></div>
-            </div>
-            <div class="self-center hidden text-sm text-[red] list-url-error"></div>
-            <div class="mb-2 text-sm md:text-base" id="url_list">
-                <div class="url-link"></div>
-            </div>
-        </div>
-        {% include "url/detail.html" %}
-    {% endblock %}
-    {% block include_js %}
-        <script type="text/javascript">
+            {% include "url/detail.html" %}
+        {% endblock %}
+        {% block include_js %}
+            <script type="text/javascript">
     const url_license = {{ user.url.license|escapejs }};
     const available_url_cnt = {{ available_url_cnt|escapejs }};
-        </script>
-    {% endblock %}
-    {% block script %}
-        <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
-        <script type="module" src="{% static 'js/url.js' %}" defer></script>
-    {% endblock %}
+            </script>
+        {% endblock %}
+        {% block script %}
+            <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
+            <script type="module" src="{% static 'js/url.js' %}" defer></script>
+        {% endblock %}
