@@ -10,10 +10,10 @@
                     <div>
                         <img src="{% static 'img/icon/admin02.png' %}"
                              alt="admin"
-                             class="h-10 mx-4 cursor-pointer"
+                             class="h-7 min-[800px]:h-10 mx-3 min-[800px]:mx-4 cursor-pointer header-btn"
                              id="header_admin_btn">
                     </div>
-                    <div class="absolute left-0 z-10 items-center hidden origin-top-left bg-white rounded-md shadow-lg w-44 justify-evenly top-11 h-14 ring-1 ring-black ring-opacity-5 focus:outline-none admin-menu"
+                    <div class="absolute z-10 items-center hidden bg-white rounded-md shadow-lg -right-16 w-44 justify-evenly top-11 h-14 ring-1 ring-black ring-opacity-5 focus:outline-none admin-menu"
                          id="header_admin_menu"
                          role="menu"
                          aria-orientation="vertical"
@@ -22,15 +22,15 @@
                         <div class="flex items-center justify-evenly admin-btn-wrap" role="none">
                             <img src="{% static 'img/icon/admin_user02.png' %}"
                                  alt="admin_user"
-                                 class="h-10 mx-4 cursor-pointer"
+                                 class="h-7 min-[800px]:h-10 mx-4 cursor-pointer header-btn"
                                  id="header_admin_user_btn">
                             <img src="{% static 'img/icon/admin_url02.png' %}"
                                  alt="admin_url"
-                                 class="h-10 mx-4 cursor-pointer"
+                                 class="h-7 min-[800px]:h-10 mx-4 cursor-pointer header-btn"
                                  id="header_admin_url_btn">
                             <img src="{% static 'img/icon/admin_job02.png' %}"
                                  alt="admin_job"
-                                 class="h-10 mx-4 cursor-pointer"
+                                 class="h-7 min-[800px]:h-10 mx-4 cursor-pointer header-btn"
                                  id="header_admin_job_btn">
                         </div>
                     </div>
@@ -39,23 +39,23 @@
             <img src="{% static 'img/icon/url05.png' %}"
                  alt="url_shortener"
                  onclick="window.location.href='{% url "url" %}'"
-                 class="mx-4 cursor-pointer h-9"
+                 class="mx-3 min-[800px]:mx-4 cursor-pointer h-6 min-[800px]:h-9 header-btn"
                  id="header_url_btn">
             <img src="{% static 'img/icon/job-post01.png' %}"
                  alt="crawling_jd"
                  onclick="window.location.href='{% url "job" %}'"
-                 class="mx-4 cursor-pointer h-9"
+                 class="mx-3 min-[800px]:mx-4 cursor-pointer h-6 min-[800px]:h-9 header-btn"
                  id="header_jd_btn">
             {% if user == undefined %}
                 <img src="{% static 'img/icon/login01.png' %}"
                      alt="login"
                      onclick="window.location.href='{% url "login" %}'"
-                     class="mx-4 cursor-pointer h-9"
+                     class="mx-3 min-[800px]:mx-4 cursor-pointer h-6 min-[800px]:h-9 header-btn"
                      id="header_login_btn">
             {% else %}
                 <img src="{% static 'img/icon/user01.png' %}"
                      alt="my_info"
-                     class="mx-4 cursor-pointer h-9"
+                     class="mx-3 min-[800px]:mx-4 cursor-pointer h-6 min-[800px]:h-9 header-btn"
                      id="header_my_info_btn">
             {% endif %}
         </div>
