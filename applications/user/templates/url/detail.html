@@ -15,10 +15,10 @@
         </div>
         <form class="flex flex-col w-full mt-4 url-form md:flex-row modify-form">
             <div class="flex mb-4 input-first md:w-2/3">
-                <div class="w-full mx-4 form-field">
+                <div class="w-full mx-4 form-field" id="form_field_target_modify">
                     <div class="flex w-full label-wrap">
                         <label class="block mb-3 mr-2 font-semibold truncate"
-                               for="url-access-modify">Target Url</label>
+                               for="url-target-modify">Target Url</label>
                         <div class="self-center hidden text-sm text-[yellow] modify-url-error"></div>
                     </div>
                     <input class="block w-full p-1 text-black outline-none"
@@ -30,8 +30,9 @@
                            placeholder="Target Url"
                            autofocus="">
                 </div>
-                <div class="w-full min-[500px]:w-[150px] mx-4 form-field">
-                    <label class="block mb-3 font-semibold">Nickname</label>
+                <div class="w-full min-[500px]:w-[150px] mx-4 form-field"
+                     id="form_field_nickname_modify">
+                    <label class="block mb-3 font-semibold" for="url-nickname-modify">Nickname</label>
                     <input class="block w-full p-1 text-black outline-none"
                            id="url_nickname_modify"
                            type="text"
@@ -43,44 +44,23 @@
                 </div>
             </div>
             <div class="flex mb-4 md:w-[320px] input-second">
-                <div class="w-1/2 md:w-[158px] mx-4 form-field">
+                <div class="w-1/2 md:w-[158px] mx-4 form-field"
+                     id="form_field_expire_modify">
                     <div class="flex items-center justify-between w-full mb-3 date-lable-wrap">
                         <label class="block font-semibold modify-expire-label"
                                for="url-expire-modify">Expire</label>
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             fill="none"
-                             viewBox="0 0 24 24"
-                             stroke-width="4"
-                             stroke="#black"
-                             class="hidden w-6 h-6 p-1 cursor-pointer"
-                             id="clear_modify_date">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
                     </div>
-                    <div class="flex items-center bg-white flatpickr" id="url_expire_modify">
-                        <input type="text"
-                               id="url_expire"
-                               name="url-expire"
-                               autocomplete="off"
-                               autofocus
-                               tabindex="8"
-                               class="w-full p-1 text-black outline-none md:w-[126px]"
-                               placeholder="Expire"
-                               data-input>
+                    {% comment %} <div class="relative flex items-center bg-white flatpickr" id="url_expire_modify_wrap">
+                        <input type="text" id="url_expire_modify" name="url-expire" autocomplete="off" autofocus tabindex="8" class="w-full p-1 text-black outline-none md:w-[126px]" placeholder="Expire" data-input>
                         <a class="input-button" title="clear" data-clear>
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 fill="none"
-                                 viewBox="0 0 24 24"
-                                 stroke-width="1.5"
-                                 stroke="black"
-                                 class="w-6 h-6 p-1 mr-1 cursor-pointer"
-                                 id="clearDate_modify">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="black" class="w-6 h-6 p-1 mr-1 cursor-pointer" id="clearDate_modify">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </a>
-                    </div>
+                    </div> {% endcomment %}
                 </div>
-                <div class="w-1/2 md:w-[108px] mx-4 form-field">
+                <div class="w-1/2 md:w-[108px] mx-4 form-field"
+                     id="form_field_access_modify">
                     <label class="block w-full mb-3 font-semibold">Access</label>
                     <select class="w-full p-1 text-black outline-none appearance-none cursor-pointer md:w-[100px]"
                             id="url_access_modify"
@@ -95,11 +75,38 @@
                 </div>
             </div>
         </form>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:flex more-info">
-            <div class="mx-4 mb-4 info-shortened-url-wrap">
+        <div class="grid grid-cols-2 md:grid-cols-5 lg:flex more-info">
+            <div class="mx-4 mb-4 info-shortened-url-wrap"
+                 id="form_field_shortened_modify">
                 <div class="mb-3 font-semibold truncate info-label">Shortened Url</div>
-                <div class="w-full h-8 p-1 text-black cursor-default md:w-32 info-shortened-url"
-                     id="url_shortened_info"></div>
+                {% if user.url.license == 4 %}
+                    <div class="flex items-center p-1 text-black bg-white url-shortened-wrap"
+                         id="url_shortened_wrap">
+                        <div class="text-[#a6a6a6] slash">/</div>
+                        <input type="text"
+                               id="url_prefix_modify"
+                               name="url-prefix-modify"
+                               autocomplete="off"
+                               autofocus
+                               tabindex="5"
+                               class="block w-3 text-right outline-none"
+                               title="prefix"
+                               maxlength="1">
+                        <div class="text-[#a6a6a6] mx-1 slash">/</div>
+                        <input type="text"
+                               id="url_suffix_modify"
+                               name="url-suffix_modify"
+                               autocomplete="off"
+                               autofocus
+                               tabindex="6"
+                               class="block w-full outline-none"
+                               title="suffix"
+                               maxlength="6">
+                    </div>
+                {% else %}
+                    <div class="w-full h-8 p-1 text-black cursor-default md:w-32 info-shortened-url"
+                         id="url_shortened_info"></div>
+                {% endif %}
             </div>
             <div class="mx-4 mb-4 info-click-wrap">
                 <div class="mb-3 font-semibold info-label">Click</div>
@@ -116,9 +123,9 @@
                 <div class="truncate text-sm min-[500px]:text-base h-8 p-1 text-black cursor-default w-full info-click pr-2"
                      id="url_created_at_info"></div>
             </div>
-            <div class="mx-4 mb-4 info-access-at-wrap">
-                <div class="mb-3 font-semibold info-label">Access Code</div>
-                <div class="flex items-center access-code-wrap">
+            <div class="mx-4 mb-4 lg:flex-1 info-access-at-wrap">
+                <div class="mb-3 font-semibold lg:text-sm xl:text-base info-label">Access Code</div>
+                <div class="flex items-center bg-[#bfbfbf] access-code-wrap">
                     <div class="truncate text-sm min-[500px]:text-base h-8 p-1 text-black cursor-default w-full info-click mr-2"
                          id="url_access_code_info"></div>
                 </div>
