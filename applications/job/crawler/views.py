@@ -138,6 +138,10 @@ class RecruitView(GenericAPIView):
                     )
         print(f"recruit_url_id_list:{recruit_url_id_list}")
 
+        if "empty" in recruit_url_id_list:
+            response_data = {"detail": "No Data Matched"}
+            return Response(response_data, status=status.HTTP_200_OK)
+
         crawling = make_crawling_data(
             user_id=user_id,
             site_id=1,  # 추후 서비스 확장시 site_id로 수정 필요
