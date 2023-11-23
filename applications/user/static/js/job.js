@@ -778,10 +778,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             const minCareerSelectBox = getElFromId(`${type}_filter_min_career`);
 
             jobMinCareer.addEventListener("click", async () => {
-                const SettingResponse = await requestSetting(1);
-                const SettingData = await SettingResponse.json();
-                renderSelectBox(SettingData, type);
-
                 const newRequestData = JSON.parse(getCookie("requestData"));
                 if (newRequestData.min_career == minCareer[0]) {
                     minCareerSelectBox.value = 0;
@@ -972,10 +968,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                 const skillSearchInput = getElFromId(`${type}_search_skill`);
 
                 skillElement.addEventListener("click", async () => {
-                    const SettingResponse = await requestSetting(1);
-                    const SettingData = await SettingResponse.json();
-                    renderSelectBox(SettingData, type);
-
                     const newRequestData = JSON.parse(getCookie("requestData"));
                     if (newRequestData.skill_ids == skill.id) {
                         skillSearchInput.value = "All";
@@ -1486,9 +1478,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const jobPostBtn = getElFromId("job_post_btn");
     const jobCrawlingBtn = getElFromId("job_crawling_btn");
     const jobManageBtn = getElFromId("job_manage_btn");
-    jobPostBtn.addEventListener("click", () => {
-        addClickEventToPostBtn();
-    });
+
     jobCrawlingBtn.addEventListener("click", () => {
         addClickEventToCrawlingBtn();
     });
@@ -1961,8 +1951,4 @@ document.addEventListener("DOMContentLoaded", async function () {
             closeJobCard();
         }
     });
-
-    const SettingResponse = await requestSetting(1);
-    const SettingData = await SettingResponse.json();
-    console.log("SettingData", SettingData);
 });
