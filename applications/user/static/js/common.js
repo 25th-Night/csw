@@ -524,6 +524,13 @@ const useScrollTopBtn = () => {
     });
 };
 
+function isAlphaNumeric(string) {
+    /* 숫자, 영어 대소문자로 구성된 문자열 여부 확인 함수 */
+    const AlNumRegex = /^[0-9a-zA-Z]+$/;
+
+    return AlNumRegex.test(string);
+}
+
 export {
     getElFromSel,
     getElsFromSel,
@@ -564,4 +571,5 @@ export {
     hoverChangeTextColor,
     hoverChangeBackgroundColor,
     useScrollTopBtn,
+    isAlphaNumeric,
 };
