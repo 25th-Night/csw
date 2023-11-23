@@ -1505,26 +1505,19 @@ document.addEventListener("DOMContentLoaded", async function () {
         const settingModal = getElFromId("setting_modal");
         settingModal.classList.remove("hidden");
 
-        // save 버튼 추가
+        createSelectArea("setting_modal_post");
+
+        createSelectArea("setting_modal_crawling");
+
         addSaveBtnInSetting();
 
-        ////////////////////////////////// Post Setting
         const postSettingResponse = await requestSetting(1);
-        const getPostSettingStatus = postSettingResponse.status;
         const postSettingData = await postSettingResponse.json();
         console.log("postSettingData", postSettingData);
 
-        let queryParameterDict = postSettingData;
-
-        createSelectArea("setting_modal_post");
-
-        ////////////////////////////////// Crawling Setting
         const crawlingSettingResponse = await requestSetting(2);
-        const getCrawlingSettingStatus = crawlingSettingResponse.status;
         const crawlingSettingData = await crawlingSettingResponse.json();
         console.log("crawlingSettingData", crawlingSettingData);
-
-        createSelectArea("setting_modal_crawling");
 
         renderSelectBox(postSettingData, "setting_modal_post");
 
