@@ -142,7 +142,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const headerAdminMenu = getElFromId("header_admin_menu");
         const adminBtn = getElFromId("header_admin_btn");
 
-        if (!headerAdminMenu.contains(e.target) && !adminBtn.contains(e.target)) {
+        if (
+            headerAdminMenu &&
+            !headerAdminMenu.contains(e.target) &&
+            !adminBtn.contains(e.target)
+        ) {
             headerAdminMenu.classList.add("hidden");
         }
     });
