@@ -1,13 +1,13 @@
 {% load static %}
 <div class="post-wrap" id="post_wrap">
     <div class="flex flex-col items-start justify-between my-2 post-title-wrap">
-        <div class="self-center hidden text-sm text-[red] post-make-options-error"></div>
         <form class="flex w-full job-form post-form" id="post_form">
             <div class="flex-1 post-btn-wrap">
                 <div class="grid flex-1 grid-cols-2 gap-y-2 min-[800px]:grid-cols-3 min-[800px]:gap-y-4 post-select-wrap"
                      id="post_select_wrap"></div>
             </div>
         </form>
+        <div class="mt-3 ml-4 hidden text-sm text-[red] post-list-error"></div>
     </div>
     <div class="grid grid-cols-1 mt-5 mb-10 gap-y-4 md:gap-4 md:grid-cols-2 post-job-card-list"
          id="post_job_card_list"></div>
