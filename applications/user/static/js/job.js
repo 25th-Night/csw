@@ -1833,7 +1833,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
         } else {
             const errorData = await post_response.json();
-            console.log("errorData", errorData);
+            console.log("errorData", errorData.detail);
+            displayErrorMessage("crawling-list", errorData.detail);
         }
     };
 
