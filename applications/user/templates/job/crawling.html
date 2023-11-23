@@ -1,13 +1,13 @@
 {% load static %}
 <div class="hidden crawling-wrap" id="crawling_wrap">
     <div class="flex flex-col items-start justify-between my-2 crawling-title-wrap">
-        <div class="self-center hidden text-sm text-[red] crawling-make-options-error"></div>
         <form class="flex w-full job-form crawling-form" id="crawling_form">
             <div class="flex-1 crawling-btn-wrap">
                 <div class="grid flex-1 grid-cols-2 gap-y-3 min-[800px]:grid-cols-3 min-[800px]:gap-y-4  crawling-select-wrap"
                      id="crawling_select_wrap"></div>
             </div>
         </form>
+        <div class="mt-3 ml-4 hidden text-sm text-[red] crawling-list-error"></div>
     </div>
     <div class="grid grid-cols-1 mt-5 mb-10 gap-y-4 md:gap-4 md:grid-cols-2 crawling-job-card-list"
          id="crawling_job_card_list"></div>
