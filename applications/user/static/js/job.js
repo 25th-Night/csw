@@ -445,8 +445,37 @@ document.addEventListener("DOMContentLoaded", async function () {
         return createdSelectBox;
     };
 
+    // Search Input Box 내의 삭제 버튼 생성
+    const createSearchRemoveBtn = (typeId, selectTypeId, filterSearchList) => {
+        const filterRemoveSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="#000000"
+                class="w-6 h-6 p-1 mr-1 cursor-pointer"
+                id="${typeId}_search_${selectTypeId}_remove_btn">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>`;
+        const filterRemoveParser = new DOMParser();
+        const filterRemoveSvgDOM = filterRemoveParser.parseFromString(
+            filterRemoveSvg,
+            "image/svg+xml"
+        );
+        const filterRemoveSvgElement = filterRemoveSvgDOM.documentElement;
+        filterRemoveSvgElement.addEventListener("click", () => {
+            filterSkillInput.value = "";
+            filterSkillInput.setAttribute("data-id", 0);
+            filterRemoveSvgElement.remove();
+            removeAllNode(filterSearchList);
+            filterSearchList.classList.add("hidden");
+            filterSkillInput.focus();
+        });
+        return filterRemoveSvgElement;
+    };
+
     // Search Input Box 생성
-    const createInputBox = async (skills, type, selectType, idx = null, disabled = false) => {
+    const createInputBox = (type, selectType, idx = null, disabled = false) => {
         const typeClass = type.replace(/_/g, "-");
         const typeId = type.replace(/-/g, "_");
         const selectTypeClass = selectType.replace(/_/g, "-");
@@ -480,70 +509,12 @@ document.addEventListener("DOMContentLoaded", async function () {
             `${typeId}_search_${selectTypeId}_list`
         );
 
-        const createSearchRemoveBtn = (typeId, selectTypeId, filterSearchList) => {
-            const filterRemoveSvg = `
-            <svg xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="2"
-                    stroke="#000000"
-                    class="w-6 h-6 p-1 mr-1 cursor-pointer"
-                    id="${typeId}_search_${selectTypeId}_remove_btn">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>`;
-            const filterRemoveParser = new DOMParser();
-            const filterRemoveSvgDOM = filterRemoveParser.parseFromString(
-                filterRemoveSvg,
-                "image/svg+xml"
-            );
-            const filterRemoveSvgElement = filterRemoveSvgDOM.documentElement;
-            filterRemoveSvgElement.addEventListener("click", () => {
-                filterSkillInput.value = "";
-                filterSkillInput.setAttribute("data-id", 0);
-                filterRemoveSvgElement.remove();
-                removeAllNode(filterSearchList);
-                filterSearchList.classList.add("hidden");
-                filterSkillInput.focus();
-            });
-            return filterRemoveSvgElement;
-        };
-
         const filterRemoveBtn = createSearchRemoveBtn(typeId, selectTypeId, filterSearchList);
 
         filterSkillWrap.appendChild(filterSkillInput);
         filterSkillWrap.appendChild(filterRemoveBtn);
         filterSkill.appendChild(filterSkillWrap);
         filterSkill.appendChild(filterSearchList);
-
-        filterSkillInput.addEventListener(
-            "input",
-            debounce(() => {
-                skillSearch(filterSkillInput.value, `${typeId}`);
-            }, 500)
-        );
-
-        filterSkillInput.addEventListener("input", () => {
-            if (getElFromId(`${typeId}_search_${selectTypeId}_remove_btn`)) {
-            } else {
-                const newFilterRemoveSvgElement = createSearchRemoveBtn(
-                    typeId,
-                    selectTypeId,
-                    filterSearchList
-                );
-                filterSkillWrap.appendChild(newFilterRemoveSvgElement);
-            }
-            filterSkillInput.setAttribute("data-id", 0);
-        });
-
-        // Skill Input에 초기 데이터 설정
-        if (skills.length) {
-            const skillInitName = skills[0].name;
-            filterSkillInput.value = skillInitName;
-            filterSkillInput.setAttribute("data-id", skills[0].id);
-        } else {
-            filterSkillInput.value = "All";
-            filterSkillInput.setAttribute("data-id", 0);
-        }
 
         return filterSkill;
     };
@@ -578,7 +549,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     // Select 영역 생성하기
-    const createSelectArea = async (SettingData, type) => {
+    const createSelectArea = (type) => {
         const typeId = type.replace(/-/g, "_");
         const siteSelectBox = createSelectBox(`${typeId}`, "site", 1, true);
         const groupSelectBox = createSelectBox(`${typeId}`, "group", 2, false);
@@ -586,13 +557,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const countrySelectBox = createSelectBox(`${typeId}`, "country", 4, true);
         const regionSelectBox = createSelectBox(`${typeId}`, "region", 5, false);
         const detailRegionSelectBox = createSelectBox(`${typeId}`, "detail-region", 6, false);
-        const skillSearchBox = await createInputBox(
-            SettingData.skills,
-            `${typeId}`,
-            "skill",
-            7,
-            false
-        );
+        const skillSearchBox = createInputBox(`${typeId}`, "skill", 7, false);
         const companyTagSelectBox = createSelectBox(`${typeId}`, "company-tag", 8, true);
         const minCareerSelectBox = createSelectBox(`${typeId}`, "min-career", 9, false);
 
@@ -609,10 +574,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         getElFromId(`${typeId}_filter_skill-wrap`).classList.add("mt-1");
         getElFromId(`${typeId}_search_skill_remove_btn`).classList.add("pr-1");
-
-        renderSelectBox(SettingData, `${typeId}`);
-
-        handleSelectBox(`${typeId}`);
     };
 
     // Select Box 초기화 함수
@@ -1330,6 +1291,26 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
 
+        skillInputBox.addEventListener(
+            "input",
+            debounce(() => {
+                skillSearch(skillInputBox.value, `${typeId}`);
+            }, 500)
+        );
+
+        skillInputBox.addEventListener("input", () => {
+            if (getElFromId(`${typeId}_search_skill_remove_btn`)) {
+            } else {
+                const newFilterRemoveSvgElement = createSearchRemoveBtn(
+                    typeId,
+                    "skill",
+                    filterSearchList
+                );
+                filterSkillWrap.appendChild(newFilterRemoveSvgElement);
+            }
+            skillInputBox.setAttribute("data-id", 0);
+        });
+
         const minCareerSelectBox = getElFromId(`${typeId}_filter_min_career`);
         removeAllNode(minCareerSelectBox);
 
@@ -1366,7 +1347,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Select Area (Box, Button) 생성
     createSearchBtn();
 
-    createSelectArea(postSettingData, "post");
+    createSelectArea("post");
+
+    renderSelectBox(postSettingData, "post");
+
+    handleSelectBox("post");
 
     /////////////////////////////////////////////////////// Page Header
 
@@ -1383,14 +1368,18 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         createSearchBtn();
 
-        createSelectArea(postSettingData, "post");
+        createSelectArea("post");
+
+        createJobBtn(jobPostBtnImgDict);
 
         page = 1;
         emptyPage = false;
         blockRequest = false;
         lastScrollY = 0;
 
-        createJobBtn(jobPostBtnImgDict);
+        renderSelectBox(postSettingData, "post");
+
+        handleSelectBox("post");
 
         deleteSelectAreaPlusBtn("crawling");
         removeAllNode(getElFromId("crawling_job_card_list"));
@@ -1419,9 +1408,13 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         createStartBtn();
 
-        createSelectArea(crawlingSettingData, "crawling");
+        createSelectArea("crawling");
 
         createJobBtn(jobCrawlingBtnImgDict);
+
+        renderSelectBox(crawlingSettingData, "crawling");
+
+        handleSelectBox("crawling");
 
         removeInfiniteScroll();
 
@@ -1509,7 +1502,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         let queryParameterDict = postSettingData;
 
-        createSelectArea(postSettingData, "setting_modal_post");
+        createSelectArea("setting_modal_post");
 
         ////////////////////////////////// Crawling Setting
         const crawlingSettingResponse = await requestSetting(2);
@@ -1517,7 +1510,15 @@ document.addEventListener("DOMContentLoaded", async function () {
         const crawlingSettingData = await crawlingSettingResponse.json();
         console.log("crawlingSettingData", crawlingSettingData);
 
-        createSelectArea(crawlingSettingData, "setting_modal_crawling");
+        createSelectArea("setting_modal_crawling");
+
+        renderSelectBox(postSettingData, "setting_modal_post");
+
+        handleSelectBox("setting_modal_post");
+
+        renderSelectBox(crawlingSettingData, "setting_modal_crawling");
+
+        handleSelectBox("setting_modal_crawling");
 
         ////////////////////////////////// Manage Setting
 
