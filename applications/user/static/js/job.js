@@ -1809,6 +1809,10 @@ document.addEventListener("DOMContentLoaded", async function () {
             const crawlingResult = await post_response.json();
             console.log("crawlingResult", crawlingResult);
             const crawlingRecruits = crawlingResult.recruits;
+            if (!crawlingRecruits) {
+                displayErrorMessage("crawling-list", crawlingResult.detail);
+                return;
+            }
             const createdRecruitsIdxList = crawlingResult.created_recruit_idx_list;
             console.log("crawlingRecruits", crawlingRecruits);
             console.log("createdRecruitsIdxList", createdRecruitsIdxList);
