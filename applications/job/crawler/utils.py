@@ -178,7 +178,13 @@ def crawling_recruits(
                     break
 
         # _region confirm btn
-        find_visible(wait, "button[class*=CommonFooter_button__").click()
+        find_visible(wait, "button[class*=CommonFooter_button__]").click()
+
+        print("complete push button")
+
+        # check data
+        if find_visible(wait, "div[class*=EmptyList_Container__]"):
+            return ["empty"]
 
         # scroll down
         prev_height = driver.execute_script("return document.body.scrollHeight")
