@@ -128,26 +128,131 @@ document.addEventListener("DOMContentLoaded", function () {
         imageHover(myInfoBtn, "/static/img/icon/user02.png", "/static/img/icon/user01.png");
     }
 
+    let windowWidth =
+        window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+    console.log(windowWidth);
+
+    const headerNav = getElFromId("header_nav");
+    const headerToggleBtnWrap = getElFromId("header_toggle_btn_wrap");
+    const headerToggleBtn = getElFromId("header_toggle_btn");
+    const headerBtnWrap = getElFromId("header_btn_wrap");
+    const headerAdminMenu = getElFromId("header_admin_menu");
+
+    if (windowWidth < 800) {
+        headerToggleBtnWrap.classList.remove("hidden");
+        headerToggleBtnWrap.classList.add("flex");
+        headerBtnWrap.classList.add("hidden");
+        headerBtnWrap.classList.add("col-span-2");
+        headerBtnWrap.classList.add("border-b");
+        headerBtnWrap.classList.add("bg-white");
+        headerBtnWrap.classList.add("border-[#373737]");
+        headerNav.style.gridTemplateRows = "80px 50px";
+    } else {
+    }
+
+    window.addEventListener("resize", function () {
+        let windowWidth =
+            window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        const headerToggleBtnWrap = getElFromId("header_toggle_btn_wrap");
+        const headerToggleBtn = getElFromId("header_toggle_btn");
+        const headerBtnWrap = getElFromId("header_btn_wrap");
+
+        if (windowWidth < 800) {
+            headerToggleBtnWrap.classList.remove("hidden");
+            headerToggleBtnWrap.classList.add("flex");
+            headerBtnWrap.classList.add("hidden");
+            headerBtnWrap.classList.add("col-span-2");
+            headerBtnWrap.classList.add("border-b");
+            headerBtnWrap.classList.add("bg-white");
+            headerBtnWrap.classList.add("border-[#373737]");
+            headerNav.style.gridTemplateRows = "80px 50px";
+            headerAdminMenu.classList.add("hidden");
+        } else {
+            headerToggleBtnWrap.classList.add("hidden");
+            headerToggleBtnWrap.classList.remove("flex");
+            headerBtnWrap.classList.remove("hidden");
+            headerBtnWrap.classList.remove("col-span-2");
+            headerBtnWrap.classList.remove("border-b");
+            headerBtnWrap.classList.remove("bg-white");
+            headerBtnWrap.classList.remove("border-[#373737]");
+            headerNav.style.gridTemplateRows = "80px";
+            headerAdminMenu.classList.add("hidden");
+        }
+    });
+
+    const handleToggleBtn = () => {
+        const headerToggleBtn = getElFromId("header_toggle_btn");
+        const headerBtnWrap = getElFromId("header_btn_wrap");
+
+        if (headerBtnWrap.classList.contains("hidden")) {
+            headerBtnWrap.classList.remove("hidden");
+        } else {
+            headerBtnWrap.classList.add("hidden");
+        }
+        if (headerToggleBtn.querySelector("path").getAttribute("d").includes("21L21")) {
+            headerToggleBtn
+                .querySelector("path")
+                .setAttribute(
+                    "d",
+                    "M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12"
+                );
+        } else {
+            headerToggleBtn
+                .querySelector("path")
+                .setAttribute(
+                    "d",
+                    "M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25"
+                );
+        }
+    };
+
+    if (headerToggleBtn) {
+        headerToggleBtn.addEventListener("click", handleToggleBtn);
+    }
+
     // esc 버튼 클릭 시 모달창 닫기
     setKeyForFunction(document, "Escape", () => {
         const headerAdminMenu = getElFromId("header_admin_menu");
-        if (headerAdminMenu) {
+        if (!headerAdminMenu.classList.contains("hidden")) {
             headerAdminMenu.classList.add("hidden");
             return;
+        } else if (
+            !headerToggleBtnWrap.classList.contains("hidden") &&
+            !headerBtnWrap.classList.contains("hidden")
+        ) {
+            headerBtnWrap.classList.add("hidden");
         }
     });
 
     // 바깥 영역 클릭 시, 모달창 닫기
     document.addEventListener("mouseup", function (e) {
+        const headerToggleBtnWrap = getElFromId("header_toggle_btn_wrap");
+        const headerToggleBtn = getElFromId("header_toggle_btn");
+        const headerBtnWrap = getElFromId("header_btn_wrap");
         const headerAdminMenu = getElFromId("header_admin_menu");
         const adminBtn = getElFromId("header_admin_btn");
 
         if (
             headerAdminMenu &&
+            !headerAdminMenu.classList.contains("hidden") &&
             !headerAdminMenu.contains(e.target) &&
             !adminBtn.contains(e.target)
         ) {
             headerAdminMenu.classList.add("hidden");
+        } else if (
+            !headerToggleBtnWrap.classList.contains("hidden") &&
+            headerAdminMenu.classList.contains("hidden") &&
+            !headerToggleBtn.contains(e.target) &&
+            !headerBtnWrap.contains(e.target)
+        ) {
+            headerBtnWrap.classList.add("hidden");
+            headerToggleBtn
+                .querySelector("path")
+                .setAttribute(
+                    "d",
+                    "M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25"
+                );
         }
     });
 });
