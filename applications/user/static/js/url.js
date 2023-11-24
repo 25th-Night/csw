@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const currentPageNumber = 1;
     const currentTotalURL = 1;
 
-    const urlListTitle = getElFromSel(".url-list-title");
+    const urlListTitle = getElFromId("url_list_title");
     setAttributeToElement(urlListTitle, "data-page", currentPageNumber);
     setAttributeToElement(urlListTitle, "data-total", currentTotalURL);
 
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        const currentTotal = parseInt(getElFromSel(".url-list-title").getAttribute("data-total"));
+        const currentTotal = parseInt(getElFromId("url_list_title").getAttribute("data-total"));
 
         if (currentTotal >= available_url_cnt) {
             alert("Cannot create more URLs.");
@@ -406,12 +406,40 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 유저가 생성한 Shortened Url List 조회
-    async function getUrlList(page = 1) {
+    async function getUrlList(page = 1, searchStatus = false) {
+        let requestURL = `${ShortenerUrl}/shortener/?page=${page}`;
+
+        const urlListTitle = getElFromId("url_list_title");
+        const searchType = urlListTitle.getAttribute("data-search");
+        const searchData = getElFromId("url_search_input").value;
+        const accessType = urlListTitle.getAttribute("data-access");
+        const searchWrap = getElFromId("url_search_wrap");
+        console.log(accessType, requestURL);
+        if (!searchWrap.classList.contains("hidden")) {
+            if (accessType > 0) {
+                requestURL += `&access=${accessType}`;
+            }
+            if (searchStatus && searchData) {
+                if (searchType == "All") {
+                    requestURL += `&search=All&target_url=${searchData}&shortened_url=${searchData}&nick_name=${searchData}`;
+                }
+                if (searchType == "target_url") {
+                    requestURL += `&target_url=${searchData}`;
+                }
+                if (searchType == "shortened_url") {
+                    requestURL += `&shortened_url=${searchData}`;
+                }
+                if (searchType == "nick_name") {
+                    requestURL += `&nick_name=${searchData}`;
+                }
+            }
+        }
+
         const urlList = getElFromId("url_list");
 
         const data = setFetchData("get", {});
 
-        const url_list_response = await fetch(`${ShortenerUrl}/shortener/?page=${page}`, data);
+        const url_list_response = await fetch(requestURL, data);
         const response_data = await url_list_response.json();
         if (url_list_response.status === 200) {
             // url-list 태그 내 모든 요소 초기화
@@ -478,7 +506,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // url 관련 정보를 각각 담을 태그 생성
                 const shortened = `${url.prefix}/${url.shortened_url}`;
                 const urlLink = `${ShortenerUrl}/${shortened}`;
-                console.log("urlLink", urlLink);
+                // console.log("urlLink", urlLink);
                 const targetUrl = createNewElement(
                     "div",
                     `url-list-1 url-link target-url-${urlId}`,
@@ -585,7 +613,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // 페이지 버튼 추가
             const listTitleWrap = getElFromSel(".list-title-wrap");
-            const pageNum = Math.ceil(response_data.count / response_data.page_size);
+            let pageNum = Math.ceil(response_data.count / response_data.page_size);
+            pageNum = pageNum == 0 ? 1 : pageNum;
             const pageBtnWrap = getElFromId("page_btn_wrap");
             removeAllNode(pageBtnWrap);
 
@@ -601,14 +630,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 pageNumBtn.style.marginLeft = "10px";
                 pageBtnWrap.appendChild(pageNumBtn);
 
-                const currentPageNumber = getElFromSel(".url-list-title").getAttribute("data-page");
+                const currentPageNumber = getElFromId("url_list_title").getAttribute("data-page");
 
                 if (i == currentPageNumber) {
                     pageNumBtn.style.cursor = "default";
                     pageNumBtn.style.color = "#bfbfbf";
                 } else {
                     pageNumBtn.addEventListener("click", () => {
-                        getUrlList(i);
+                        getUrlList(i, searchStatus);
                         setAttributeToElement(urlListTitle, "data-page", i);
                     });
                     hoverChangeTextColor(pageNumBtn, "#d9d9d9", "#373737");
@@ -814,7 +843,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // URL List 새로고침 버튼
     const refreshListBtn = getElFromSel(".refresh-list-btn");
     refreshListBtn.addEventListener("click", () => {
-        const currentPageNumber = getElFromSel(".url-list-title").getAttribute("data-page");
+        const currentPageNumber = getElFromId("url_list_title").getAttribute("data-page");
         getUrlList(currentPageNumber);
     });
 
@@ -891,4 +920,84 @@ document.addEventListener("DOMContentLoaded", function () {
     body.classList.remove("scrollbar-thin");
     body.classList.remove("scrollbar-thumb-black");
     body.classList.remove("scrollbar-thumb");
+
+    // Search Button
+    const searchBtn = getElFromId("search_toggle_btn");
+    searchBtn.addEventListener("click", () => {
+        const searchWrap = getElFromId("url_search_wrap");
+        const urlListTitle = getElFromId("url_list_title");
+        const searchTypeSelect = getElFromId("url_search_select");
+        const searchInput = getElFromId("url_search_input");
+        const filterAccess = getElFromId("url_filter_access");
+        if (searchWrap.classList.contains("hidden")) {
+            searchWrap.classList.remove("hidden");
+            searchWrap.classList.add("flex");
+            searchBtn
+                .querySelector("path")
+                .setAttribute(
+                    "d",
+                    "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM13.5 10.5h-6"
+                );
+        } else {
+            searchWrap.classList.add("hidden");
+            searchWrap.classList.remove("flex");
+            searchTypeSelect.value = "All";
+            searchInput.value = "";
+            filterAccess.value = "0";
+            urlListTitle.dataset.access = 0;
+            urlListTitle.setAttribute("data-search-status", "false");
+            urlListTitle.setAttribute("data-page", "1");
+            getUrlList(1);
+            searchBtn
+                .querySelector("path")
+                .setAttribute(
+                    "d",
+                    "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                );
+        }
+    });
+
+    const searchTypeSelect = getElFromId("url_search_select");
+    searchTypeSelect.addEventListener("change", () => {
+        const urlListTitle = getElFromId("url_list_title");
+        urlListTitle.dataset.search = searchTypeSelect.value;
+    });
+
+    const searchInput = getElFromId("url_search_input");
+    searchInput.addEventListener("input", () => {
+        if (searchInput.value) {
+            const searchRemoveBtn = getElFromId("url_search_remove_btn");
+            searchRemoveBtn.classList.remove("hidden");
+            searchInput.style.width = "calc(100% - 48px)";
+        }
+    });
+
+    const searchRemoveBtn = getElFromId("url_search_remove_btn");
+    searchRemoveBtn.addEventListener("click", () => {
+        const searchInput = getElFromId("url_search_input");
+        const urlListTitle = getElFromId("url_list_title");
+        urlListTitle.setAttribute("data-search-status", "false");
+        urlListTitle.setAttribute("data-page", "1");
+        searchInput.value = "";
+        searchRemoveBtn.classList.add("hidden");
+        searchInput.style.width = "calc(100% - 24px)";
+        getUrlList(1, false);
+    });
+
+    const searchRequestBtn = getElFromId("url_search_request_btn");
+    searchRequestBtn.addEventListener("click", () => {
+        const urlListTitle = getElFromId("url_list_title");
+        urlListTitle.setAttribute("data-search-status", "true");
+        getUrlList(1, true);
+    });
+
+    const filterAccess = getElFromId("url_filter_access");
+    filterAccess.addEventListener("change", () => {
+        const urlListTitle = getElFromId("url_list_title");
+        const searchStatus = urlListTitle.getAttribute("data-search-status");
+        if (searchStatus === "false") {
+            urlListTitle.dataset.access = filterAccess.value;
+            getUrlList(1, false);
+        }
+    });
 });
