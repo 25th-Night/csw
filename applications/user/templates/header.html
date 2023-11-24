@@ -1,25 +1,41 @@
 {% load static %}
 <header class="fixed z-10 grid h-20 mb-5 bg-white border-b-2 border-black screen-width sm:mb-10">
-    <nav class="flex items-center justify-between">
-        <a href="{% url 'index' %}"
-           class="block text-4xl font-bold font-yedstreet hover:text-blue-700 header-logo"
-           id="header_logo">csw</a>
-        <div class="flex items-center list-none header-btn-wrap">
+    <nav class="grid items-center justify-between grid-cols-2" id="header_nav">
+        <div class="flex items-center justify-start ml-3 header_logo_wrap">
+            <a href="{% url 'index' %}"
+               class="text-4xl font-bold font-yedstreet hover:text-blue-700 header-logo"
+               id="header_logo">csw</a>
+        </div>
+        <div class="items-center justify-end hidden header-toggle-btn-wrap"
+             id="header_toggle_btn_wrap">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke-width="1.5"
+                 stroke="currentColor"
+                 id="header_toggle_btn"
+                 class="mr-3 cursor-pointer w-7 h-7 min-[800px]:w-9 min-[800px]:h-9 header-toggle-btn">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25" />
+            </svg>
+        </div>
+        <div class="z-10 h-[50px] flex items-center justify-end bg-white header-btn-wrap"
+             id="header_btn_wrap">
             {% if user.is_admin %}
                 <div class="relative inline-block text-left">
-                    <div>
+                    <div class="mx-3 min-[800px]:mx-4 w-7 h-7 min-[800px]:w-10 min-[800px]:h-10">
                         <img src="{% static 'img/icon/admin02.png' %}"
                              alt="admin"
-                             class="h-7 min-[800px]:h-10 mx-3 min-[800px]:mx-4 cursor-pointer header-btn"
+                             class="w-7 h-7 min-[800px]:w-10 min-[800px]:h-10  cursor-pointer header-btn"
                              id="header_admin_btn">
                     </div>
-                    <div class="absolute z-10 items-center hidden bg-white rounded-md shadow-lg -right-16 w-44 justify-evenly top-11 h-14 ring-1 ring-black ring-opacity-5 focus:outline-none admin-menu"
+                    <div class="absolute z-10 items-center hidden w-48 bg-white rounded-md shadow-lg -right-16 justify-evenly top-11 h-14 ring-1 ring-black ring-opacity-5 focus:outline-none admin-menu"
                          id="header_admin_menu"
                          role="menu"
                          aria-orientation="vertical"
                          aria-labelledby="menu-button"
                          tabindex="-1">
-                        <div class="flex items-center justify-evenly admin-btn-wrap" role="none">
+                        <div class="flex items-center w-full justify-evenly admin-btn-wrap"
+                             role="none">
                             <img src="{% static 'img/icon/admin_user02.png' %}"
                                  alt="admin_user"
                                  class="h-7 min-[800px]:h-10 mx-4 cursor-pointer header-btn"
