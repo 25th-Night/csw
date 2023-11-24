@@ -884,4 +884,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const expireFormField = getElFromId("form_field_expire_modify");
         expireFormField.appendChild(expireModifyWrap);
     };
+
+    // body 태그 scrollbar hide
+    const body = getElFromSel("body");
+    body.classList.add("scrollbar-hide");
+    body.classList.remove("scrollbar-thin");
+    body.classList.remove("scrollbar-thumb-black");
+    body.classList.remove("scrollbar-thumb");
 });
