@@ -130,21 +130,37 @@
             </div>
             <hr class="mt-5 mb-2 md:mb-7 hr border-[#373737]">
             <div class="mb-10 list-wrap">
-                <div class="grid items-center justify-between grid-cols-1 min-[450px]:grid-cols-2 mb-[10px] min-[800px]:mb-5 min-[800px]:grid-cols-3 title-wrap">
+                <div class="grid items-center justify-between grid-cols-1 min-[500px]:grid-cols-2 mb-[10px] min-[800px]:mb-5 min-[800px]:grid-cols-3 title-wrap">
                     <div class="flex items-center list-title-wrap">
-                        <div class="mr-4 title url-list-title">URL List</div>
+                        <div class="mr-4 title url-list-title"
+                             id="url_list_title"
+                             data-search="All"
+                             data-search-status="false"
+                             data-access="0">URL List</div>
                         <svg xmlns="http://www.w3.org/2000/svg"
                              fill="none"
                              viewBox="0 0 24 24"
                              stroke-width="1.5"
                              stroke="#373737"
-                             class="w-5 h-5 hover:stroke-[#d9d9d9] cursor-pointer refresh-list-btn">
+                             id="refresh_list_btn"
+                             tabindex="8"
+                             class="w-5 h-5 mr-4 hover:stroke-[#d9d9d9] cursor-pointer refresh-list-btn">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                         </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             id="search_toggle_btn"
+                             tabindex="9"
+                             class="w-6 h-6 hover:stroke-[#d9d9d9] cursor-pointer search-toggle-btn">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
                     </div>
-                    <div class="flex justify-center items-end mt-[10px] min-[800px]:h-[48px] min-[800px]:mt-0 min-[450px]:col-span-2 row-start-3 min-[450px]:row-start-2 min-[800px]:col-span-1 min-[800px]:row-start-auto page-btn-wrap"
+                    <div class="flex justify-center items-end mt-[10px] min-[800px]:h-[48px] min-[800px]:mt-0 min-[500px]:col-span-2 row-start-3 min-[500px]:row-start-2 min-[800px]:col-span-1 min-[800px]:row-start-auto page-btn-wrap"
                          id="page_btn_wrap"></div>
-                    <div class="count-wrap">
+                    <div class="mt-[10px] min-[500px]:mt-0 count-wrap">
                         <div class="flex items-center justify-end available-total-count">
                             <div class="font-semibold">{{ available_url_cnt }} URLs</div>
                             <div class="ml-2 text-sm">Available</div>
@@ -154,6 +170,60 @@
                             <div class="ml-2 text-sm">Created</div>
                         </div>
                     </div>
+                </div>
+                <div class="items-center hidden text-xs md:text-base url-search-wrap"
+                     id="url_search_wrap">
+                    <select id="url_search_select"
+                            name="url-search-select"
+                            class="w-1/4 p-1 mx-2 outline-none border-b border-[#d9d9d9] appearance-none cursor-pointer url-search-select"
+                            autofocus
+                            tabindex="10"
+                            placeholder="Access">
+                        <option value="All" class="select-option">All</option>
+                        <option value="target_url" class="select-option">Target URL</option>
+                        <option value="shortened_url" class="select-option">Shortened URL</option>
+                        <option value="nick_name" class="select-option">Nickname</option>
+                    </select>
+                    <div class="flex items-center w-1/2 mx-2 border-b border-[#d9d9d9] url-search-input-wrap"
+                         id="url_search_input_wrap">
+                        <input type="text"
+                               id="url_search_input"
+                               name="url-search-input"
+                               autocomplete="off"
+                               autofocus
+                               tabindex="11"
+                               class="w-[calc(100%-24px)] block p-1 outline-none url-search-input"
+                               placeholder="Search">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="hidden w-5 h-5 mr-1 url-search-remove-btn"
+                             id="url_search_remove_btn">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="w-5 h-5 mr-1 url-search-request-btn"
+                             id="url_search_request_btn">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <select id="url_filter_access"
+                            name="url-filter-access"
+                            class="w-1/4 p-1 mx-2 outline-none border-b border-[#d9d9d9] appearance-none cursor-pointer url-filter-access"
+                            autofocus
+                            tabindex="12"
+                            placeholder="Access">
+                        <option value="0" class="select-option">All</option>
+                        <option value="1" class="select-option">Public</option>
+                        <option value="2" class="select-option">Private</option>
+                        <option value="3" class="select-option">Secret</option>
+                    </select>
                 </div>
                 <div class="flex items-center w-full h-10 font-semibold text-white bg-[#373737] content md:flex-row my-2 px-2">
                     <div class="px-1 url-list-1 target-url">Target Url</div>
