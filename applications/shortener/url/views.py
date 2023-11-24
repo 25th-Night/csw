@@ -2,6 +2,7 @@ from django.shortcuts import redirect
 import jwt
 
 from django.conf import settings
+from django.db.models import Q
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -9,32 +10,60 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from common.data import URL_LICENSE
 
+from django_filters.rest_framework import DjangoFilterBackend
+
+from common.data import URL_LICENSE
 from common.permissions import IsAuthenticated
 from common.utils import get_object_or_404, make_access_code
+
 from url.models import ShortenedUrl
 from url.serializers import ShortenedUrlSerializer, SimpleShortenedUrlSerializer
+from url.filters import ShortenedUrlFilter
 
 
 class ShortenedUrlView(GenericAPIView):
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ShortenedUrlFilter
     serializer_class = ShortenedUrlSerializer
 
-    def get(self, request: Request):
-        user_id = request.user.get("id")
+    def get_queryset(self):
+        user_id = self.request.user.get("id")
         shortened_url = ShortenedUrl.objects.filter(creator_id=user_id, is_active=True)
+        return shortened_url
 
-        page = self.paginate_queryset(shortened_url)
+    def filter_queryset(self, queryset):
+        queryset = self.filter_backends[0]().filter_queryset(
+            self.request, queryset, self
+        )
+        return queryset
+
+    def get(self, request: Request):
+        queryset = self.get_queryset()
+        if "search" in request.GET:
+            nick_name = request.GET.get("nick_name")
+            target_url = request.GET.get("target_url")
+            shortened_url = request.GET.get("shortened_url")
+            queryset = queryset.filter(
+                Q(nick_name__icontains=nick_name)
+                | Q(target_url__icontains=target_url)
+                | Q(shortened_url__icontains=shortened_url)
+            )
+            if "access" in request.GET:
+                access = request.GET.get("access")
+                queryset = queryset.filter(access=access)
+        else:
+            queryset = self.filter_queryset(queryset)
+
+        page = self.paginate_queryset(queryset)
         if page is not None:
             serializer: ShortenedUrlSerializer = self.get_serializer(page, many=True)
             response_data = self.get_paginated_response(serializer.data)
             response_data.data["page_size"] = self.pagination_class.page_size
             return response_data
 
-        serializer: ShortenedUrlSerializer = self.get_serializer(
-            shortened_url, many=True
-        )
+        serializer: ShortenedUrlSerializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
