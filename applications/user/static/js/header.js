@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let windowWidth =
         window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 
-    console.log(windowWidth);
+    // console.log(windowWidth);
 
     const headerNav = getElFromId("header_nav");
     const headerToggleBtnWrap = getElFromId("header_toggle_btn_wrap");
