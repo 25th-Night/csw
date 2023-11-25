@@ -96,7 +96,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const login_response = await fetch("/api/user/auth", data);
 
         if (login_response.status === 200) {
-            location.href = "/";
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const nextUrlPath = urlParams.get("next");
+            if (nextUrlPath) {
+                location.href = nextUrlPath;
+            } else {
+                location.href = "/";
+            }
         } else if (login_response.status === 400) {
             const errorData = await login_response.json();
             console.log("errorData:", errorData);
