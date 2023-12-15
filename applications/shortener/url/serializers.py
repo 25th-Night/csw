@@ -61,7 +61,7 @@ class ShortenedUrlSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         nick_name = validated_data.get("nick_name", "Undefined")
         prefix = validated_data.get("prefix", make_prefix())
-        shortened_url = validated_data.get("suffix", make_shortened_url())
+        shortened_url = validated_data.get("shortened_url", make_shortened_url())
 
         validated_data["nick_name"] = nick_name
         validated_data["prefix"] = prefix
